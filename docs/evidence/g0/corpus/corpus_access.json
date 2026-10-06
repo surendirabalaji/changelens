@@ -1,0 +1,84 @@
+{
+  "candidates": [
+    {
+      "repo": "encode/httpx",
+      "manifest": "pyproject.toml",
+      "language": "Python",
+      "size_kb": null,
+      "stars": 15527,
+      "sha": "b5addb64f0161ff6bfe94c124ef76f6a1fba5254",
+      "status": "ok",
+      "resource_uri": "repo://encode/httpx/sha/b5addb64f0161ff6bfe94c124ef76f6a1fba5254/contents/pyproject.toml"
+    },
+    {
+      "repo": "pallets/click",
+      "manifest": "pyproject.toml",
+      "language": "Python",
+      "size_kb": null,
+      "stars": 17785,
+      "sha": "2247b35ea1c47c727d7a06e51fa280e12a863ff6",
+      "status": "ok",
+      "resource_uri": "repo://pallets/click/sha/2247b35ea1c47c727d7a06e51fa280e12a863ff6/contents/pyproject.toml"
+    },
+    {
+      "repo": "fastapi/full-stack-fastapi-template",
+      "manifest": "backend/pyproject.toml",
+      "language": "TypeScript",
+      "size_kb": null,
+      "stars": 45885,
+      "sha": "1762adac607a1b29cfc4da129557780beea71616",
+      "status": "ok",
+      "resource_uri": "repo://fastapi/full-stack-fastapi-template/sha/1762adac607a1b29cfc4da129557780beea71616/contents/backend/pyproject.toml"
+    },
+    {
+      "repo": "expressjs/express",
+      "manifest": "package.json",
+      "language": "JavaScript",
+      "size_kb": null,
+      "stars": 69553,
+      "sha": "7ef98448f8b38099ab1ded55e458538ad47a51e7",
+      "status": "ok",
+      "resource_uri": "repo://expressjs/express/sha/7ef98448f8b38099ab1ded55e458538ad47a51e7/contents/package.json"
+    },
+    {
+      "repo": "honojs/hono",
+      "manifest": "package.json",
+      "language": "TypeScript",
+      "size_kb": null,
+      "stars": 32419,
+      "sha": "5f36607f67aa9357887337328ac84a1c1d48dc04",
+      "status": "ok",
+      "resource_uri": "repo://honojs/hono/sha/5f36607f67aa9357887337328ac84a1c1d48dc04/contents/package.json"
+    },
+    {
+      "repo": "go-chi/chi",
+      "manifest": "go.mod",
+      "language": "Go",
+      "size_kb": null,
+      "stars": 22927,
+      "sha": "167e1e3bd039d060696b99c8da4e876ae04f42c1",
+      "status": "ok",
+      "resource_uri": "repo://go-chi/chi/sha/167e1e3bd039d060696b99c8da4e876ae04f42c1/contents/go.mod"
+    },
+    {
+      "repo": "spf13/cobra",
+      "manifest": "go.mod",
+      "language": "Go",
+      "size_kb": null,
+      "stars": 44684,
+      "sha": "adbc8813901bba65827259daa8e22ff94ec1f30e",
+      "status": "ok",
+      "resource_uri": "repo://spf13/cobra/sha/adbc8813901bba65827259daa8e22ff94ec1f30e/contents/go.mod"
+    },
+    {
+      "repo": "BurntSushi/ripgrep",
+      "manifest": "Cargo.toml",
+      "language": "Rust",
+      "size_kb": null,
+      "stars": 68871,
+      "sha": "3fce3b5bb0236da2df6d99672afb8a719642eca7",
+      "status": "ok",
+      "resource_uri": "repo://BurntSushi/ripgrep/sha/3fce3b5bb0236da2df6d99672afb8a719642eca7/contents/Cargo.toml"
+    }
+  ]
+}
