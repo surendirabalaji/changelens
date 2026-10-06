@@ -36,6 +36,8 @@ pip install -r requirements.txt
 ## Hard Rules
 
 - Never commit secrets. Inject them at runtime through environment variables or a managed secret store.
+- Never read, print, inspect, edit or overwrite `.env` (or any `.env.*` file except `.env.example`), not even key names, lengths or prefixes. Use `.env.example` for variable names. If something in `.env` needs checking or changing, tell me what and why, and I will do it. Project code may load `.env` at runtime via `python-dotenv`, but its contents must never be shown to Claude.
+- Never act in Google Cloud or any other cloud account. This covers `gcloud` commands (including read-only ones), REST calls to cloud APIs, running `deploy.sh`, and changes to billing, APIs, IAM, Cloud Build, Artifact Registry or Cloud Run. Instead, tell me exactly what to run or click and why it is needed; I will do it myself. Claude may write scripts such as `deploy.sh`, but must not run them.
 - Production and integration verification must use real MCP. Unit tests may use clearly identified mocks; resilience tests may inject controlled failures.
 - Memory must use the framework’s built-in primitives and be session-scoped as required by requirements.md.
 - Handle required MCP failures with clear error responses and appropriate fallbacks. Use bounded retries only for transient failures when retrying is safe; never fabricate successful tool results.
