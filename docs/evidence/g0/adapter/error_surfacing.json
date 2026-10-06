@@ -1,0 +1,38 @@
+{
+  "cases": [
+    {
+      "server": "github",
+      "tool": "get_file_contents",
+      "arguments": {
+        "owner": "encode",
+        "repo": "httpx",
+        "path": "pyproject.toml"
+      },
+      "outcome": "returned",
+      "output_type": "list",
+      "output_preview": "[{'type': 'text', 'text': 'successfully downloaded text file (SHA: fc3e95ea74e575fca80b0e7be54154088ea085a7)', 'id': 'lc_6f202c91-2944-4358-bbd7-d79044e16ff9'}, {'type': 'text', 'text': '[build-system]\\nrequires = [\"hatchling\", \"hatch-fancy-pypi-readme\"]\\nbuild-backend = \"hatchling.build\"\\n\\n[project]\\nname = \"httpx\"\\ndescription = \"The next generation HTTP client.\"\\nlicense = \"BSD-3-Clause\"\\nrequ"
+    },
+    {
+      "server": "github",
+      "tool": "get_file_contents",
+      "arguments": {
+        "owner": "encode",
+        "repo": "httpx",
+        "path": "does/not/exist.py"
+      },
+      "outcome": "returned",
+      "output_type": "list",
+      "output_preview": "[{'type': 'text', 'text': 'Failed to get file contents. The path does not point to a file or directory, or the file does not exist in the repository.', 'id': 'lc_b3eced20-fdba-4753-b2dd-ceb9623073ab'}]"
+    },
+    {
+      "server": "tavily",
+      "tool": "tavily_search",
+      "arguments": {
+        "max_results": "many"
+      },
+      "outcome": "raised",
+      "exception": "McpError: Internal error: 2 validation errors for call[tavily_search]\nquery\n  Missing required argument [type=missing_argument, input_value={'max_results': 'many'}, input_type=dict]\n    For further information visit https://errors.pydantic.dev/2.13/v/missing_argument\nmax_results\n  Input should be a valid integer, unable to parse string as an integer [type=int_parsing, input_value='many', input_type=str]\n    For further information visit https://errors.pydantic.dev/2.13/v/int_parsing",
+      "exception_type": "McpError"
+    }
+  ]
+}

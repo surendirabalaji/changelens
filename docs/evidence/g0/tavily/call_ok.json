@@ -1,0 +1,26 @@
+{
+  "server": "tavily",
+  "url": "https://mcp.tavily.com/mcp/",
+  "probed_at": "2026-10-06T07:57:24.952220+00:00",
+  "server_info": {
+    "name": "tavily-mcp",
+    "title": null,
+    "version": "4.0.4",
+    "websiteUrl": null,
+    "icons": null
+  },
+  "tool": "tavily_search",
+  "arguments": {
+    "query": "httpx HTTPTransport retries known issues",
+    "max_results": 3
+  },
+  "isError": false,
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"query\":\"httpx HTTPTransport retries known issues\",\"follow_up_questions\":null,\"answer\":null,\"images\":[],\"results\":[{\"url\":\"https://will-ockmore.github.io/httpx-retries\",\"title\":\"HTTPX Retries - HTTPX Retries\",\"content\":\"Skip to content\\n\\n Features\\n Acknowledgements\\n\\n# HTTPX Retries\u00b6\\n\\nTest Suite   Package version   Python versions   Downloads   Coverage\\n\\nA retry layer for HTTPX.\\n\\nHTTPX Retries implements request retry for HTTPX.\\n\\nIt's very common to deal with flaky and unreliable APIs. When requests fail, your program needs to be able to retry them.\\n\\nInstall HTTPX Retries using pip:\\n\\n```\\npip install httpx-retries   \\n```\\n\\nTo get started, add the transport to your client: [...] To reduce boilerplate, this package includes a transport that works with both sync and async HTTPX Clients, with sensible defaults for simple use cases.\\n\\nHTTPX adds support for asynchronous requests, and this package includes a new retry utility that can handle this behaviour (Retry). To make it easy to migrate, the API surface is almost identical to `Retry` from urllib3, with a few main differences:\\n\\n `total` is the only parameter used to configure the number of retries.\\n asleep(response) [...] `async`\\n  \\\">asleep is an async implementation of sleep(response)\\\">sleep.\\n backoff\\\\_strategy()\\\">backoff\\\\_strategy can be overridden to customize backoff behavior.\\n Some options that are not strictly retry-related are not included (`raise_on_status`, `raise_on_redirect`)\\n\\nNote\\n\\nFor more information, visit the API reference.\\n\\n## Acknowledgements\u00b6\\n\\nThis package builds on the great work done on HTTPX, urllib3 and requests.\",\"score\":0.7163977,\"raw_content\":null,\"id\":\"c0a7c4-00\"},{\"url\":\"https://www.python-httpx.org/advanced/transports\",\"title\":\"Transports - HTTPX\",\"content\":\"Connection retries are also available via this interface. Requests will be retried the given number of times in case an `httpx.ConnectError` or an `httpx.ConnectTimeout` occurs, allowing smoother operation under flaky networks. If you need other forms of retry behaviors, such as handling read/write errors or reacting to `503 Service Unavailable`, consider general-purpose tools such as tenacity. [...] ```\\n>>> import  httpx>>> transport = httpx. HTTPTransport(retries = 1)>>> client = httpx. Client(transport = transport)\\n```\\n\\nSimilarly, instantiating a transport directly provides a `uds` option for connecting via a Unix Domain Socket that is only available via this low-level API:\",\"score\":0.69870013,\"raw_content\":null,\"id\":\"dad187-01\"},{\"url\":\"https://medium.com/@danielsolomongs888/why-requests-falls-short-and-how-httpx-solves-it-01953c8e90c3\",\"title\":\"Why Requests Falls Short_and How HTTPX Solves It\",\"content\":\"import httpx  \\nwith httpx.Client() as client:  \\n r1 = client.get(\\\"  \\n r2 = client.get(\\\"\\nHere, both requests reuse the same connection.\\n\\n## Retries and Resilience\\n\\nNetworks are unreliable. Servers can be down, timeouts can happen, connections can drop. By default, neither `requests` nor `httpx` retries automatically. If a request fails, it just raises an exception and gives up.\\n\\n## What Is a Retry?\\n\\nA retry means: if a request fails, try again after a short delay.\\n\\nExample: [...] import httpx  \\nfrom httpx_retry import RetryTransport  \\ntransport = RetryTransport(  \\n retries=3, # number of retries  \\n backoff_factor=0.5, # wait: 0.5s, then 1s, then 2s...  \\n)  \\nclient = httpx.Client(transport=transport)  \\nresponse = client.get(\\\"  \\nprint(response.text)\\nPros:\\n\\n   Retries are applied transparently for all requests using that client.\\n   Useful for building reusable clients or libraries.\\n\\nCons: [...] Cons:\\n\\n   More setup compared to `tenacity`.\\n   Less flexible for \u201cbusiness-logic\u201d retries (e.g. retry only after a specific API error code).\\n\\n(I won\u2019t go into the implementation details here because they\u2019re quite involved, but the idea is: wrap the default transport in a retry layer.)\\n\\n## Rate Limiting\\n\\nSometimes I need to limit how many requests I send per unit of time. Why?\",\"score\":0.60666215,\"raw_content\":null,\"id\":\"a7357e-02\"}],\"response_time\":1.01,\"request_id\":\"782d792c-32ed-44ec-aa6e-031731910b4f\",\"auth_mode\":\"keyed\"}",
+      "annotations": null,
+      "meta": null
+    }
+  ]
+}

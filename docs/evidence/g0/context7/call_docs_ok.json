@@ -1,0 +1,33 @@
+{
+  "server": "context7",
+  "url": "https://mcp.context7.com/mcp",
+  "probed_at": "2026-10-06T07:57:42.484066+00:00",
+  "server_info": {
+    "name": "Context7",
+    "title": null,
+    "version": "4.1.1",
+    "websiteUrl": "https://context7.com",
+    "icons": [
+      {
+        "src": "https://context7.com/context7-icon-green.png",
+        "mimeType": "image/png",
+        "sizes": null
+      }
+    ],
+    "description": "Context7 provides up-to-date documentation and code examples for libraries and frameworks."
+  },
+  "tool": "query-docs",
+  "arguments": {
+    "libraryId": "/encode/httpx/0.28.1",
+    "query": "how to configure retries on HTTPTransport"
+  },
+  "isError": false,
+  "content": [
+    {
+      "type": "text",
+      "text": "### Configure connection retries on HTTPTransport\n\nSource: https://github.com/encode/httpx/blob/0.28.1/docs/advanced/transports.md\n\nSet the `retries` parameter on HTTPTransport to retry requests automatically when `httpx.ConnectError` or `httpx.ConnectTimeout` occurs.\n\n```pycon\n>>> import httpx\n>>> transport = httpx.HTTPTransport(retries=1)\n>>> client = httpx.Client(transport=transport)\n```\n\n--------------------------------\n\n### Configure explicit AsyncHTTPTransport instance\n\nSource: https://github.com/encode/httpx/blob/0.28.1/docs/async.md\n\nInstantiate httpx.AsyncHTTPTransport directly when configuring custom transport parameters such as retries for an AsyncClient.\n\n```pycon\n>>> import httpx\n>>> transport = httpx.AsyncHTTPTransport(retries=1)\n>>> async with httpx.AsyncClient(transport=transport) as client:\n>>>     ...\n```\n\n### HTTP Transport\n\nSource: https://github.com/encode/httpx/blob/0.28.1/docs/advanced/transports.md\n\nConnection retries are also available via this interface. Requests will be retried the given number of times in case an `httpx.ConnectError` or an `httpx.ConnectTimeout` occurs, allowing smoother operation under flaky networks. If you need other forms of retry behaviors, such as handling read/write errors or reacting to `503 Service Unavailable`, consider general-purpose tools such as [tenacity](https://github.com/jd/tenacity).",
+      "annotations": null,
+      "meta": null
+    }
+  ]
+}

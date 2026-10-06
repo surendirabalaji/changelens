@@ -1,0 +1,33 @@
+{
+  "server": "context7",
+  "url": "https://mcp.context7.com/mcp",
+  "probed_at": "2026-10-06T07:57:21.167598+00:00",
+  "server_info": {
+    "name": "Context7",
+    "title": null,
+    "version": "4.1.1",
+    "websiteUrl": "https://context7.com",
+    "icons": [
+      {
+        "src": "https://context7.com/context7-icon-green.png",
+        "mimeType": "image/png",
+        "sizes": null
+      }
+    ],
+    "description": "Context7 provides up-to-date documentation and code examples for libraries and frameworks."
+  },
+  "tool": "resolve-library-id",
+  "arguments": {
+    "libraryName": "httpx",
+    "query": "configure retries on the HTTP transport"
+  },
+  "isError": false,
+  "content": [
+    {
+      "type": "text",
+      "text": "Available Libraries:\n\n- Title: HTTPX\n- Context7-compatible library ID: /encode/httpx\n- Description: A next generation HTTP client for Python. \ud83e\udd8b\n- Code Snippets: 558\n- Source Reputation: High\n- Benchmark Score: 88.5\n- Versions: 0.27.2, 0.28.1\n----------\n- Title: HTTPX Retries\n- Context7-compatible library ID: /will-ockmore/httpx-retries\n- Description: HTTPX Retries is a retry layer for the HTTPX library, designed to handle flaky and unreliable APIs by retrying failed requests automatically.\n- Code Snippets: 253\n- Source Reputation: High\n- Benchmark Score: 84.11\n----------\n- Title: HTTPX\n- Context7-compatible library ID: /websites/python-httpx\n- Description: HTTPX is a fully-featured HTTP client for Python 3 that provides sync and async APIs, and support for both HTTP/1.1 and HTTP/2.\n- Code Snippets: 529\n- Source Reputation: High\n- Benchmark Score: 86.51\n----------\n- Title: pytest-httpx\n- Context7-compatible library ID: /colin-b/pytest_httpx\n- Description: pytest-httpx is a pytest fixture for mocking httpx requests in tests, allowing you to register custom responses for both sync and async HTTP calls.\n- Code Snippets: 505\n- Source Reputation: High\n- Benchmark Score: 91.58\n----------\n- Title: HTTPX\n- Context7-compatible library ID: /honeyryderchuck/httpx\n- Description: HTTPX is a Ruby HTTP client library with support for HTTP/2, concurrent requests, advanced authentication, compression, proxying, and a lightweight plugin-based architecture.\n- Code Snippets: 401\n- Source Reputation: High\n- Benchmark Score: 66.58",
+      "annotations": null,
+      "meta": null
+    }
+  ]
+}

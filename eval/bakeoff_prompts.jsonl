@@ -1,0 +1,18 @@
+{"id": "nt1", "kind": "no_tool", "accept": ["none"], "prompt": "What is the difference between a process and a thread?"}
+{"id": "nt2", "kind": "no_tool", "accept": ["none"], "prompt": "Explain what idempotency means for HTTP methods, briefly."}
+{"id": "nt3", "kind": "no_tool", "accept": ["none"], "prompt": "What is 17 multiplied by 23?"}
+{"id": "nt4", "kind": "no_tool", "accept": ["none"], "prompt": "Write a one-line Python list comprehension that squares the numbers 1 to 5."}
+{"id": "gh1", "kind": "github", "accept": ["github"], "prompt": "Show me the go.mod file of the go-chi/chi repository."}
+{"id": "gh2", "kind": "github", "accept": ["github"], "prompt": "In the encode/httpx repo, where is the HTTPTransport class defined?"}
+{"id": "gh3", "kind": "github", "accept": ["github"], "prompt": "What changed in the most recent commit to spf13/cobra?"}
+{"id": "gh4", "kind": "github", "accept": ["github"], "prompt": "Find GitHub issues in expressjs/express that mention request timeouts."}
+{"id": "c71", "kind": "context7", "accept": ["context7"], "prompt": "According to the official httpx documentation, how do I configure retries on an HTTPTransport?"}
+{"id": "c72", "kind": "context7", "accept": ["context7"], "prompt": "What options does Hono's CORS middleware accept, per its documentation?"}
+{"id": "c73", "kind": "context7", "accept": ["context7", "github"], "prompt": "Show the documented way to define a command group with the click library."}
+{"id": "tv1", "kind": "tavily", "accept": ["tavily"], "prompt": "Search the web for recently disclosed security vulnerabilities affecting Express.js."}
+{"id": "tv2", "kind": "tavily", "accept": ["tavily"], "prompt": "What is the latest news about the Rust programming language this month?"}
+{"id": "tv3", "kind": "tavily", "accept": ["tavily", "github"], "prompt": "Are there any blog posts comparing ripgrep's performance to grep from the last year?"}
+{"id": "cl1", "kind": "clarify", "accept": ["clarify"], "prompt": "Add caching to my repo."}
+{"id": "cl2", "kind": "clarify", "accept": ["clarify"], "prompt": "Why is my endpoint slow?"}
+{"id": "ch1", "kind": "chain_first_step", "accept": ["github"], "prompt": "In BurntSushi/ripgrep, find which version of the regex crate it depends on, then look up that version's documentation for Unicode handling."}
+{"id": "ch2", "kind": "chain_first_step", "accept": ["github"], "prompt": "Read honojs/hono's package.json to find which TypeScript version it uses, then fetch the TypeScript documentation for that version about decorators."}
