@@ -1,0 +1,32 @@
+{
+  "server": "context7",
+  "url": "https://mcp.context7.com/mcp",
+  "probed_at": "2026-10-06T07:57:23.873894+00:00",
+  "server_info": {
+    "name": "Context7",
+    "title": null,
+    "version": "4.1.1",
+    "websiteUrl": "https://context7.com",
+    "icons": [
+      {
+        "src": "https://context7.com/context7-icon-green.png",
+        "mimeType": "image/png",
+        "sizes": null
+      }
+    ],
+    "description": "Context7 provides up-to-date documentation and code examples for libraries and frameworks."
+  },
+  "tool": "query-docs",
+  "arguments": {
+    "libraryId": 42
+  },
+  "isError": true,
+  "content": [
+    {
+      "type": "text",
+      "text": "Input validation error: Invalid arguments for tool query-docs: libraryId: Invalid input: expected string, received number, query: Invalid input: expected string, received undefined",
+      "annotations": null,
+      "meta": null
+    }
+  ]
+}
