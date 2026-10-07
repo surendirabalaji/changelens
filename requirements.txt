@@ -8,3 +8,4 @@ fastapi==0.142.2
 uvicorn[standard]==0.54.0
 python-dotenv==1.2.4
 pydantic==2.13.5
+typesafe-sdk==0.7.2  # Jev triage (D18), added 2026-10-06 in M0

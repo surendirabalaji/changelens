@@ -1,0 +1,33 @@
+{
+  "server": "context7",
+  "url": "https://mcp.context7.com/mcp",
+  "probed_at": "2026-10-07T03:05:24.116024+00:00",
+  "server_info": {
+    "name": "Context7",
+    "title": null,
+    "version": "4.1.1",
+    "websiteUrl": "https://context7.com",
+    "icons": [
+      {
+        "src": "https://context7.com/context7-icon-green.png",
+        "mimeType": "image/png",
+        "sizes": null
+      }
+    ],
+    "description": "Context7 provides up-to-date documentation and code examples for libraries and frameworks."
+  },
+  "tool": "resolve-library-id",
+  "arguments": {
+    "libraryName": "fastapi",
+    "query": "response caching and dependency injection"
+  },
+  "isError": false,
+  "content": [
+    {
+      "type": "text",
+      "text": "Available Libraries:\n\n- Title: FastAPI\n- Context7-compatible library ID: /websites/fastapi_tiangolo\n- Description: FastAPI is a modern, high-performance web framework for building APIs with Python, known for its speed, ease of use, and automatic interactive documentation based on OpenAPI standards.\n- Code Snippets: 3457\n- Source Reputation: High\n- Benchmark Score: 85.79\n----------\n- Title: FastAPI Cache\n- Context7-compatible library ID: /long2ice/fastapi-cache\n- Description: FastAPI Cache is a tool to cache FastAPI endpoint and function results, with backends supporting Redis, Memcached, and Amazon DynamoDB.\n- Code Snippets: 110\n- Source Reputation: High\n- Benchmark Score: 87.59\n----------\n- Title: FastAPI Injectable\n- Context7-compatible library ID: /jaspersui/fastapi-injectable\n- Description: FastAPI Injectable enables seamless use of FastAPI's Depends() dependency injection system outside of route handlers, allowing developers to reuse dependencies in CLI tools, background workers, scheduled jobs, and other non-FastAPI contexts without refactoring.\n- Code Snippets: 258\n- Source Reputation: High\n- Benchmark Score: 97.5\n----------\n- Title: FastAPI\n- Context7-compatible library ID: /websites/fastapi_tiangolo_reference\n- Description: FastAPI is a modern Python web framework for building fast APIs with automatic interactive documentation and built-in validation using Python type hints.\n- Code Snippets: 1402\n- Source Reputation: High\n- Benchmark Score: 77.36\n----------\n- Title: FastAPI (Deepwiki)\n- Context7-compatible library ID: /websites/deepwiki_fastapi_fastapi\n- Description: FastAPI is a high-performance web framework for building APIs with Python based on standard Python type hints, Starlette, and Pydantic.\n- Code Snippets: 1022\n- Source Reputation: High\n- Benchmark Score: 59.25",
+      "annotations": null,
+      "meta": null
+    }
+  ]
+}

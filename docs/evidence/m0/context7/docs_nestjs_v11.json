@@ -1,0 +1,33 @@
+{
+  "server": "context7",
+  "url": "https://mcp.context7.com/mcp",
+  "probed_at": "2026-10-07T03:06:08.840945+00:00",
+  "server_info": {
+    "name": "Context7",
+    "title": null,
+    "version": "4.1.1",
+    "websiteUrl": "https://context7.com",
+    "icons": [
+      {
+        "src": "https://context7.com/context7-icon-green.png",
+        "mimeType": "image/png",
+        "sizes": null
+      }
+    ],
+    "description": "Context7 provides up-to-date documentation and code examples for libraries and frameworks."
+  },
+  "tool": "query-docs",
+  "arguments": {
+    "libraryId": "/nestjs/nest/v11.1.16",
+    "query": "CacheInterceptor and cache keys"
+  },
+  "isError": false,
+  "content": [
+    {
+      "type": "text",
+      "text": "### Applying CacheInterceptor at controller level\n\nSource: https://github.com/nestjs/nest/blob/master/sample/20-cache/src/app.controller.ts\n\nDemonstrates registering the built-in CacheInterceptor with @UseInterceptors to cache endpoint responses, with a simulated 3s delay to highlight the performance benefit.\n\n```typescript\nimport { CacheInterceptor } from '@nestjs/cache-manager';\nimport { Controller, Get, UseInterceptors } from '@nestjs/common';\n\n@Controller()\n@UseInterceptors(CacheInterceptor)\nexport class AppController {\n  @Get()\n  async findAll() {\n    // For demonstration purposes, we will simulate a delay\n    // to show that the cache is working as expected.\n    await new Promise(resolve => setTimeout(resolve, 3000));\n    return [{ id: 1, name: 'Nest' }];\n  }\n}\n```\n\n--------------------------------\n\n### Custom CacheInterceptor with trackBy\n\nSource: https://github.com/nestjs/nest/blob/master/sample/20-cache/src/common/http-cache.interceptor.ts\n\nExtends CacheInterceptor to only cache GET requests and exclude specific paths \u2014 a key performance best practice to avoid caching mutations or sensitive routes.\n\n```typescript\nimport { CacheInterceptor } from '@nestjs/cache-manager';\nimport { ExecutionContext, Injectable } from '@nestjs/common';\n\n@Injectable()\nexport class HttpCacheInterceptor extends CacheInterceptor {\n  trackBy(context: ExecutionContext): string | undefined {\n    const request = context.switchToHttp().getRequest();\n    const { httpAdapter } = this.httpAdapterHost;\n\n    const isGetRequest = httpAdapter.getRequestMethod(request) === 'GET';\n    const excludePaths: string[] = [\n      // Routes to be excluded\n    ];\n    if (\n      !isGetRequest ||\n      (isGetRequest &&\n        excludePaths.includes(httpAdapter.getRequestUrl(request)))\n    ) {\n      return undefined;\n    }\n    return httpAdapter.getRequestUrl(request);\n  }\n}\n```",
+      "annotations": null,
+      "meta": null
+    }
+  ]
+}

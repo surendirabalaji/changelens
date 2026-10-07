@@ -1,0 +1,87 @@
+{
+  "repeats": 3,
+  "note": "measured from the developer laptop, not Cloud Run",
+  "servers": {
+    "github": {
+      "fresh_session_runs": [
+        {
+          "handshake_s": 0.268,
+          "call_s": 1.235,
+          "isError": false
+        },
+        {
+          "handshake_s": 0.235,
+          "call_s": 1.31,
+          "isError": false
+        },
+        {
+          "handshake_s": 0.25,
+          "call_s": 1.397,
+          "isError": false
+        }
+      ],
+      "median_handshake_s": 0.25,
+      "median_call_on_fresh_session_s": 1.31,
+      "reused_session_call_s": [
+        1.068,
+        0.424,
+        0.614
+      ],
+      "median_call_on_reused_session_s": 0.614
+    },
+    "context7": {
+      "fresh_session_runs": [
+        {
+          "handshake_s": 0.243,
+          "call_s": 2.11,
+          "isError": false
+        },
+        {
+          "handshake_s": 0.228,
+          "call_s": 1.809,
+          "isError": false
+        },
+        {
+          "handshake_s": 0.23,
+          "call_s": 1.931,
+          "isError": false
+        }
+      ],
+      "median_handshake_s": 0.23,
+      "median_call_on_fresh_session_s": 1.931,
+      "reused_session_call_s": [
+        1.964,
+        1.63,
+        1.887
+      ],
+      "median_call_on_reused_session_s": 1.887
+    },
+    "tavily": {
+      "fresh_session_runs": [
+        {
+          "handshake_s": 0.239,
+          "call_s": 3.231,
+          "isError": false
+        },
+        {
+          "handshake_s": 0.23,
+          "call_s": 0.689,
+          "isError": false
+        },
+        {
+          "handshake_s": 0.302,
+          "call_s": 0.698,
+          "isError": false
+        }
+      ],
+      "median_handshake_s": 0.239,
+      "median_call_on_fresh_session_s": 0.698,
+      "reused_session_call_s": [
+        0.693,
+        0.314,
+        0.249
+      ],
+      "median_call_on_reused_session_s": 0.314
+    }
+  }
+}

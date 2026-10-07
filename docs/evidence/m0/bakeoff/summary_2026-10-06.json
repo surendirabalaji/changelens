@@ -1,0 +1,37 @@
+{
+  "tools_bound": [
+    "get_commit",
+    "get_file_contents",
+    "list_commits",
+    "list_pull_requests",
+    "pull_request_read",
+    "query-docs",
+    "resolve-library-id",
+    "search_code",
+    "search_issues",
+    "search_pull_requests",
+    "tavily_extract",
+    "tavily_search"
+  ],
+  "prompt_count": 25,
+  "models": [
+    {
+      "model": "nvidia/nemotron-3-super-120b-a12b",
+      "selection_correct": "25/25",
+      "no_tool_correct": "4/4",
+      "schema_valid": "18/18",
+      "api_errors": 0,
+      "http_429": 0,
+      "median_latency_s": 1.35
+    },
+    {
+      "model": "nvidia/nemotron-3.5-lightning-30b-a3b",
+      "selection_correct": "24/25",
+      "no_tool_correct": "4/4",
+      "schema_valid": "18/18",
+      "api_errors": 0,
+      "http_429": 0,
+      "median_latency_s": 0.92
+    }
+  ]
+}

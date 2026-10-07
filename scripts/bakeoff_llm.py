@@ -5,10 +5,12 @@ and scores only the model's FIRST decision per prompt. No tool is executed, so
 this is a selection test, not MCP integration evidence.
 
 Usage:
-    python scripts/bakeoff_llm.py [--models m1,m2] [--repeat 1]
+    python scripts/bakeoff_llm.py [--models m1,m2] [--prompts a.jsonl,b.jsonl] [--out g0]
 
 Reads LLM_API_KEY / LLM_BASE_URL from .env at runtime; never prints them.
-Writes redacted results to docs/evidence/g0/bakeoff/.
+Writes redacted results to docs/evidence/<out>/bakeoff/. Each row is appended to
+rows_<date>.jsonl as soon as it is scored, so an interrupted run keeps its rows.
+A prompt may set "accept_tools" to require specific tool names, not just a server.
 """
 from __future__ import annotations
 
@@ -30,8 +32,7 @@ sys.path.insert(0, str(Path(__file__).resolve().parent))
 from probe_mcp import redact  # noqa: E402
 
 ROOT = Path(__file__).resolve().parent.parent
-EVIDENCE = ROOT / "docs" / "evidence" / "g0"
-OUT_DIR = EVIDENCE / "bakeoff"
+EVIDENCE = ROOT / "docs" / "evidence" / "g0"  # tools_list.json dumps from S0b
 PROMPTS = ROOT / "eval" / "bakeoff_prompts.jsonl"
 
 DEFAULT_MODELS = [
@@ -44,7 +45,8 @@ DEFAULT_MODELS = [
 ]
 
 TOOLS = {
-    "github": ["get_file_contents", "search_code", "list_commits", "search_issues"],
+    "github": ["get_file_contents", "search_code", "list_commits", "search_issues",
+               "pull_request_read", "get_commit", "list_pull_requests", "search_pull_requests"],
     "context7": ["resolve-library-id", "query-docs"],
     "tavily": ["tavily_search", "tavily_extract"],
 }
@@ -52,7 +54,7 @@ TOOLS = {
 SYSTEM_PROMPT = (
     "You are ChangeLens, an assistant that helps developers understand and safely change "
     "public GitHub codebases. You can call tools: GitHub (read repository files, commits, "
-    "issues, code search), Context7 (version-specific library documentation) and Tavily "
+    "pull requests and their diffs, issues, code search), Context7 (version-specific library documentation) and Tavily "
     "(web search). Call a tool only when it is needed to answer accurately. Answer directly "
     "from your own knowledge when no tool is needed. If the request is too ambiguous to act "
     "on (for example, no repository is named), ask one short clarifying question instead."
@@ -97,7 +99,15 @@ def classify(message, index: dict) -> dict:
     return {"decision": server, "tool": name, "schema_valid": valid}
 
 
-def run_model(client: OpenAI, model: str, prompts: list[dict], specs: list, index: dict) -> list[dict]:
+def is_correct(row: dict, case: dict) -> bool:
+    if row["decision"] not in case["accept"]:
+        return False
+    tools = case.get("accept_tools")
+    return not tools or row["decision"] not in TOOLS or row["tool"] in tools
+
+
+def run_model(client: OpenAI, model: str, prompts: list[dict], specs: list, index: dict,
+              rows_path: Path) -> list[dict]:
     rows = []
     for case in prompts:
         row = {"model": model, "id": case["id"], "kind": case["kind"], "accept": "|".join(case["accept"])}
@@ -122,8 +132,10 @@ def run_model(client: OpenAI, model: str, prompts: list[dict], specs: list, inde
             row.update({"decision": "api_error", "tool": "", "schema_valid": None,
                         "error": redact(f"{type(error).__name__}: {str(error)[:160]}")})
         row["latency_s"] = round(time.monotonic() - started, 2)
-        row["correct"] = row["decision"] in case["accept"]
+        row["correct"] = is_correct(row, case)
         rows.append(row)
+        with open(rows_path, "a") as handle:
+            handle.write(redact(json.dumps(row)) + "\n")
         time.sleep(PAUSE_SECONDS)
     return rows
 
@@ -147,30 +159,35 @@ def summarize(model: str, rows: list[dict]) -> dict:
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__.splitlines()[0])
     parser.add_argument("--models", default=",".join(DEFAULT_MODELS))
+    parser.add_argument("--prompts", default=str(PROMPTS), help="comma-separated JSONL prompt files")
+    parser.add_argument("--out", default="g0", help="evidence subfolder under docs/evidence/")
     opts = parser.parse_args()
 
     load_dotenv(find_dotenv(usecwd=True))
     client = OpenAI(api_key=os.environ["LLM_API_KEY"], base_url=os.environ["LLM_BASE_URL"])
-    prompts = [json.loads(line) for line in PROMPTS.read_text().splitlines() if line.strip()]
+    prompts = [json.loads(line) for path in opts.prompts.split(",")
+               for line in Path(path).read_text().splitlines() if line.strip()]
     specs, index = load_tools()
 
-    OUT_DIR.mkdir(parents=True, exist_ok=True)
+    out_dir = ROOT / "docs" / "evidence" / opts.out / "bakeoff"
+    out_dir.mkdir(parents=True, exist_ok=True)
     stamp = date.today().isoformat()
+    rows_path = out_dir / f"rows_{stamp}.jsonl"
     all_rows, summaries = [], []
     for model in opts.models.split(","):
-        rows = run_model(client, model, prompts, specs, index)
+        rows = run_model(client, model, prompts, specs, index, rows_path)
         all_rows.extend(rows)
         summary = summarize(model, rows)
         summaries.append(summary)
         print(json.dumps(summary), flush=True)
 
-    with open(OUT_DIR / f"bakeoff_{stamp}.csv", "w", newline="") as handle:
+    with open(out_dir / f"bakeoff_{stamp}.csv", "w", newline="") as handle:
         writer = csv.DictWriter(handle, fieldnames=list(all_rows[0]))
         writer.writeheader()
         writer.writerows(all_rows)
-    (OUT_DIR / f"summary_{stamp}.json").write_text(redact(json.dumps(
+    (out_dir / f"summary_{stamp}.json").write_text(redact(json.dumps(
         {"tools_bound": sorted(index), "prompt_count": len(prompts), "models": summaries}, indent=2)) + "\n")
-    print(f"saved -> {OUT_DIR}")
+    print(f"saved -> {out_dir}")
     return 0
 
 

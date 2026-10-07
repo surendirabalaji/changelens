@@ -26,7 +26,9 @@ The research-architect read `requirements.md` (present, authoritative), the v2 d
 - **D15:** any public repo.
 - **D17:** no cache shared across sessions.
 - **Carried-over mechanisms:** citation check, budget ledger, coverage disclosure, test-only stub server for fault injection.
-- **Tool-calling path:** tool calls go through the raw `ClientSession`, because adapter 0.3.2 hides `isError` and drops the SHA resource URI (verified in S0b).
+- **Tool-calling path, updated after M0 (E11 and E12 in `docs/evidence/m0/README.md`):**
+  - The guarded executor is a `ToolCallInterceptor` from adapter 0.3.2. It receives the raw `CallToolResult` (`isError` and the SHA resource URI) before the adapter converts it. This replaces the S0b plan to bypass the adapter with the raw `ClientSession`.
+  - One MCP session per server per turn is passed to `load_mcp_tools(session=...)`. This avoids a new handshake on every call: about 0.25 s each, and GitHub calls are about 2× slower on a fresh session.
 
 **Changed:**
 1. A first-class `DecisionRecord`, `Assumption` and `Evidence` schema in checkpoint state. Workflows A, B and C; C is new.
@@ -78,7 +80,7 @@ What the sources show:
 **`triage` as one Jev call.** The state is the query, a summary of the stored decision ledger and the last few messages. The questions:
 - `intent`: a `Choice` over {conceptual, repo_review, revise_decision, recheck, memory_recall, clarify, out_of_scope}.
 - `target_decision`: a `Choice` over the session's current `decision_id`s plus `none`. It is asked only when the ledger is not empty.
-- `needs_clarification`: a `Noul`.
+- ~~`needs_clarification`: a `Noul`.~~ **Dropped after M0 (E14).** It was poorly calibrated for this task: 0.39–0.58 on clear-cut cases. Clarification now comes from the `clarify` intent and the code rule below.
 
 **How the questions are written** (from TypeSafe's `typesafe-ai` skill guide, supplied by the student on 2026-10-06; vendor guidance):
 - Each question has **instructions** for the judgement and **criteria** that define each option. Question IDs are not sent to the model, so the full meaning goes into the question itself.
@@ -89,10 +91,17 @@ What the sources show:
 **Fallback policy.** `Choice` confidence measures how concentrated the probabilities are, not whether the answer is correct. So a low score alone does not trigger the fallback. Nemotron runs instead only when one of these holds:
 - the top two intents fall on **different sides of the tool / no-tool split** and the margin between them is below a threshold (tuned in M0 on our labelled set);
 - `target_decision` is uncertain between two real decisions;
-- `needs_clarification` is near 0.5;
 - the call errors or times out.
 
 A near-tie between two harmless options, such as `conceptual` vs `clarify`, is accepted. The routers read only these typed fields.
+
+**Code rule (policy v2, from M0):** if the intent is `recheck` or `revise_decision`, more than one decision is stored, and `target_decision` is `none`, the turn becomes `clarify` and asks which decision is meant.
+
+**M0 result** (`docs/evidence/m0/README.md` §7):
+- Jev `jev-1.13.0` and Nemotron super were equally accurate: 29/30 request types and 27/27 targets.
+- Jev's p95 was **0.20 s** against Nemotron's 4.54 s.
+- Policy v2 scored 30/30 with no fallbacks, but it was tuned on those same cases, so it must be confirmed on held-out cases in M3.
+- **D18: GO.** Triage uses `RetryPolicy(max_retries=1, timeout≈2 s)` (E15).
 
 **Optional Jev uses, after M6 [O].** These are not part of the build. Each must beat its Nemotron or code version in an ablation before it is adopted.
 - **Workflow C impact filter.** One `Noul` per (assumption, changed-file summary): "does this change touch the condition this assumption depends on?". It runs before the LLM judgement and cuts the LLM calls in recheck. This follows the vendor's "verify and escalate" and "respond to changing state" patterns.
@@ -179,7 +188,7 @@ ChangeLens is a decision-memory layer for code review.
 ```
 Client → FastAPI POST /chat (validate, query cap, per-session lock, semaphore, deadline)
  → LangGraph StateGraph ⇄ InMemorySaver(thread_id=session_id)
- → Guarded MCP executor (raw ClientSession.call_tool; tools/list discovery)
+ → Guarded MCP executor (adapter ToolCallInterceptor on raw CallToolResult; one session per server per turn; tools/list discovery)
      → GitHub (api.githubcopilot.com/mcp, X-MCP-Readonly, public-only PAT)
      → Context7 (mcp.context7.com/mcp, API key)
      → Tavily (mcp.tavily.com/mcp, Bearer)
@@ -271,7 +280,16 @@ There is no store shared across threads and no project ledger. The HTML store is
 
 **Workflow C:** `unaffected` moves only `current_revision_checked` forward. `concept` triggers catch semantic changes such as discount logic added in a new file.
 
-**Missing evidence:** `InMemorySaver` growth and pruning APIs in langgraph 1.2.13. This decides 512Mi vs 1Gi.
+**Measured in M0 (E13):**
+- `InMemorySaver` stores the full message list in every checkpoint and has **no pruning API**; only `delete_thread` exists.
+- In a synthetic test, one session reached 98 MB after 50 turns when tool output stayed in `messages`, and 27 MB when it was trimmed.
+
+**Rules:**
+- Tool output never goes into `messages`. It lives in `evidence`.
+- Keep only the last N messages.
+- Cap `evidence` at 150 entries.
+- Evict sessions idle past a TTL with `delete_thread`.
+- M7 measures memory under load to choose 512Mi or 1Gi.
 
 ## Failure handling
 | Category | Handling |
@@ -353,12 +371,12 @@ Faults are injected with a test-only stub server, and by overriding a real serve
 
 ## Missing evidence (for the student or Claude to obtain)
 1. ~~The professor's original clarification text.~~ Resolved; see F8.
-2. GitHub: traces for the PR and commit tools, diff truncation, `search_code` behaviour on branches and its pagination, rate limits.
-3. Context7 coverage and quota for FastAPI, Express and NestJS.
-4. Tavily credits per call and its rate limit.
-5. B1 and B2 app repos and PRs, checked for access at pinned SHAs.
-6. Whether adapter 0.3.2 has an interceptor hook, and the session lifecycle.
-7. `InMemorySaver` growth and pruning.
+2. ~~GitHub PR and commit tools.~~ Done in M0 (E1, E2, E7). Still open: measured rate limits.
+3. ~~Context7 coverage.~~ Done in M0 (E3–E5). Still open: quota.
+4. Tavily: responses don't report credits (E6). Still open: published pricing and rate limit.
+5. ~~Batch repos.~~ Proposed and checked in M0 (`docs/evidence/m0/corpus/`). The student may swap in their own.
+6. ~~Adapter interceptor and session lifecycle.~~ Done in M0 (E11, E12).
+7. ~~`InMemorySaver` growth.~~ Measured in M0 (E13).
 8. Cold-start time on Cloud Run. The grader expects under 60 s (F10); the Cloud Run request timeout is set above 60 s in `deploy.sh`.
 9. Dated prices for LLM tokens, Cloud Run, and NIM credit and expiry.
 10. ~~S0a status.~~ The student confirmed on 2026-10-06 that gcloud setup and the budget alert are done.
@@ -380,8 +398,9 @@ These are per-request limits that keep one `/chat` call within cost, rate-limit 
 ### Latency constraint (F10): staying under 60 s
 - **Deadline budget for each turn** [A, to be tuned in M1 and M4 from measured traces]:
   - `triage`: ≤1 s with Jev, ≤4 s with the Nemotron fallback.
-  - Tool loop: stops at **T+38 s**.
-  - `synthesize` and `check_decision`: **reserve of ≥10 s** that the tool loop cannot use.
+  - Tool loop: stops at **T+30 s**. This was T+38 s before M0 (E8).
+  - `synthesize` and `check_decision`: **reserve of ≥15 s** that the tool loop cannot use. M0 measured Nemotron super at 9.5–14.7 s for a full `DecisionRecord` in `json_schema` mode. Output is capped at about 900 tokens: at most 4 assumptions and 4 tests, short strings.
+  - Every budget is enforced with `asyncio.wait_for`, and LLM clients use `max_retries=0`. The OpenAI client applies `timeout` to each attempt and retries twice by default, so one call took 181 s in M0 (E9).
   - `render`: ≤1 s.
   - The response is sent by **T+50 s**, which leaves ≥10 s for network time and slow scheduling.
 - **Parallel reads.** When the agent asks for several independent tool calls in one step (for example, route, service and test files at the same SHA), the `tools` node runs them together with `asyncio.gather`, under a cap on how many run at once for each server. Dependent chains stay sequential.

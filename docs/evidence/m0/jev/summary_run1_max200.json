@@ -1,0 +1,40 @@
+{
+  "cases": 30,
+  "jev_model": "jev-1.13.0",
+  "jev_intent_accuracy": "29/30",
+  "nemotron_intent_accuracy": "19/30",
+  "combined_intent_accuracy": "26/30",
+  "jev_group_crossings": 1,
+  "nemotron_group_crossings": 0,
+  "combined_group_crossings": 1,
+  "jev_target_accuracy": "27/27",
+  "nemotron_target_accuracy": "17/27",
+  "fallback_rate": "7/30",
+  "jev_stable_across_runs": "29/30",
+  "jev_latency_p50_s": 0.1,
+  "jev_latency_p95_s": 0.162,
+  "nemotron_latency_p50_s": 1.198,
+  "nemotron_latency_p95_s": 2.408,
+  "jev_errors": 0,
+  "nemotron_errors": 11,
+  "jev_mean_conf_correct": 0.965,
+  "jev_mean_conf_wrong": 0.84,
+  "jev_input_tokens_total": 32074,
+  "note": "Latency measured from the developer laptop, not Cloud Run. Labels written by Claude; student review pending.",
+  "invalid_request_check": {
+    "outcome": "TypeSafeBadRequestError",
+    "detail": "POST https://api.typesafe.ai/v1/systemone: 400 Choice question must have at least one choice: bad (request_id=req_01a1146424b67f96ae06fd77e625fbed)"
+  },
+  "models_listed": [
+    {
+      "name": "jev-latest",
+      "description": "The latest iteration of TypeSafe's System One Model: Jev",
+      "release_date": "2026-09-10T18:38:01.391457+00:00"
+    },
+    {
+      "name": "jev-preview",
+      "description": "A preview version of `jev-latest`: should be better in most ways",
+      "release_date": "2026-09-10T18:39:06.057655+00:00"
+    }
+  ]
+}

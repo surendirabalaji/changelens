@@ -1,0 +1,33 @@
+{
+  "server": "context7",
+  "url": "https://mcp.context7.com/mcp",
+  "probed_at": "2026-10-07T03:06:00.691622+00:00",
+  "server_info": {
+    "name": "Context7",
+    "title": null,
+    "version": "4.1.1",
+    "websiteUrl": "https://context7.com",
+    "icons": [
+      {
+        "src": "https://context7.com/context7-icon-green.png",
+        "mimeType": "image/png",
+        "sizes": null
+      }
+    ],
+    "description": "Context7 provides up-to-date documentation and code examples for libraries and frameworks."
+  },
+  "tool": "query-docs",
+  "arguments": {
+    "libraryId": "/fastapi/fastapi/0.115.0",
+    "query": "dependencies with yield"
+  },
+  "isError": false,
+  "content": [
+    {
+      "type": "text",
+      "text": "Version \"0.115.0\" not found for library \"/fastapi/fastapi\". Available versions: 0.115.13, 0_116_1, 0.118.2, 0.122.0, 0.128.0",
+      "annotations": null,
+      "meta": null
+    }
+  ]
+}

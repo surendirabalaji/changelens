@@ -1,0 +1,33 @@
+{
+  "server": "context7",
+  "url": "https://mcp.context7.com/mcp",
+  "probed_at": "2026-10-07T03:05:26.611901+00:00",
+  "server_info": {
+    "name": "Context7",
+    "title": null,
+    "version": "4.1.1",
+    "websiteUrl": "https://context7.com",
+    "icons": [
+      {
+        "src": "https://context7.com/context7-icon-green.png",
+        "mimeType": "image/png",
+        "sizes": null
+      }
+    ],
+    "description": "Context7 provides up-to-date documentation and code examples for libraries and frameworks."
+  },
+  "tool": "resolve-library-id",
+  "arguments": {
+    "libraryName": "starlette",
+    "query": "middleware ordering"
+  },
+  "isError": false,
+  "content": [
+    {
+      "type": "text",
+      "text": "Available Libraries:\n\n- Title: Starlette\n- Context7-compatible library ID: /kludex/starlette\n- Description: Starlette is a lightweight ASGI framework and toolkit for building fast async web services in Python with WebSocket support, middleware, and 100% type coverage.\n- Code Snippets: 505\n- Source Reputation: High\n- Benchmark Score: 82.67\n----------\n- Title: Starlette\n- Context7-compatible library ID: /websites/starlette_io\n- Description: Starlette is a lightweight ASGI framework/toolkit for building production-ready async web services in Python with WebSocket support, background tasks, and extensive middleware.\n- Code Snippets: 8\n- Source Reputation: High\n- Benchmark Score: 20.36\n----------\n- Title: Starlette (Deepwiki)\n- Context7-compatible library ID: /websites/deepwiki_encode_starlette\n- Description: Starlette is a lightweight ASGI framework and toolkit for building high-performance asynchronous web services in Python.\n- Code Snippets: 587\n- Source Reputation: High\n- Benchmark Score: 79.29\n----------\n- Title: Starlette Compress\n- Context7-compatible library ID: /zaczero/starlette-compress\n- Description: A fast and simple middleware for Starlette and FastAPI that compresses responses using ZStd, Brotli, and GZip with more algorithms and sensible defaults than built-in options.\n- Code Snippets: 6\n- Source Reputation: High\n- Benchmark Score: 90.67\n----------\n- Title: Starlette Context\n- Context7-compatible library ID: /tomwojcik/starlette-context\n- Description: Starlette Context is middleware for Starlette that allows storing and accessing context data throughout a request's lifecycle, enabling automatic inclusion of request headers like correlation IDs in logging.\n- Code Snippets: 184\n- Source Reputation: High\n- Benchmark Score: 96",
+      "annotations": null,
+      "meta": null
+    }
+  ]
+}

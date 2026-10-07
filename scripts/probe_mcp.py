@@ -23,8 +23,9 @@ from dotenv import find_dotenv, load_dotenv
 from mcp import ClientSession
 from mcp.client.streamable_http import streamablehttp_client
 
-SECRET_VARS = ("LLM_API_KEY", "GITHUB_PAT", "TAVILY_API_KEY", "CONTEXT7_API_KEY")
-EVIDENCE_ROOT = Path(__file__).resolve().parent.parent / "docs" / "evidence" / "g0"
+SECRET_VARS = ("LLM_API_KEY", "GITHUB_PAT", "TAVILY_API_KEY", "CONTEXT7_API_KEY", "TYPESAFE_API_KEY")
+EVIDENCE_BASE = Path(__file__).resolve().parent.parent / "docs" / "evidence"
+EVIDENCE_ROOT = EVIDENCE_BASE / "g0"  # overridden by --out
 PREVIEW_CHARS = 600
 
 
@@ -109,7 +110,11 @@ def main() -> int:
     parser.add_argument("--call", help="tool name to invoke; omit to list tools")
     parser.add_argument("--args", default="{}", help="tool arguments as JSON")
     parser.add_argument("--label", default="", help="evidence file name (without .json)")
+    parser.add_argument("--out", default="g0", help="evidence subfolder under docs/evidence/")
     opts = parser.parse_args()
+
+    global EVIDENCE_ROOT
+    EVIDENCE_ROOT = EVIDENCE_BASE / opts.out
 
     load_dotenv(find_dotenv(usecwd=True))
     try:
