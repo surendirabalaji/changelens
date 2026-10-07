@@ -59,7 +59,10 @@ Source: https://typesafe.ai/blog/introducing-system-one-models-and-jev
 - TypeSafe's `typesafe-ai` skill guide, pasted by the student (MIT licence). It is vendor guidance on how to write questions, read confidence and use patterns.
 
 What the sources show:
-- **Package:** LangChain package `langchain-typesafe`, class `TypeSafeClassifier`. The API key comes from `TYPESAFE_API_KEY`. The docs say `classifier.invoke({"state": ..., "questions": {...}})`, so it can be called directly from inside the `triage` node. No custom wrapper is needed.
+- **Packages:**
+  - LangChain package: `langchain-typesafe`, class `TypeSafeClassifier`.
+  - Official SDK: `typesafe-sdk`. **We use the official SDK** (see the docs check below).
+  - Both read the API key from `TYPESAFE_API_KEY`.
 - **Question types:**
   - `Choice` returns `choice`, `probabilities` and `confidence`.
   - `Score` returns `score`, `probabilities` and `confidence`.
@@ -101,18 +104,38 @@ A near-tie between two harmless options, such as `conceptual` vs `clarify`, is a
 - This adds a second model provider. It is **not** a framework and **not** an MCP server, so it adds no MCP credit.
 - Placeholder in `.env.example`: `TYPESAFE_API_KEY`. The SDK expects this name.
 
-**Missing evidence (the student is supplying sources):**
-- Whether `Choice` options can be set **at runtime on each request**. The decision IDs depend on this. It is likely: the skill guide says criteria are defined in each question, and questions are passed per call. Confirm it on the Choice page or in the SDK types. If they can't, `target_decision` is resolved by Nemotron or deterministically. When there is only one decision there is nothing to resolve.
-- Docs to read in M0, as Markdown by adding `.md`, starting from https://docs.typesafe.ai/llms.txt:
-  - `sdk/python.md` and `api.md`: version, async, errors, limits;
-  - `primitives/choice.md`, `primitives/noul.md` and `confidence.md`;
-  - `concepts/state.md`;
-  - `cookbooks/function_calling.md` and `cookbooks/citation_check.md`.
-- The pinned package version, async support (`ainvoke`) and the error types it raises. These decide how transport and tool errors map onto §Failure handling.
-- The input-size limit for `state`.
-- Rate limits, free credit, pricing on our volume, and availability through the grading window.
-- Data retention for public repo text sent as `state`.
-- How the confidence scale is calibrated, and what threshold to use.
+**Checked against the TypeSafe docs (2026-10-06).** Pages read: `sdk/python.md`, `api.md`, `primitives/choice.md`, `primitives/noul.md`, `confidence.md`, `concepts/state.md`.
+- **SDK: we use the official `typesafe-sdk`, not `langchain-typesafe`.**
+  - It provides `AsyncTypeSafeClient` (async context manager) with `system_one(state=..., questions=...)`.
+  - The `triage` node calls it directly. LangGraph nodes are already async, so no LangChain wrapper is needed and there is one less dependency.
+  - Optional extra: `[http2]`.
+- **HTTP API.**
+  - Endpoint: `POST https://api.typesafe.ai/v1/systemone`, authenticated with `Authorization: Bearer <TYPESAFE_API_KEY>`.
+  - The `model` field takes `"jev-latest"`. The docs list no pinned version, so we record the `model` string from each response in traces for reproducibility.
+  - Responses include `usage.input_tokens` and `usage.output_tokens`, which go into the budget ledger.
+- **Runtime labels: CONFIRMED.** `Choice` criteria are a map in each request: option → description, which can be a string, a `{what, not_for, examples}` object, or null. The limit is ≤255 options. So `target_decision` options are built from the session's ledger on every call.
+- **Outputs.**
+  - `Choice`: `choice`, `probabilities` (they sum to 1) and `confidence` = `(p_max − 1/n)/(1 − 1/n)`, which is 0 for an even split and 1 for certainty.
+  - `Noul`: the probability of yes, from 0 to 1. A value near 0.5 means uncertain, not "medium".
+  - The SDK docs name the response fields in two ways: `response.choices[k]` and `response.answers[k]`. The SDK summary also called a Noul "boolean". We confirm the actual types against the installed SDK in M0.
+- **Error mapping into §Failure handling.**
+  - 401 (bad key): tool-execution error. No retry; use the Nemotron fallback.
+  - 422 (validation): malformed request. This is a code bug, so log it and use the fallback.
+  - 429 (rate limit) and 529 (overloaded): one retry with exponential backoff if the deadline allows, as the docs advise. Otherwise use the fallback.
+  - Connection errors or timeouts: transport error. Use the fallback.
+  - Jev failing never fails the turn.
+- **State.**
+  - Text only: a string, an object or an array of text. We use an object with named fields, as the docs recommend.
+  - Accuracy is lower for non-English text, including CJK.
+- **Confidence thresholds.** The docs suggest proceeding above 0.9 and escalating or clarifying below 0.5, set separately for each action according to its cost. This matches our fallback policy, and the actual thresholds are tuned in M0.
+
+**Still missing evidence:**
+- Rate-limit numbers.
+- The maximum size of `state`. The docs list none, so we cap it ourselves at about 4k characters by trimming `recent_turns`.
+- Data retention and privacy for text sent as `state`. It is public repo text, but that should be confirmed.
+- Pricing and free credit, and whether the key stays valid through the grading window.
+- Prompt-injection behaviour. The docs give no guidance. Because Jev only picks among options and the routers read only typed fields, injected text can at worst cause a misroute, never a tool call.
+- Cookbooks to read when the optional uses are taken up: `cookbooks/function_calling.md`, `cookbooks/citation_check.md`.
 
 **Risk:**
 - It is a new vendor, and the claims come from its own marketing.
@@ -128,7 +151,8 @@ A near-tie between two harmless options, such as `conceptual` vs `clarify`, is a
 | F5 | There is no compare or range-diff tool | Recheck uses the PR `get_files` and `get_diff`, or `get_commit full_patch`, plus a drift check on cited excerpts at the new SHA. |
 | F6 | 11 LLM nodes vs the NIM limit of about 40 requests per minute | Only 3 nodes call the LLM. |
 | F7 | "Reviewer effort" needs a study with people | Optional and qualitative; no claim made. |
-| F8 | The professor's clarification exists only as a paraphrase | **Missing evidence:** the original wording. |
+| F8 | The professor's clarification (**RESOLVED 2026-10-06**; the student supplied the professor's answer) | Verbatim: *"Does not count as real MCP integration, as it can be very few lines of code, and fails the test as 'Hard-coded / simulated tool responses that never touch the wire = zero credit on MCP integration'. All MCP servers that will count must 'wrap real external systems or data sources'. What you suggest I would consider 'gaming' the system."* (This was the answer to whether a student-built FastMCP server returning seeded or simulated data counts.) **Effect:** GitHub, Context7 and Tavily all wrap real external systems, so all three count. No student-built server is counted. The fault-injection stub server is test-only. It is never deployed, never listed in the runtime server manifest and never claimed as an integration. |
+| F10 | The grader expects a response in **under 60 s** (student, 2026-10-06; "preferably"). v2 and v3 allowed 90 s for Workflow A. | Hard internal deadline of **50 s** for each turn. See "Latency constraint" under the budget section. Workflow A gets fewer tool calls, reads in parallel, and can **continue across turns**. |
 | F9 | `search_code` searches all of GitHub and probably only default branches | Require a `repo:` qualifier. Recheck never uses search for PR-head code. |
 
 ## Requirements summary (`requirements.md`)
@@ -204,7 +228,7 @@ Client → FastAPI POST /chat (validate, query cap, per-session lock, semaphore,
 **Typical chains:**
 | Workflow | Chain | Budget |
 |---|---|---|
-| A | manifest at the SHA → version → Context7 `resolve-library-id` → `query-docs` → route, service and test reads → Tavily only if needed | ≤14 calls, ≤2 Tavily |
+| A | manifest at the SHA → version → Context7 `resolve-library-id` → `query-docs` → route, service and test reads → Tavily only if needed | ≤10 calls, ≤1 Tavily; independent reads in parallel |
 | B | Mostly no tools | ≤4 calls |
 | C | PR `get` (head and base SHA) → `get_files` → impact match → reads at the head SHA, plus `get_diff` | ≤10 calls |
 
@@ -283,7 +307,7 @@ Faults are injected with a test-only stub server, and by overriding a real serve
 |---|---|---|---|
 | Tool selection | About 48 turns (≥10 no-tool, ≥4 clarification, ≥4 recall) with accepted alternative paths | (a) `triage` off. (b) **Jev triage vs Nemotron triage**, everything else identical; also report triage accuracy, p50/p95 latency and cost for each. | ≥85% |
 | Multi-step | ≥15 tasks with dependent arguments; the chain is present and the answer is correct | Single-pass planner | ≥70% |
-| Latency | p50/p95 per class (no-tool ≥40, A ≥20, B ≥20, C ≥15 runs), ≥10 cold starts, concurrency 1 and 3 | HTML off, `triage` off | No-tool p95 ≤8 s, A ≤90 s, B ≤30 s, C ≤60 s |
+| Latency | p50/p95 per class (no-tool ≥40, A ≥20, B ≥20, C ≥15 runs), ≥10 cold starts, concurrency 1 and 3 | HTML off, `triage` off | No-tool p95 ≤8 s, A ≤55 s, B ≤30 s, C ≤55 s; **every class must stay under the 60 s grader limit, including cold starts** |
 | Resilience | 3 categories × 3 servers × {discovery, invocation} × 3 runs, plus LLM faults | Recovery off | 0 crashes, 0 fabrications, ≥80% full or partial |
 | Memory | ≥20 interleaved sessions; recall, correction, recheck; adversarial isolation | No checkpointer; messages only | ≥90% pass, 0 leaks |
 | Groundedness | ≥100 claims labelled by a human | `check_decision` off | ≥95% supported, 0 fake IDs |
@@ -300,7 +324,7 @@ Faults are injected with a test-only stub server, and by overriding a real serve
 | Instance replacement wipes decisions | Document it; pasteable summary; optional `min-instances 1` |
 | Semantic misses in recheck | LLM review of diffs plus a measured comparison with the baseline |
 | Workflow graphs outside Python | All edges `inferred` with citations |
-| Grader timeout | Internal deadline; partial answers |
+| Grader timeout (expects under 60 s) | 50 s hard deadline; a synthesis reserve that cannot be skipped; parallel reads; resumable reviews; cold starts measured. If cold-start p95 goes over the limit, the student can consider `--min-instances 1`, which costs money. |
 | Scope creep | Compliance line at M3; HTML and Java optional |
 | Session leakage | No cross-thread store; isolation tests |
 
@@ -328,31 +352,49 @@ Faults are injected with a test-only stub server, and by overriding a real serve
 | M10 Readiness | README, attribution, cost, secret scan | Fresh-clone build; 10 unseen live queries |
 
 ## Missing evidence (for the student or Claude to obtain)
-1. The professor's original clarification text.
+1. ~~The professor's original clarification text.~~ Resolved; see F8.
 2. GitHub: traces for the PR and commit tools, diff truncation, `search_code` behaviour on branches and its pagination, rate limits.
 3. Context7 coverage and quota for FastAPI, Express and NestJS.
 4. Tavily credits per call and its rate limit.
 5. B1 and B2 app repos and PRs, checked for access at pinned SHAs.
 6. Whether adapter 0.3.2 has an interceptor hook, and the session lifecycle.
 7. `InMemorySaver` growth and pruning.
-8. Cloud Run timeout, cold-start behaviour, and the grader's HTTP timeout.
+8. Cold-start time on Cloud Run. The grader expects under 60 s (F10); the Cloud Run request timeout is set above 60 s in `deploy.sh`.
 9. Dated prices for LLM tokens, Cloud Run, and NIM credit and expiry.
-10. S0a status (gcloud setup and budget alert); there is no evidence file.
+10. ~~S0a status.~~ The student confirmed on 2026-10-06 that gcloud setup and the budget alert are done.
 11. Fetch details, only if it is adopted.
-12. Jev (D18): the SDK (`langchain-typesafe`) and auth (`TYPESAFE_API_KEY`) are now known. Still open:
-    - whether `Choice` options can be set per request (runtime labels);
-    - the package version, async support and error types;
-    - the input-size limit;
-    - rate limits, credit and pricing;
+12. Jev (D18). Now known from the docs: the SDK (`typesafe-sdk`, async), the endpoint, auth, error codes, runtime labels (confirmed) and the confidence formula. Still open:
+    - rate-limit numbers;
+    - the maximum size of `state`;
     - data retention;
-    - how confidence is calibrated.
+    - pricing and credit through grading;
+    - response field types, checked against the installed SDK.
 
 ## The "budget" in this design
 These are per-request limits that keep one `/chat` call within cost, rate-limit and timeout bounds. All numbers are [A] until measured.
-- **Tool-call budget for each turn:** A ≤14 calls (≤2 Tavily), B ≤4, C ≤10.
-- **Time limit for each turn:** kept below the Cloud Run timeout.
+- **Tool-call budget for each turn:** A ≤10 calls (≤1 Tavily), B ≤4, C ≤10.
+- **Time limit for each turn:** a hard deadline of 50 s (F10: the grader expects under 60 s).
 
   When either limit runs out, the graph goes to `synthesize` using the evidence it already has, marks the answer **partial**, and shows what was not checked.
+
+### Latency constraint (F10): staying under 60 s
+- **Deadline budget for each turn** [A, to be tuned in M1 and M4 from measured traces]:
+  - `triage`: ≤1 s with Jev, ≤4 s with the Nemotron fallback.
+  - Tool loop: stops at **T+38 s**.
+  - `synthesize` and `check_decision`: **reserve of ≥10 s** that the tool loop cannot use.
+  - `render`: ≤1 s.
+  - The response is sent by **T+50 s**, which leaves ≥10 s for network time and slow scheduling.
+- **Parallel reads.** When the agent asks for several independent tool calls in one step (for example, route, service and test files at the same SHA), the `tools` node runs them together with `asyncio.gather`, under a cap on how many run at once for each server. Dependent chains stay sequential.
+- **Synthesis cutoff.** If the reserve is reached during `synthesize`, the turn returns the deterministic report built from validated evidence (the existing text fallback). It never waits past the deadline.
+- **Resumable reviews.** Evidence and the partly built `DecisionRecord` (`acceptance=proposed`, `coverage.pending`) are saved to the checkpoint even when a turn is partial.
+  - The response ends with *"Reply 'continue' to check: …"*.
+  - On the next turn, `triage` (intent `repo_review`, with the same `target_decision`) picks up from the pending coverage list instead of starting over. A large Workflow A review therefore spans 2–3 turns under 60 s each, instead of one turn that times out.
+  - This uses framework-native session memory directly, so it also strengthens R4.
+- **Cold starts.** Measure them in M1 using the live URL (≥10 runs). If cold-start p95 plus a Workflow A turn goes over 60 s, the options are:
+  - lazy MCP sessions with discovery at startup;
+  - a smaller image;
+  - the student enabling `--min-instances 1`, which costs money; the student decides.
+- **Cloud Run request timeout** in `deploy.sh`: 120 s. It is a safety margin above the internal deadline, never the actual limit.
 - **Budget ledger:** counts calls, tokens and Tavily credits for each turn. This is the data for the cost metric.
 - **Daily cost budget (M7):** once it is spent, the service switches to a cheaper mode that still uses tools.
 
