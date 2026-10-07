@@ -52,17 +52,44 @@ Source: https://typesafe.ai/blog/introducing-system-one-models-and-jev
 **Why use it:**
 - `triage` runs on every turn. Moving it off NIM saves about 1 call per turn against the ~40 requests-a-minute limit, and should cut no-tool latency.
 
+**Integration (2026-10-06).** Sources:
+- https://www.langchain.com/blog/building-a-harness-with-jev
+- https://www.langchain.com/blog/building-prod-with-jev-and-langgraph
+- https://docs.typesafe.ai/introduction (overview page only)
+
+What the sources show:
+- **Package:** LangChain package `langchain-typesafe`, class `TypeSafeClassifier`. The API key comes from `TYPESAFE_API_KEY`. The docs say `classifier.invoke({"state": ..., "questions": {...}})`, so it can be called directly from inside the `triage` node. No custom wrapper is needed.
+- **Question types:**
+  - `Choice` returns `choice`, `probabilities` and `confidence`.
+  - `Score` returns `score`, `probabilities` and `confidence`.
+  - `Noul` is a yes/no that returns a value from 0 to 1.
+
+  Questions can be mixed in one call and are evaluated in parallel and in isolation. `state` can be text, structured data or LangChain messages.
+- **Typed answers only. Jev does not extract free text.** This confirms the design: the repo URL, SHA and PR number are parsed deterministically, and the proposed change and constraints are read by `agent`.
+- **Reported speed (vendor and partner claims, UNVERIFIED for this workload):**
+  - 5–6× faster than Claude Sonnet on a document-classification step.
+  - Browserbase's median `act()` time fell from 1.97 s to 0.46 s.
+  - LangChain's post also links to related middleware (`ModelRouterMiddleware`, `AutoModeMiddleware`). Not used here.
+
+**`triage` as one Jev call.** The state is the query, a summary of the stored decision ledger and the last few messages. The questions:
+- `intent`: a `Choice` over {conceptual, repo_review, revise_decision, recheck, memory_recall, clarify, out_of_scope}.
+- `target_decision`: a `Choice` over the session's current `decision_id`s plus `none`. It is asked only when the ledger is not empty.
+- `needs_clarification`: a `Noul`.
+
+If `intent.confidence` is below a threshold (tuned in M0), or the call errors or times out, the Nemotron structured-output call runs instead. The routers read only these typed fields.
+
 **Scope:**
 - Jev only picks the mode. All allowlisted tools stay bound to Nemotron in `agent`, so the LLM still makes the final tool choice (R §3.2).
 - This adds a second model provider. It is **not** a framework and **not** an MCP server, so it adds no MCP credit.
-- New placeholder in `.env.example`: `JEV_API_KEY`.
+- Placeholder in `.env.example`: `TYPESAFE_API_KEY`. The SDK expects this name.
 
-**Missing evidence:**
-- API reference and SDK (only a "Python adapter" is mentioned), and the auth method.
-- Rate limits, a free tier or credit, and availability through the grading window.
-- Whether it supports **labels set at runtime** (the decision IDs) and free-text extraction.
-- Whether its data retention is acceptable for public repo text.
-- There is no LangChain or LangGraph integration, so it gets a thin wrapper inside the `triage` node.
+**Missing evidence (the student is supplying sources):**
+- Whether `Choice` options can be set **at runtime on each request**. The decision IDs depend on this. The `invoke` shape suggests they can, because questions are passed per call, but it is not confirmed. If they can't, `target_decision` is resolved by Nemotron or deterministically. When there is only one decision there is nothing to resolve.
+- The pinned package version, async support (`ainvoke`) and the error types it raises. These decide how transport and tool errors map onto §Failure handling.
+- The input-size limit for `state`.
+- Rate limits, free credit, pricing on our volume, and availability through the grading window.
+- Data retention for public repo text sent as `state`.
+- How the confidence scale is calibrated, and what threshold to use.
 
 **Risk:**
 - It is a new vendor, and the claims come from its own marketing.
@@ -289,7 +316,13 @@ Faults are injected with a test-only stub server, and by overriding a real serve
 9. Dated prices for LLM tokens, Cloud Run, and NIM credit and expiry.
 10. S0a status (gcloud setup and budget alert); there is no evidence file.
 11. Fetch details, only if it is adopted.
-12. Jev: API reference and SDK, auth, rate limits, free tier, runtime labels, data retention (D18).
+12. Jev (D18): the SDK (`langchain-typesafe`) and auth (`TYPESAFE_API_KEY`) are now known. Still open:
+    - whether `Choice` options can be set per request (runtime labels);
+    - the package version, async support and error types;
+    - the input-size limit;
+    - rate limits, credit and pricing;
+    - data retention;
+    - how confidence is calibrated.
 
 ## The "budget" in this design
 These are per-request limits that keep one `/chat` call within cost, rate-limit and timeout bounds. All numbers are [A] until measured.
