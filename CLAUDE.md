@@ -95,3 +95,17 @@ Do not mark a milestone documented until PROCESS_LOG.md reflects it.
 
 I write PROCESS_LOG.md myself. Help me gather evidence and organize
 my thoughts; do not automatically write or overwrite my narrative.
+
+## Coding coach workflow
+
+The user writes their own code to learn. Apply this workflow to the user's coding tasks.
+
+- Default to Guide mode. Explain the task, give one step at a time, and wait for the user's code before the next step.
+- Use the `coding-coach` subagent for focused explanations, step guidance, and reviews.
+- Pass the subagent: the mode (Guide, Review, or Implement), the current task, the relevant files, the user's latest attempt, and progress so far.
+- Show the user the guidance it returns. In Guide mode, stop and wait for the user's code.
+- Do not implement a task through any agent while the user is meant to write it.
+- Honor explicit implementation requests ("implement it", "you fix this", "write the full solution") and pass `Mode: Implement` clearly. "Help me implement this" stays Guide mode.
+- Keep interactive teaching in the main conversation. Use the subagent for bounded analysis, guidance, review, or authorized implementation.
+- Use the same explanation style in your own replies: short active sentences, one idea per sentence, exact identifiers, concrete inputs and outputs.
+- If it is unclear whether a task is one the user wants to write, ask.
