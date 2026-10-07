@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>G0 / S0b: MCP access probe findings (2026-10-06)</title>
+<style>
+:root {
+  --bg: #fbfbfa; --surface: #ffffff; --text: #1f2328; --muted: #59636e; --border: #d8dee4;
+  --accent: #0b6bcb; --code-bg: #f2f4f6; --row-alt: #f6f8fa; --mark: #fff3c4;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1115; --surface: #161a20; --text: #e6e8eb; --muted: #9aa4af; --border: #2c333c;
+    --accent: #6cb6ff; --code-bg: #1d232b; --row-alt: #1a1f26; --mark: #4a3f12;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1115; --surface: #161a20; --text: #e6e8eb; --muted: #9aa4af; --border: #2c333c;
+  --accent: #6cb6ff; --code-bg: #1d232b; --row-alt: #1a1f26; --mark: #4a3f12;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+.layout { display: grid; grid-template-columns: 1fr; max-width: 1280px; margin: 0 auto; padding: 0 16px; }
+@media (min-width: 1100px) { .layout { grid-template-columns: 260px minmax(0, 1fr); gap: 40px; } }
+nav.toc { display: none; }
+@media (min-width: 1100px) {
+  nav.toc { display: block; position: sticky; top: 0; align-self: start; max-height: 100vh; overflow-y: auto;
+    padding: 24px 0; font-size: 14px; }
+}
+nav.toc a { color: var(--muted); text-decoration: none; display: block; padding: 3px 0; }
+nav.toc a:hover { color: var(--accent); }
+nav.toc .h3 { padding-left: 14px; font-size: 13px; }
+nav.toc .home { font-weight: 600; color: var(--text); margin-bottom: 10px; }
+main { min-width: 0; padding: 24px 0 80px; }
+.banner { font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 10px;
+  margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between; }
+.banner button { font: inherit; color: var(--muted); background: none; border: 1px solid var(--border);
+  border-radius: 6px; padding: 2px 10px; cursor: pointer; }
+h1 { font-size: 2em; line-height: 1.25; margin: 0.2em 0 0.6em; }
+h2 { font-size: 1.5em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; margin-top: 2em; }
+h3 { font-size: 1.2em; margin-top: 1.6em; }
+h1, h2, h3, h4 { scroll-margin-top: 16px; }
+a { color: var(--accent); }
+p, li { overflow-wrap: anywhere; }
+code { background: var(--code-bg); border-radius: 4px; padding: 0.1em 0.35em; font-size: 0.88em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+pre { background: var(--code-bg); border-radius: 8px; padding: 14px 16px; overflow-x: auto; font-size: 13.5px;
+  line-height: 1.5; }
+pre code { background: none; padding: 0; font-size: inherit; }
+pre.mermaid { background: var(--surface); border: 1px solid var(--border); text-align: center; }
+blockquote { margin: 1em 0; padding: 0.4em 1em; border-left: 4px solid var(--accent); color: var(--muted);
+  background: var(--surface); border-radius: 0 6px 6px 0; }
+.table-wrap { overflow-x: auto; margin: 1em 0; border: 1px solid var(--border); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; background: var(--surface); }
+th, td { border-bottom: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+th { background: var(--row-alt); font-weight: 600; }
+tr:nth-child(even) td { background: var(--row-alt); }
+tr:last-child td { border-bottom: none; }
+del { color: var(--muted); }
+hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+.index-list { list-style: none; padding: 0; }
+.index-list li { padding: 12px 0; border-bottom: 1px solid var(--border); }
+.index-list .path { color: var(--muted); font-size: 13px; }
+</style>
+
+<script>
+(function () {
+  var key = "changelens-docs-theme";
+  try { var saved = localStorage.getItem(key); if (saved) document.documentElement.dataset.theme = saved; } catch (e) {}
+  window.toggleTheme = function () {
+    var dark = document.documentElement.dataset.theme
+      ? document.documentElement.dataset.theme === "dark"
+      : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var next = dark ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem(key, next); } catch (e) {}
+  };
+})();
+</script>
+
+</head>
+<body>
+<div class="layout">
+<nav class="toc"><a class="home" href="../../index.html">ChangeLens docs</a><a class="h2" href="#discovery-toolslist-all-three-servers-reachable-over-streamable-http">Discovery (tools/list): all three servers reachable over streamable HTTP</a><a class="h2" href="#invocation-toolscall">Invocation (tools/call)</a><a class="h2" href="#findings-that-change-the-design">Findings that change the design</a><a class="h2" href="#not-covered-yet">Not covered yet</a></nav>
+<main>
+<div class="banner"><span>Generated from <code>docs/evidence/g0/README.md</code>. Edit the .md file, then run
+<code>python scripts/render_docs.py</code>.</span><span><a href="../../index.html">All docs</a>
+<button type="button" onclick="toggleTheme()">Light / dark</button></span></div>
+<h1 id="g0--s0b-mcp-access-probe-findings-2026-10-06">G0 / S0b: MCP access probe findings (2026-10-06)</h1>
+<p>The scripts that produced this evidence are <code>scripts/probe_mcp.py</code> (raw MCP SDK, mcp 1.30.0) and <code>scripts/probe_adapter.py</code> (langchain-mcp-adapters 0.3.2). Keys were loaded from <code>.env</code> at runtime, sent only in headers, and redacted from all output. A secret scan of this folder found no keys.</p>
+<h2 id="discovery-toolslist-all-three-servers-reachable-over-streamable-http">Discovery (<code>tools/list</code>): all three servers reachable over streamable HTTP</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Server</th>
+<th>Endpoint</th>
+<th>Auth</th>
+<th>Tools</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GitHub</td>
+<td><code>https://api.githubcopilot.com/mcp/</code> with <code>X-MCP-Readonly: true</code></td>
+<td>Fine-grained PAT (public repos, read-only), Bearer header</td>
+<td>29 (read-only set)</td>
+</tr>
+<tr>
+<td>Context7</td>
+<td><code>https://mcp.context7.com/mcp</code></td>
+<td><code>CONTEXT7_API_KEY</code> header</td>
+<td>2: <code>resolve-library-id</code>, <code>query-docs</code></td>
+</tr>
+<tr>
+<td>Tavily</td>
+<td><code>https://mcp.tavily.com/mcp/</code></td>
+<td>Bearer header</td>
+<td>5: <code>tavily_search</code>, <code>tavily_extract</code>, <code>tavily_crawl</code>, <code>tavily_map</code>, <code>tavily_research</code></td>
+</tr>
+</tbody>
+</table></div>
+<p>The GitHub read-only set includes <code>get_file_contents</code> (files and directories), <code>search_code</code>, <code>list_commits</code>, <code>get_commit</code>, <code>issue_read</code> and <code>search_issues</code>. There is no dedicated tree tool; directory listings come from <code>get_file_contents</code> on a directory path.</p>
+<h2 id="invocation-toolscall">Invocation (<code>tools/call</code>)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Case</th>
+<th>File</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GitHub read a public file (<code>encode/httpx</code> <code>pyproject.toml</code>)</td>
+<td><code>github/call_ok.json</code></td>
+<td><code>isError=False</code>. The file text arrives as an <strong>embedded resource with a SHA-pinned URI</strong> (<code>repo://encode/httpx/sha/&lt;sha&gt;/contents/pyproject.toml</code>).</td>
+</tr>
+<tr>
+<td>GitHub read the private <code>surendirabalaji/changelens</code></td>
+<td><code>github/pat_negative.json</code></td>
+<td><code>isError=True</code>, <strong>404</strong>. The token cannot see the private repo, so the negative test passed.</td>
+</tr>
+<tr>
+<td>GitHub missing file</td>
+<td><code>github/call_not_found.json</code></td>
+<td><code>isError=True</code>, &quot;file does not exist&quot;</td>
+</tr>
+<tr>
+<td>GitHub invalid arguments</td>
+<td><code>github/call_bad_args.json</code></td>
+<td><code>isError=True</code>, &quot;parameter owner is not of type string&quot;</td>
+</tr>
+<tr>
+<td>Context7 resolve <code>httpx</code></td>
+<td><code>context7/call_resolve_ok.json</code></td>
+<td><code>/encode/httpx</code>, versions 0.27.2 and 0.28.1 listed</td>
+</tr>
+<tr>
+<td>Context7 version-pinned docs (<code>/encode/httpx/0.28.1</code>)</td>
+<td><code>context7/call_docs_ok.json</code></td>
+<td>Docs cite <code>github.com/encode/httpx/blob/0.28.1/...</code>, so version pinning works</td>
+</tr>
+<tr>
+<td>Context7 invalid arguments</td>
+<td><code>context7/call_bad_args.json</code></td>
+<td><code>isError=True</code>, input validation error</td>
+</tr>
+<tr>
+<td>Tavily search</td>
+<td><code>tavily/call_ok.json</code></td>
+<td>Real results with URLs</td>
+</tr>
+<tr>
+<td>Tavily invalid arguments</td>
+<td><code>tavily/call_bad_args_exception.json</code></td>
+<td><strong>Raised <code>McpError</code></strong> (JSON-RPC protocol error), not an <code>isError</code> result</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="findings-that-change-the-design">Findings that change the design</h2>
+<ol>
+<li><strong>Errors arrive in two shapes.</strong> GitHub and Context7 return <code>isError=True</code> results. Tavily raises a protocol-level <code>McpError</code>. The guarded executor must classify both.</li>
+<li><strong>The adapter (0.3.2) hides <code>isError</code>.</strong> Through <code>MultiServerMCPClient</code> tools, the GitHub not-found call <em>returned normally</em>, with no flag and no exception (<code>adapter/error_surfacing.json</code>). Tavily's <code>McpError</code> is still raised.</li>
+<li><strong>The adapter drops the SHA-pinned resource URI.</strong> The file text survives, but the <code>repo://…/sha/…</code> URI does not.</li>
+<li><strong>Consequence for S1 (provisional):</strong> the executor needs the raw <code>CallToolResult</code>. The options are an adapter hook, if one exists in 0.3.2, or keeping discovery in the adapter but invoking through an MCP <code>ClientSession</code>. Decide in S1.</li>
+</ol>
+<h2 id="not-covered-yet">Not covered yet</h2>
+<ul>
+<li>Corpus access: at least 5 repos across 3 or more languages at pinned SHAs.</li>
+<li>A real transport failure (unreachable endpoint). Planned for S3.</li>
+<li>How <code>search_code</code> truncates and paginates on large repos.</li>
+<li>Rate-limit figures.</li>
+</ul>
+
+</main>
+</div>
+</body>
+</html>

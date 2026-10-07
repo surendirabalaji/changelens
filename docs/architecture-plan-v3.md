@@ -95,12 +95,15 @@ What the sources show:
 
 A near-tie between two harmless options, such as `conceptual` vs `clarify`, is accepted. The routers read only these typed fields.
 
-**Code rule (policy v2, from M0):** if the intent is `recheck` or `revise_decision`, more than one decision is stored, and `target_decision` is `none`, the turn becomes `clarify` and asks which decision is meant.
+**Ambiguous targets (policy v3; the student's call on 2026-10-06):** a recheck with `target_decision = none` stays a `recheck`. Triage does not turn it into `clarify`.
+- The agent resolves the PR's repository from the query and the ledger, then rechecks every active decision on that repository.
+- It asks a clarifying question only when it can't resolve the repository, for example "latest PR" with decisions on two repos.
+- Policy v2's code-side clarify rule is dropped.
 
 **M0 result** (`docs/evidence/m0/README.md` §7):
 - Jev `jev-1.13.0` and Nemotron super were equally accurate: 29/30 request types and 27/27 targets.
 - Jev's p95 was **0.20 s** against Nemotron's 4.54 s.
-- Policy v2 scored 30/30 with no fallbacks, but it was tuned on those same cases, so it must be confirmed on held-out cases in M3.
+- After the student relabelled `q2` as `recheck`, Jev, Nemotron and policy v3 each score 30/30, with 0 fallbacks and 0 tool/no-tool crossings. The label changed after the results were seen, so held-out validation in M3 decides.
 - **D18: GO.** Triage uses `RetryPolicy(max_retries=1, timeout≈2 s)` (E15).
 
 **Optional Jev uses, after M6 [O].** These are not part of the build. Each must beat its Nemotron or code version in an ablation before it is adopted.

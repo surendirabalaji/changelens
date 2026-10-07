@@ -24,6 +24,7 @@ It is a design only. Nothing is built yet.
 - `deploy.sh` — Build & deploy script
 - `.env.example` — Placeholders only (never commit real secrets)
 - `PROCESS_LOG.md` — Required development narrative
+- `docs/**/*.html` — Generated readable views of the docs. After editing any `docs/**/*.md`, run `python scripts/render_docs.py`. Never hand-edit the HTML.
 - `README.md` — Must contain the diagrams required by requirements.md
 - `.claude/agents/` — Custom subagents (including `research-architect`)
 

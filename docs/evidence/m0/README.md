@@ -27,7 +27,7 @@ The next section lists the design changes that follow.
 | E11 | The adapter (0.3.2) has `ToolCallInterceptor`, which receives the **raw `CallToolResult`** (`isError` and the resource URI) and can retry, short-circuit or return a LangGraph `Command`. | The guarded executor is built **as an interceptor** instead of bypassing the adapter. This replaces the raw `ClientSession` workaround from S0b. |
 | E12 | Without an explicit session the adapter opens **a new MCP session for every tool call**: a 0.23–0.30 s handshake, and the first call is slower (GitHub median 1.31 s fresh vs 0.61 s reused). | Open **one session per server per `/chat` turn**, lazily, and pass it to `load_mcp_tools(session=...)`. |
 | E13 | `InMemorySaver` stores the full message list in every checkpoint, so it grows faster than linearly. In a synthetic test one session reached 98 MB after 50 turns without trimming and 27 MB with tool output trimmed. There is no pruning API; `delete_thread` frees everything. | Keep tool output out of `messages` (it lives in `evidence`). Keep only the last N messages. Cap evidence at 150 entries. Evict idle sessions with `delete_thread` (LRU by idle time). Measure under M7 load before choosing 512Mi or 1Gi. |
-| E14 | Jev's `needs_clarification` yes/no question is **poorly calibrated** for this task: 0.39–0.58 on clear-cut cases. It caused 6 of 7 fallbacks in run 1. | Drop the question from the fallback rule. Decide "clarify" in code: when the request is `recheck` or `revise_decision`, there are stored decisions, and the target is `none` (TypeSafe's "keep policy in code" guidance). See the Jev section for the effect, which was tuned on the same cases. |
+| E14 | Jev's `needs_clarification` yes/no question is **poorly calibrated** for this task: 0.39–0.58 on clear-cut cases. It caused 6 of 7 fallbacks in run 1. | Drop the question from the fallback rule. ~~Decide "clarify" in code when a recheck or revision has target `none`.~~ That code rule was **removed** after the student relabelled `q2` as `recheck` (**policy v3**, §7). The agent asks a clarifying question only when it can't resolve the PR's repository. |
 | E15 | The TypeSafe SDK's default `RetryPolicy` allows **up to 30 s** of retries per call. An invalid request returned **400 `TypeSafeBadRequestError`**, not the documented 422. `jev-latest` resolved to **`jev-1.13.0`**. | Triage uses `RetryPolicy(max_retries=1, timeout≈2 s)` and records the concrete model string in traces. The failure map adds 400 next to 422. |
 
 ## 1. GitHub PR and commit tools (`github/`)
@@ -140,6 +140,11 @@ In `json_schema` mode, super produced richer records (2–4 assumptions, against
 **Errors:** an empty `Choice` returned **HTTP 400 `TypeSafeBadRequestError`** ("Choice question must have at least one choice"), not 422 (E15).
 
 **Models for this account:** `jev-latest` and `jev-preview`, both released 2026-09-10. `jev-latest` served as `jev-1.13.0`.
+
+**Relabel by the student (2026-10-06, after run 2):** the student judged `q2` to be a `recheck` ("what is there to clarify"). That agrees with both models.
+- **Code rule removed:** v2's code-side clarify rule would now turn a correct answer into a wrong one, so it is dropped. This is **policy v3**: v2's fallback triggers with no clarify rule. Clarification moves into the agent, which asks only when the PR's repository can't be resolved, for example "latest PR" with decisions on two repos.
+- **Rescore** (`rescore_after_relabel.json`, saved rows only, no new calls): Jev 30/30, Nemotron 30/30, policy v3 30/30 with 0/30 fallbacks and 0 tool/no-tool crossings.
+- **Caveat:** the label changed after seeing the answers, so this is not an independent test. Held-out validation in M3 still decides.
 
 **D18 decision rule (set in the plan before the test):** keep Jev if it is at least as accurate as Nemotron and has lower p95. **Met: equal accuracy, about 23× lower p95. D18 is GO**, with Nemotron as the fallback and the v2 policy.
 

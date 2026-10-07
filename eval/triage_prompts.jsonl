@@ -22,7 +22,7 @@
 {"id": "m3", "intent": "memory_recall", "target": "D2", "ledger": "L2", "query": "Which assumptions were still unresolved in our NestJS decision?"}
 {"id": "m4", "intent": "memory_recall", "target": "any", "ledger": "L2", "query": "Summarize the decisions we've made in this session."}
 {"id": "q1", "intent": "clarify", "target": "none", "ledger": "none", "query": "Add caching to my repo."}
-{"id": "q2", "intent": "clarify", "target": "none", "ledger": "L2", "query": "Recheck our decision against the latest PR."}
+{"id": "q2", "intent": "recheck", "target": "none", "ledger": "L2", "query": "Recheck our decision against the latest PR.", "relabel": "clarify -> recheck by the student on 2026-10-06, after run 2; any clarifying happens in the agent when the PR's repo cannot be resolved"}
 {"id": "q3", "intent": "clarify", "target": "none", "ledger": "none", "query": "Is it safe?"}
 {"id": "q4", "intent": "clarify", "target": "any", "ledger": "L1", "query": "Can you review the PR?"}
 {"id": "o1", "intent": "out_of_scope", "target": "none", "ledger": "none", "query": "Write me a poem about autumn."}

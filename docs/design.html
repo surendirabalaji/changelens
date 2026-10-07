@@ -1,0 +1,917 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ChangeLens v2: Provisional Design Diagrams and Staged Development Plan</title>
+<style>
+:root {
+  --bg: #fbfbfa; --surface: #ffffff; --text: #1f2328; --muted: #59636e; --border: #d8dee4;
+  --accent: #0b6bcb; --code-bg: #f2f4f6; --row-alt: #f6f8fa; --mark: #fff3c4;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1115; --surface: #161a20; --text: #e6e8eb; --muted: #9aa4af; --border: #2c333c;
+    --accent: #6cb6ff; --code-bg: #1d232b; --row-alt: #1a1f26; --mark: #4a3f12;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1115; --surface: #161a20; --text: #e6e8eb; --muted: #9aa4af; --border: #2c333c;
+  --accent: #6cb6ff; --code-bg: #1d232b; --row-alt: #1a1f26; --mark: #4a3f12;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+.layout { display: grid; grid-template-columns: 1fr; max-width: 1280px; margin: 0 auto; padding: 0 16px; }
+@media (min-width: 1100px) { .layout { grid-template-columns: 260px minmax(0, 1fr); gap: 40px; } }
+nav.toc { display: none; }
+@media (min-width: 1100px) {
+  nav.toc { display: block; position: sticky; top: 0; align-self: start; max-height: 100vh; overflow-y: auto;
+    padding: 24px 0; font-size: 14px; }
+}
+nav.toc a { color: var(--muted); text-decoration: none; display: block; padding: 3px 0; }
+nav.toc a:hover { color: var(--accent); }
+nav.toc .h3 { padding-left: 14px; font-size: 13px; }
+nav.toc .home { font-weight: 600; color: var(--text); margin-bottom: 10px; }
+main { min-width: 0; padding: 24px 0 80px; }
+.banner { font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 10px;
+  margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between; }
+.banner button { font: inherit; color: var(--muted); background: none; border: 1px solid var(--border);
+  border-radius: 6px; padding: 2px 10px; cursor: pointer; }
+h1 { font-size: 2em; line-height: 1.25; margin: 0.2em 0 0.6em; }
+h2 { font-size: 1.5em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; margin-top: 2em; }
+h3 { font-size: 1.2em; margin-top: 1.6em; }
+h1, h2, h3, h4 { scroll-margin-top: 16px; }
+a { color: var(--accent); }
+p, li { overflow-wrap: anywhere; }
+code { background: var(--code-bg); border-radius: 4px; padding: 0.1em 0.35em; font-size: 0.88em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+pre { background: var(--code-bg); border-radius: 8px; padding: 14px 16px; overflow-x: auto; font-size: 13.5px;
+  line-height: 1.5; }
+pre code { background: none; padding: 0; font-size: inherit; }
+pre.mermaid { background: var(--surface); border: 1px solid var(--border); text-align: center; }
+blockquote { margin: 1em 0; padding: 0.4em 1em; border-left: 4px solid var(--accent); color: var(--muted);
+  background: var(--surface); border-radius: 0 6px 6px 0; }
+.table-wrap { overflow-x: auto; margin: 1em 0; border: 1px solid var(--border); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; background: var(--surface); }
+th, td { border-bottom: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+th { background: var(--row-alt); font-weight: 600; }
+tr:nth-child(even) td { background: var(--row-alt); }
+tr:last-child td { border-bottom: none; }
+del { color: var(--muted); }
+hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+.index-list { list-style: none; padding: 0; }
+.index-list li { padding: 12px 0; border-bottom: 1px solid var(--border); }
+.index-list .path { color: var(--muted); font-size: 13px; }
+</style>
+
+<script>
+(function () {
+  var key = "changelens-docs-theme";
+  try { var saved = localStorage.getItem(key); if (saved) document.documentElement.dataset.theme = saved; } catch (e) {}
+  window.toggleTheme = function () {
+    var dark = document.documentElement.dataset.theme
+      ? document.documentElement.dataset.theme === "dark"
+      : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var next = dark ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem(key, next); } catch (e) {}
+  };
+})();
+</script>
+
+</head>
+<body>
+<div class="layout">
+<nav class="toc"><a class="home" href="index.html">ChangeLens docs</a><a class="h2" href="#part-a-diagrams-provisional">Part A: Diagrams (PROVISIONAL)</a><a class="h3" href="#diagram-1-system-architecture">Diagram 1: System architecture</a><a class="h3" href="#diagram-2-tool-invocation-loop">Diagram 2: Tool invocation loop</a><a class="h3" href="#diagram-3-deployment-topology">Diagram 3: Deployment topology</a><a class="h3" href="#diagram-4-langgraph-state-and-conditional-edges">Diagram 4: LangGraph state and conditional edges</a><a class="h3" href="#diagram-5-a-dependent-multi-server-chain">Diagram 5: A dependent multi-server chain</a><a class="h2" href="#part-b-staged-development-plan">Part B: Staged development plan</a><a class="h3" href="#proposed-repo-layout-a">Proposed repo layout [A]</a><a class="h3" href="#stage-overview">Stage overview</a><a class="h3" href="#s0a-accounts-keys-gcloud-g0-s">S0a: Accounts, keys, gcloud (G0, S)</a><a class="h3" href="#s0b-mcp-access-probes-g0-m">S0b: MCP access probes (G0, M)</a><a class="h3" href="#s0c-llm-bake-off-g0-m">S0c: LLM bake-off (G0, M)</a><a class="h3" href="#s1-local-walking-skeleton-g1-m">S1: Local walking skeleton (G1, M)</a><a class="h3" href="#s2-container-and-early-deploy-d14-g1-m">S2: Container and early deploy, D14 (G1, M)</a><a class="h3" href="#s3-failure-handling-and-fault-injection-g1-l">S3: Failure handling and fault injection (G1, L)</a><a class="h3" href="#s4-tool-selection-no-tool-and-chaining-checks-g1-m">S4: Tool selection, no-tool and chaining checks (G1, M)</a><a class="h3" href="#s5-minimum-readme-3-diagrams-redeploy-g1-m">S5: Minimum README, 3 diagrams, redeploy (G1, M)</a><a class="h3" href="#s6-evidence-model-budget-ledger-coverage-disclosure-g1-l">S6: Evidence model, budget ledger, coverage disclosure (G1, L)</a><a class="h3" href="#s7-synthesize-and-verify_citations-closes-g1-m">S7: Synthesize and verify_citations (closes G1, M)</a><a class="h3" href="#s8-python-ast-structural-pass-and-inferred-edge-checks-g2-m">S8: Python ast structural pass and inferred-edge checks (G2, M)</a><a class="h3" href="#s9-assumption-ledger-corrections-scenarios-g2-m">S9: Assumption ledger, corrections, scenarios (G2, M)</a><a class="h3" href="#s10-admission-and-cost-controls-g2-m-required-before-graders">S10: Admission and cost controls (G2, M; required before graders)</a><a class="h3" href="#s11-html-report-g3-m-optional-o">S11: HTML report (G3, M, optional [O])</a><a class="h3" href="#s12-planner-flag-and-ablation-g4-s-optional-o">S12: Planner flag and ablation (G4, S, optional [O])</a><a class="h3" href="#s13-evaluation-harness-and-corpus-g4-l">S13: Evaluation harness and corpus (G4, L)</a><a class="h3" href="#s14-final-readme-diagrams-redrawn-from-code-attribution-cost-g5-m">S14: Final README, diagrams redrawn from code, attribution, cost (G5, M)</a><a class="h3" href="#s15-submission-readiness-g5-s">S15: Submission readiness (G5, S)</a><a class="h2" href="#open-items-that-affect-the-stages">Open items that affect the stages</a></nav>
+<main>
+<div class="banner"><span>Generated from <code>docs/design.md</code>. Edit the .md file, then run
+<code>python scripts/render_docs.py</code>.</span><span><a href="index.html">All docs</a>
+<button type="button" onclick="toggleTheme()">Light / dark</button></span></div>
+<h1 id="changelens-v2-provisional-design-diagrams-and-staged-development-plan">ChangeLens v2: Provisional Design Diagrams and Staged Development Plan</h1>
+<blockquote>
+<p><strong>Superseded (2026-10-06):</strong> the current design is <a href="architecture-plan-v3.html">architecture-plan-v3.md</a>, the decision-memory redesign.</p>
+<p><strong>Carried into v3:</strong> D1, D2 (still to be re-checked in S0d), D3–D5, D6, D8, D15 and D17, plus the raw <code>ClientSession</code> executor.</p>
+<p><strong>New in v3:</strong> decision records, Workflows A/B/C, the triage-plus-modes graph and D18 (Jev triage).</p>
+<p>This file is kept for history. Its diagrams do not describe v3.</p>
+</blockquote>
+<blockquote>
+<p>Produced by the <code>research-architect</code> subagent on 2026-10-05 from <a href="architecture-plan.html">architecture-plan.md</a> (v2).
+<strong>Status:</strong> design only. Every diagram below is <strong>PROVISIONAL</strong> and must be redrawn from the final code before submission [V: P §4.6, §7.4]. Nothing here has been implemented, run or measured.</p>
+</blockquote>
+<p><strong>Claim tags</strong></p>
+<ul>
+<li><strong>[V: src §]</strong> means the source says it.</li>
+<li><strong>[A]</strong> is an assumption.</li>
+<li><strong>[O]</strong> is an optional enhancement.</li>
+<li><strong>[T]</strong> is a target hypothesis.</li>
+<li><strong>Missing</strong> marks evidence not yet available.</li>
+</ul>
+<hr />
+<h2 id="part-a-diagrams-provisional">Part A: Diagrams (PROVISIONAL)</h2>
+<h3 id="diagram-1-system-architecture">Diagram 1: System architecture</h3>
+<ul>
+<li>A request enters FastAPI and runs through the LangGraph state graph. Conversation state lives in <code>InMemorySaver</code>, keyed by <code>thread_id = session_id</code>.</li>
+<li>The <code>agent</code> node calls the NIM LLM, whose model is set by D2 after the G0 bake-off.</li>
+<li>The <code>tools</code> node reaches three named remote MCP servers through the guarded MCP client wrapper.</li>
+<li>Dashed parts are optional or not decided yet.</li>
+</ul>
+<pre class="mermaid">flowchart LR
+  client[&quot;Client or grader&quot;]
+
+  subgraph svc[&quot;Cloud Run container: ChangeLens&quot;]
+    api[&quot;FastAPI POST /chat&lt;br/&gt;validate body, query cap,&lt;br/&gt;per-session lock, admission, deadline&quot;]
+    subgraph lg[&quot;LangGraph StateGraph&quot;]
+      ingest[&quot;ingest&quot;]
+      agent[&quot;agent: LLM reasoning and tool selection&quot;]
+      tools[&quot;tools: guarded executor&quot;]
+      upd[&quot;apply_update: evidence and ledger validation&quot;]
+      synth[&quot;synthesize&quot;]
+      vc[&quot;verify_citations&quot;]
+      render[&quot;render: text and Mermaid&quot;]
+    end
+    ckpt[(&quot;InMemorySaver checkpointer&lt;br/&gt;thread_id = session_id&quot;)]
+    budget[&quot;Budget ledger and coverage disclosure&quot;]
+    mcpc[&quot;MCP client wrapper&lt;br/&gt;MultiServerMCPClient&lt;br/&gt;inputSchema check, retry, circuit breaker,&lt;br/&gt;evidence adapters&quot;]
+    html[&quot;HTML report store - optional&quot;]
+  end
+
+  llm[&quot;LLM backend: NVIDIA NIM&lt;br/&gt;OpenAI-compatible endpoint&lt;br/&gt;model per D2&quot;]
+  llm2[&quot;Fallback LLM provider - optional&quot;]
+  gh[&quot;GitHub MCP server&lt;br/&gt;remote HTTP, read-only, public repos&quot;]
+  c7[&quot;Context7 MCP server&lt;br/&gt;version-pinned library docs&quot;]
+  tv[&quot;Tavily MCP server&lt;br/&gt;web search and extract&quot;]
+
+  client --&gt;|request JSON| api
+  api --&gt;|invoke with thread_id| ingest
+  ingest --&gt; agent
+  agent --&gt;|tool calls| tools
+  tools --&gt; upd
+  upd --&gt;|loop back| agent
+  agent --&gt;|done or budget hit| synth
+  synth --&gt; vc
+  vc --&gt; render
+  render --&gt;|final text| api
+  api --&gt;|response JSON| client
+
+  lg &lt;--&gt;|load and save state| ckpt
+  agent &lt;--&gt;|chat completions with tool schemas| llm
+  synth &lt;--&gt;|chat completions| llm
+  agent -.-&gt;|on 429 or 5xx| llm2
+  tools &lt;--&gt; budget
+  tools &lt;--&gt;|tools/list and tools/call| mcpc
+  mcpc &lt;--&gt;|HTTPS| gh
+  mcpc &lt;--&gt;|HTTPS| c7
+  mcpc &lt;--&gt;|HTTPS| tv
+  render -.-&gt; html
+</pre>
+<h3 id="diagram-2-tool-invocation-loop">Diagram 2: Tool invocation loop</h3>
+<ul>
+<li>This is the loop P §4.6 requires: query → entry → LLM reasoning → tool selection → MCP <code>tools/call</code> → server response → loop back → synthesis → final response.</li>
+<li>It adds the no-tool exit, the budget and deadline partial exits, the three required failure branches, and citation verification.</li>
+<li>Every path ends with a <code>{&quot;response&quot;: string}</code> body.</li>
+</ul>
+<pre class="mermaid">flowchart TD
+  q[&quot;User query + session_id&quot;] --&gt; entry[&quot;Agent entry: ingest&lt;br/&gt;load checkpoint, init budget&quot;]
+  entry --&gt; reason[&quot;LLM reasoning step&quot;]
+  reason --&gt; need{&quot;Tool call needed?&quot;}
+  need --&gt;|no, no evidence gathered| notool[&quot;No-tool exit: answer from LLM knowledge&quot;]
+  need --&gt;|no, evidence gathered| synth[&quot;LLM synthesis step&lt;br/&gt;cite evidence IDs&quot;]
+  need --&gt;|yes| bud{&quot;Budget and deadline OK?&quot;}
+  bud --&gt;|exhausted| partial[&quot;Mark partial&lt;br/&gt;attach coverage disclosure&quot;]
+  partial --&gt; synth
+  bud --&gt;|ok| select[&quot;Tool selection&lt;br/&gt;validate args against inputSchema&quot;]
+  select --&gt;|args invalid, one repair| reason
+  select --&gt;|args valid| call[&quot;MCP tools/call request&quot;]
+  call --&gt; outcome{&quot;Outcome&quot;}
+  outcome --&gt;|transport failure| retry[&quot;One jittered retry&quot;]
+  retry --&gt;|recovered| resp
+  retry --&gt;|still failing| circuit[&quot;Circuit open&lt;br/&gt;structured source-unavailable message&quot;]
+  circuit --&gt; reason
+  outcome --&gt;|tool execution error| classify[&quot;Classify: auth, not found,&lt;br/&gt;rate limit, bad args&quot;]
+  classify --&gt; reason
+  outcome --&gt;|response received| resp[&quot;MCP server response&quot;]
+  resp --&gt; valid{&quot;Parseable and schema-valid?&quot;}
+  valid --&gt;|no, malformed| reject[&quot;Reject as evidence&lt;br/&gt;record failure&quot;]
+  reject --&gt; reason
+  valid --&gt;|yes| record[&quot;Record Evidence: SHA, path, lines, excerpt&lt;br/&gt;update budget ledger&quot;]
+  record --&gt;|loop back for another call| reason
+  synth --&gt; vc{&quot;verify_citations:&lt;br/&gt;IDs exist and quotes match&quot;}
+  vc --&gt;|pass| final[&quot;Final response JSON&quot;]
+  vc --&gt;|fail, first time| synth
+  vc --&gt;|fail after repair| strip[&quot;Drop or flag unverified claims&quot;]
+  strip --&gt; final
+  notool --&gt; final
+  crash[&quot;Any unhandled exception or hard timeout&quot;] --&gt; safe[&quot;Safe failure message&quot;]
+  safe --&gt; final
+</pre>
+<h3 id="diagram-3-deployment-topology">Diagram 3: Deployment topology</h3>
+<ul>
+<li>Locally, <code>.env</code> feeds <code>python-dotenv</code> (bare-metal run) or <code>docker run --env-file</code> (container). Both use the same NIM backend as production.</li>
+<li>For deployment, <code>set -a; source .env; set +a</code> exports shell variables. <code>deploy.sh</code> builds through Cloud Build into Artifact Registry and deploys to Cloud Run in us-west1 with <code>--set-env-vars</code> [V: P §4.4–4.5].</li>
+<li>The running service makes outbound HTTPS calls to NIM and the three MCP servers.</li>
+</ul>
+<pre class="mermaid">flowchart LR
+  subgraph local[&quot;Local development - macOS&quot;]
+    envf[&quot;.env - git-ignored&lt;br/&gt;LLM_API_KEY, LLM_BASE_URL, LLM_MODEL,&lt;br/&gt;GITHUB_PAT, TAVILY_API_KEY, CONTEXT7_API_KEY,&lt;br/&gt;GCP_PROJECT_ID&quot;]
+    envx[&quot;.env.example - committed placeholders&quot;]
+    dev[&quot;python main.py&lt;br/&gt;load_dotenv&quot;]
+    dock[&quot;Local Docker&lt;br/&gt;docker run --env-file .env -e PORT=8080&quot;]
+    shell[&quot;Shell variables&lt;br/&gt;set -a, source .env, set +a&quot;]
+    deploy[&quot;deploy.sh&quot;]
+  end
+
+  subgraph gcp[&quot;Google Cloud project - education credit&quot;]
+    cb[&quot;Cloud Build&lt;br/&gt;gcloud builds submit&quot;]
+    ar[&quot;Artifact Registry&lt;br/&gt;gcr.io compatible repo&lt;br/&gt;image: changelens&quot;]
+    run[&quot;Cloud Run service - us-west1&lt;br/&gt;--allow-unauthenticated&lt;br/&gt;--max-instances 1, --min-instances 0&lt;br/&gt;--set-env-vars from shell variables&lt;br/&gt;non-root container, binds 0.0.0.0:PORT&quot;]
+    url[&quot;Live URL&lt;br/&gt;https://SERVICE-HASH-uw.a.run.app&quot;]
+  end
+
+  grader[&quot;Grader HTTP client&quot;]
+  nim[&quot;NVIDIA NIM&lt;br/&gt;integrate.api.nvidia.com/v1&quot;]
+  gh[&quot;GitHub MCP server - remote&quot;]
+  c7[&quot;Context7 MCP server - remote&quot;]
+  tv[&quot;Tavily MCP server - remote&quot;]
+
+  envx -.-&gt;|copy then fill| envf
+  envf --&gt; dev
+  envf --&gt; dock
+  envf --&gt; shell
+  shell --&gt; deploy
+  deploy --&gt;|source upload| cb
+  cb --&gt;|push image| ar
+  deploy --&gt;|gcloud run deploy| run
+  ar --&gt;|pull image| run
+  run --&gt; url
+  grader --&gt;|POST /chat| url
+
+  dev --&gt;|HTTPS| nim
+  dock --&gt;|HTTPS| nim
+  run --&gt;|HTTPS| nim
+  run --&gt;|HTTPS + PAT| gh
+  run --&gt;|HTTPS + API key| c7
+  run --&gt;|HTTPS + API key| tv
+  dock --&gt;|HTTPS| gh
+  dock --&gt;|HTTPS| c7
+  dock --&gt;|HTTPS| tv
+</pre>
+<h3 id="diagram-4-langgraph-state-and-conditional-edges">Diagram 4: LangGraph state and conditional edges</h3>
+<ul>
+<li>These are the node names from plan v2 §3.1. <code>plan</code> sits behind a feature flag (D7).</li>
+<li>The router functions are deterministic checks on state: tool calls present, budget, deadline and repair count. None of them inspects query keywords [V: P §7.2].</li>
+</ul>
+<pre class="mermaid">flowchart TD
+  s([&quot;START&quot;]) --&gt; ingest[&quot;ingest&lt;br/&gt;load state, reset turn budget,&lt;br/&gt;record deadline&quot;]
+  ingest --&gt; r0{&quot;route_after_ingest&quot;}
+  r0 --&gt;|planner flag on| plan[&quot;plan - optional&quot;]
+  r0 --&gt;|planner flag off| agent[&quot;agent&lt;br/&gt;LLM with allowlisted MCP tools&lt;br/&gt;+ update_investigation&quot;]
+  plan --&gt; agent
+  agent --&gt; r1{&quot;route_after_agent&quot;}
+  r1 --&gt;|tool calls and within budget| tools[&quot;tools&lt;br/&gt;guarded MCP execution,&lt;br/&gt;Python ast pass, budget ledger&quot;]
+  r1 --&gt;|tool calls but budget or deadline hit| synth[&quot;synthesize&lt;br/&gt;partial flag + coverage&quot;]
+  r1 --&gt;|no tool calls, evidence present| synth
+  r1 --&gt;|no tool calls, no evidence| render[&quot;render&quot;]
+  tools --&gt; upd[&quot;apply_update&lt;br/&gt;deterministic validation of&lt;br/&gt;evidence, edges, assumptions&quot;]
+  upd --&gt; agent
+  synth --&gt; vc[&quot;verify_citations&quot;]
+  vc --&gt; r2{&quot;route_after_verify&quot;}
+  r2 --&gt;|all citations valid| render
+  r2 --&gt;|invalid, repairs left| synth
+  r2 --&gt;|invalid, no repairs left| render
+  render --&gt; e([&quot;END&quot;])
+
+  state[(&quot;State checkpointed per thread_id:&lt;br/&gt;messages trimmed, investigation, evidence,&lt;br/&gt;assumptions, graph edges, concerns,&lt;br/&gt;scenarios, budget, failures&quot;)]
+  agent -.-&gt; state
+  upd -.-&gt; state
+  render -.-&gt; state
+</pre>
+<h3 id="diagram-5-a-dependent-multi-server-chain">Diagram 5: A dependent multi-server chain</h3>
+<ul>
+<li>The example asks: &quot;In repo X at SHA S, I want to change retry behaviour in the HTTP client. What could break?&quot;</li>
+<li>Each call needs the previous result:
+<ul>
+<li>the manifest gives the library name and version;</li>
+<li>the version selects the Context7 docs;</li>
+<li>the documented behaviour shapes the Tavily query.</li>
+</ul>
+</li>
+<li>Tool names are placeholders until the G0 <code>tools/list</code> dumps exist (<strong>Missing</strong>).</li>
+</ul>
+<pre class="mermaid">sequenceDiagram
+  participant U as Developer or grader
+  participant API as FastAPI /chat
+  participant G as LangGraph agent
+  participant CP as InMemorySaver
+  participant L as NIM LLM
+  participant GH as GitHub MCP
+  participant C7 as Context7 MCP
+  participant TV as Tavily MCP
+  participant V as verify_citations
+
+  U-&gt;&gt;API: POST query + session_id
+  API-&gt;&gt;G: invoke with thread_id = session_id
+  G-&gt;&gt;CP: load prior state
+  G-&gt;&gt;L: reasoning step with tool schemas
+  L--&gt;&gt;G: tool call: read manifest at SHA S
+  G-&gt;&gt;GH: tools/call get file contents, path = manifest, ref = S
+  GH--&gt;&gt;G: manifest text with library name and version V
+  Note over G: Evidence E1 stored with SHA, path, line range
+  G-&gt;&gt;L: reasoning step with E1
+  L--&gt;&gt;G: tool call: resolve library id
+  G-&gt;&gt;C7: tools/call resolve library id for the library
+  C7--&gt;&gt;G: library id
+  G-&gt;&gt;C7: tools/call get docs, topic = retries, version = V
+  alt docs available for version V
+    C7--&gt;&gt;G: versioned docs excerpt
+    Note over G: Evidence E2 stored
+  else version mismatch or tool error
+    C7--&gt;&gt;G: other version or error
+    Note over G: Concern recorded as version mismatch
+  end
+  G-&gt;&gt;L: reasoning step with E1 and E2
+  L--&gt;&gt;G: tool call: search upstream issues for library V retry behaviour
+  G-&gt;&gt;TV: tools/call search
+  TV--&gt;&gt;G: issue or release-note results
+  Note over G: Evidence E3 stored, after-cutoff results screened
+  G-&gt;&gt;L: synthesis step citing E1, E2, E3
+  L--&gt;&gt;G: draft answer with citations
+  G-&gt;&gt;V: check IDs exist and quotes match fetched text
+  V--&gt;&gt;G: pass, or one repair then flag
+  G-&gt;&gt;CP: save state for the session
+  G--&gt;&gt;API: final text with coverage disclosure
+  API--&gt;&gt;U: response JSON
+</pre>
+<hr />
+<h2 id="part-b-staged-development-plan">Part B: Staged development plan</h2>
+<h3 id="proposed-repo-layout-a">Proposed repo layout [A]</h3>
+<pre><code>main.py                     # entrypoint: load_dotenv, read PORT, uvicorn on 0.0.0.0 [V: P §4.2]
+app/
+  config.py                 # typed settings from env vars (LLM_*, keys, budgets, flags)
+  api.py                    # FastAPI app, /chat, /healthz, request model, guards, top-level handler
+  state.py                  # LangGraph state schema
+  graph.py                  # StateGraph build + router functions
+  llm.py                    # ChatOpenAI factory (base_url/model), optional fallback
+  mcp_client.py             # MultiServerMCPClient config, discovery, tool allowlist
+  executor.py               # guarded tool execution: schema check, retry, breaker, error classes
+  evidence.py               # Evidence/Assumption/Concern/Scenario models + result adapters
+  budget.py                 # per-request budget ledger, size tiers, coverage disclosure
+  structure.py              # Python ast structural edges
+  citations.py              # verify_citations
+  admission.py              # semaphore, rate limit, daily token budget, lite mode
+  prompts.py                # system and synthesis prompts
+  render.py                 # text + Mermaid output (HTML optional)
+tests/
+  unit/                     # pure logic; mocks clearly named
+  integration/              # real MCP + real LLM; marked `live`
+  resilience/
+    stub_server.py          # TEST-ONLY fault-injection MCP server; never counted as an integration
+scripts/
+  probe_mcp.py              # G0 tools/list + tools/call dumps
+  bakeoff_llm.py            # G0 tool-calling bake-off
+  smoke_live.sh             # contract + 2-turn recall against a URL
+eval/                       # corpus.yaml, cases/*.jsonl, run_eval.py, score.py
+docs/
+  evidence/&lt;stage&gt;/...      # saved outputs, redacted
+Dockerfile  .dockerignore  deploy.sh  requirements.txt  requirements-dev.txt
+.env.example  README.md  PROCESS_LOG.md
+</code></pre>
+<p><strong>Rules for saved evidence:</strong></p>
+<ul>
+<li>Redact keys before saving anything under <code>docs/evidence/</code>.</li>
+<li>Each file records the date, the git SHA and the model ID.</li>
+<li>No file under <code>docs/evidence/</code> may ever contain a key.</li>
+</ul>
+<p><strong>Common commands [A]:</strong></p>
+<ul>
+<li><code>URL=$(gcloud run services describe changelens --region us-west1 --format='value(status.url)')</code></li>
+<li>Contract check: <code>curl -sS -X POST &quot;$URL/chat&quot; -H 'Content-Type: application/json' -d '{&quot;query&quot;:&quot;hi&quot;,&quot;session_id&quot;:&quot;t1&quot;}' | jq -e 'keys==[&quot;response&quot;] and (.response|type==&quot;string&quot;)'</code></li>
+</ul>
+<h3 id="stage-overview">Stage overview</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Stage</th>
+<th>Gate</th>
+<th>Size</th>
+<th>Tier</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>S0a Accounts, keys, gcloud</td>
+<td>G0</td>
+<td>S</td>
+<td>Required</td>
+</tr>
+<tr>
+<td>S0b MCP access probes</td>
+<td>G0</td>
+<td>M</td>
+<td>Required</td>
+</tr>
+<tr>
+<td>S0c LLM bake-off (D2)</td>
+<td>G0</td>
+<td>M</td>
+<td>Required</td>
+</tr>
+<tr>
+<td>S1 Local skeleton: contract, graph, memory, 3 servers</td>
+<td>G1</td>
+<td>M</td>
+<td>Required</td>
+</tr>
+<tr>
+<td>S2 Container and early deploy (D14)</td>
+<td>G1</td>
+<td>M</td>
+<td>Required</td>
+</tr>
+<tr>
+<td>S3 Failure handling and fault injection</td>
+<td>G1</td>
+<td>L</td>
+<td>Required</td>
+</tr>
+<tr>
+<td>S4 Tool selection, no-tool and chaining checks</td>
+<td>G1</td>
+<td>M</td>
+<td>Required</td>
+</tr>
+<tr>
+<td>S5 Minimum README, 3 diagrams, redeploy</td>
+<td>G1</td>
+<td>M</td>
+<td>Required</td>
+</tr>
+<tr>
+<td><strong>— Minimum-compliance line —</strong></td>
+<td></td>
+<td></td>
+<td></td>
+</tr>
+<tr>
+<td>S6 Evidence model, budget ledger, coverage</td>
+<td>G1</td>
+<td>L</td>
+<td>Core product</td>
+</tr>
+<tr>
+<td>S7 Synthesize and verify_citations</td>
+<td>G1</td>
+<td>M</td>
+<td>Core product</td>
+</tr>
+<tr>
+<td>S8 Python ast structural pass and inferred-edge checks</td>
+<td>G2</td>
+<td>M</td>
+<td>Core product (D8)</td>
+</tr>
+<tr>
+<td>S9 Assumption ledger, corrections, scenarios</td>
+<td>G2</td>
+<td>M</td>
+<td>Core product</td>
+</tr>
+<tr>
+<td>S10 Admission and cost controls (§3.9)</td>
+<td>G2</td>
+<td>M</td>
+<td>Required before graders</td>
+</tr>
+<tr>
+<td>S11 HTML report</td>
+<td>G3</td>
+<td>M</td>
+<td>Optional [O]</td>
+</tr>
+<tr>
+<td>S12 Planner flag and ablation</td>
+<td>G4</td>
+<td>S</td>
+<td>Optional [O]</td>
+</tr>
+<tr>
+<td>S13 Evaluation harness and corpus</td>
+<td>G4</td>
+<td>L</td>
+<td>Project goal; not graded by the rubric</td>
+</tr>
+<tr>
+<td>S14 Final README, diagrams from code, attribution, cost</td>
+<td>G5</td>
+<td>M</td>
+<td>Required</td>
+</tr>
+<tr>
+<td>S15 Submission readiness</td>
+<td>G5</td>
+<td>S</td>
+<td>Required</td>
+</tr>
+</tbody>
+</table></div>
+<h3 id="s0a-accounts-keys-gcloud-g0-s">S0a: Accounts, keys, gcloud (G0, S)</h3>
+<ul>
+<li><strong>Goal:</strong> working credentials and a GCP project billed to the education credit [V: P §3.4, §4.1].</li>
+<li><strong>Deliverables:</strong>
+<ul>
+<li>local <code>.env</code> (never committed);</li>
+<li><code>GCP_PROJECT_ID=</code> added to <code>.env.example</code>.</li>
+</ul>
+</li>
+<li><strong>Dependencies:</strong> none.</li>
+<li><strong>Acceptance:</strong>
+<ul>
+<li><code>brew install --cask google-cloud-sdk</code>, then <code>gcloud auth login</code> and <code>gcloud config set project $GCP_PROJECT_ID</code>.</li>
+<li><code>gcloud services enable run.googleapis.com cloudbuild.googleapis.com</code> succeeds. Artifact Registry may also be needed (<strong>Missing</strong>).</li>
+<li><code>gcloud services list --enabled | grep -E 'run|cloudbuild'</code> shows both.</li>
+<li>A GCP budget alert is set. Whether it can hard-stop spending is <strong>Missing</strong>.</li>
+<li><code>git check-ignore .env</code> prints <code>.env</code>.</li>
+</ul>
+</li>
+<li><strong>Evidence:</strong> <code>docs/evidence/g0/gcloud_setup.txt</code> (project ID and enabled APIs only).</li>
+<li><strong>Checkpoint trigger:</strong> first cloud setup done.</li>
+</ul>
+<h3 id="s0b-mcp-access-probes-g0-m">S0b: MCP access probes (G0, M)</h3>
+<ul>
+<li><strong>Goal:</strong> prove <code>tools/list</code> and <code>tools/call</code> against GitHub, Context7 and Tavily over the wire, and record the real schemas and error shapes.</li>
+<li><strong>Deliverables:</strong> <code>scripts/probe_mcp.py</code>, which takes a server name and runs: list tools; one successful call; one call with deliberately bad arguments; one call for a missing resource.</li>
+<li><strong>Dependencies:</strong> S0a.</li>
+<li><strong>Acceptance:</strong>
+<ul>
+<li><code>python scripts/probe_mcp.py --server github --out docs/evidence/g0/github/</code> exits 0. Same for <code>context7</code> and <code>tavily</code>.</li>
+<li>The GitHub PAT is <strong>denied</strong> reading <code>surendirabalaji/changelens</code>, which is private; this is the negative test.</li>
+<li>At least 5 candidate corpus repos in at least 3 languages read successfully at pinned SHAs.</li>
+<li>The tools for tree listing and code search are identified, along with how they truncate.</li>
+<li>It is documented how a tool error surfaces in <code>langchain-mcp-adapters</code> 0.3.2: <code>isError</code> content or an exception.</li>
+</ul>
+</li>
+<li><strong>Evidence:</strong>
+<ul>
+<li><code>docs/evidence/g0/&lt;server&gt;/tools_list.json</code>, <code>call_ok.json</code>, <code>call_bad_args.json</code>, <code>call_not_found.json</code>;</li>
+<li><code>pat_negative.txt</code>;</li>
+<li><code>corpus_access.md</code>.</li>
+</ul>
+</li>
+<li><strong>Checkpoint trigger:</strong> the first real MCP round trip, and any server that fails (this would trigger a D3/D4 fallback).</li>
+</ul>
+<h3 id="s0c-llm-bake-off-g0-m">S0c: LLM bake-off (G0, M)</h3>
+<ul>
+<li><strong>Goal:</strong> settle D2 using tool-calling evidence.</li>
+<li><strong>Deliverables:</strong>
+<ul>
+<li><code>scripts/bakeoff_llm.py</code>;</li>
+<li><code>eval/bakeoff_prompts.jsonl</code> with 15–20 labelled prompts: no-tool, single tool, a dependent first step, and clarification.</li>
+<li>It binds the <strong>real schemas</strong> dumped in S0b and scores only the model's tool-call output.</li>
+<li>This is a selection test, not MCP integration evidence.</li>
+</ul>
+</li>
+<li><strong>Dependencies:</strong> S0b.</li>
+<li><strong>Acceptance:</strong>
+<ul>
+<li>Each candidate is run with fixed prompts. Candidates are the PDF-tested Nemotron models if their IDs can be resolved (<strong>Missing</strong>), then the current default, <code>gpt-oss-20b</code> and <code>mistral-large</code>.</li>
+<li>For each model, record:
+<ul>
+<li>the rate of tool calls whose arguments validate against the schema;</li>
+<li>no-tool abstention;</li>
+<li>median latency;</li>
+<li>the number of 429s.</li>
+</ul>
+</li>
+<li>Write the chosen model into <code>.env.example</code> and the decision register.</li>
+<li>No threshold is promised. One proposed rule [T]: pick the model with the best schema-valid rate whose abstention is acceptable.</li>
+</ul>
+</li>
+<li><strong>Evidence:</strong> <code>docs/evidence/g0/bakeoff_&lt;date&gt;.csv</code> and <code>bakeoff_decision.md</code>.</li>
+<li><strong>Checkpoint trigger:</strong> D2 decided. This is an architecture decision.</li>
+</ul>
+<h3 id="s1-local-walking-skeleton-g1-m">S1: Local walking skeleton (G1, M)</h3>
+<ul>
+<li><strong>Goal:</strong> the exact contract, a minimal LangGraph <code>agent</code> ⇄ <code>tools</code> loop, <code>InMemorySaver</code> keyed by <code>session_id</code>, and discovery of all 3 servers. Per-request safety caps are in from day one: the recursion limit, a maximum number of tool calls and a deadline.</li>
+<li><strong>Deliverables:</strong>
+<ul>
+<li><code>main.py</code>;</li>
+<li><code>app/config.py</code>, <code>app/api.py</code>, <code>app/state.py</code>, <code>app/graph.py</code>, <code>app/llm.py</code>, <code>app/mcp_client.py</code>, <code>app/prompts.py</code>;</li>
+<li><code>requirements-dev.txt</code> (pytest, pytest-asyncio; versions pinned at install time);</li>
+<li><code>tests/unit/test_contract.py</code>.</li>
+</ul>
+</li>
+<li><strong>Dependencies:</strong> S0b, S0c.</li>
+<li><strong>Acceptance:</strong>
+<ul>
+<li><code>pytest tests/unit -q</code> passes. It checks that a valid body returns 200 with exactly one <code>response</code> string key, and that a malformed body returns 4xx with a <code>{&quot;response&quot;}</code> body (D9).</li>
+<li><code>python main.py</code> starts and logs the tool count discovered per server.</li>
+<li>A local 2-turn test passes: turn 1 &quot;My name is Ana, remember it&quot; and turn 2 &quot;What did I ask you last?&quot; with the same <code>session_id</code> both recall correctly. A different <code>session_id</code> does not recall [V: P §7.3].</li>
+<li>Structured logs show <code>tools/call</code> per server for one query.</li>
+</ul>
+</li>
+<li><strong>Evidence:</strong> <code>docs/evidence/s1/local_recall.txt</code>, <code>discovery_log.txt</code>.</li>
+<li><strong>Checkpoint trigger:</strong> first end-to-end agent turn.</li>
+</ul>
+<h3 id="s2-container-and-early-deploy-d14-g1-m">S2: Container and early deploy, D14 (G1, M)</h3>
+<ul>
+<li><strong>Goal:</strong> a live URL early. Settle C4 (the non-root install path).</li>
+<li><strong>Deliverables:</strong>
+<ul>
+<li><code>Dockerfile</code>: multi-stage, <code>python:3.12-slim</code>, a venv at <code>/opt/venv</code> copied into the runtime stage, <code>useradd</code> plus <code>USER appuser</code>, no Node unless a stdio fallback is needed [V: P §4.3];</li>
+<li><code>.dockerignore</code>;</li>
+<li><code>deploy.sh</code>: <code>set -a; source .env; set +a</code>, <code>gcloud builds submit</code>, then <code>gcloud run deploy changelens --region us-west1 --allow-unauthenticated --max-instances 1 --min-instances 0 --memory 512Mi --timeout &lt;D10&gt; --set-env-vars &quot;LLM_API_KEY=${LLM_API_KEY},...&quot;</code>. Only variable references, never literal keys [V: P §4.4–4.5].</li>
+<li>If any value can contain commas, use the custom delimiter syntax [A, verify].</li>
+<li><code>scripts/smoke_live.sh</code>.</li>
+</ul>
+</li>
+<li><strong>Dependencies:</strong> S1, S0a.</li>
+<li><strong>Acceptance:</strong>
+<ul>
+<li><code>docker build -t changelens:dev .</code> succeeds.</li>
+<li><code>docker run --rm changelens:dev id -u</code> is not 0.</li>
+<li><code>docker run --rm --env-file .env -e PORT=9090 -p 9090:9090 changelens:dev</code> answers the contract curl on port 9090.</li>
+<li><code>bash deploy.sh</code> prints the URL.</li>
+<li><code>bash scripts/smoke_live.sh &quot;$URL&quot;</code> passes the contract and the 2-turn recall on the <strong>live</strong> URL.</li>
+<li><code>grep -nE 'nvapi-|ghp_|github_pat_|tvly-' deploy.sh Dockerfile</code> finds nothing.</li>
+</ul>
+</li>
+<li><strong>Evidence:</strong> <code>docs/evidence/s2/deploy_&lt;date&gt;.txt</code> (URL and revision, no env values), <code>live_smoke.txt</code>, <code>nonroot.txt</code>.</li>
+<li><strong>Checkpoint trigger:</strong> first live deployment.</li>
+</ul>
+<h3 id="s3-failure-handling-and-fault-injection-g1-l">S3: Failure handling and fault injection (G1, L)</h3>
+<ul>
+<li><strong>Goal:</strong> handle all 3 required categories without crashing [V: P §3.3, §7.1].</li>
+<li><strong>Deliverables:</strong>
+<ul>
+<li><code>app/executor.py</code>: inputSchema pre-check, one jittered retry for transport errors, circuit breaker, error classification, and a top-level handler in <code>app/api.py</code>.</li>
+<li><code>tests/resilience/stub_server.py</code>, a <strong>test-only</strong> FastMCP server with these tools:
+<ul>
+<li><code>raise_error</code> (tool execution error);</li>
+<li><code>malformed_result</code> (schema-violating output);</li>
+<li><code>die_midcall</code> (transport closes).</li>
+</ul>
+</li>
+<li><code>tests/resilience/test_failures.py</code>.</li>
+</ul>
+</li>
+<li><strong>Dependencies:</strong> S1.</li>
+<li><strong>Acceptance:</strong>
+<ul>
+<li><code>pytest tests/resilience -q</code> passes. Each category yields HTTP 200 with a useful <code>{&quot;response&quot;}</code> and a logged classification.</li>
+<li>A real transport failure is also checked locally: run the container with an unreachable Context7 URL override. The agent should still answer using the other servers and say which source was unavailable.</li>
+<li>Never inject failures into the graded live revision.</li>
+</ul>
+</li>
+<li><strong>Evidence:</strong> <code>docs/evidence/s3/&lt;category&gt;_trace.txt</code> for each of the 3 categories, plus <code>real_transport_fail.txt</code>.</li>
+<li><strong>Checkpoint trigger:</strong> debugging breakthroughs and the first full pass.</li>
+</ul>
+<h3 id="s4-tool-selection-no-tool-and-chaining-checks-g1-m">S4: Tool selection, no-tool and chaining checks (G1, M)</h3>
+<ul>
+<li><strong>Goal:</strong> show semantic selection, no-tool answers and at least 2 dependent calls [V: P §7.2].</li>
+<li><strong>Deliverables:</strong>
+<ul>
+<li>a refined <code>app/prompts.py</code>;</li>
+<li><code>tests/integration/test_selection.py</code> (marked <code>live</code>; real MCP and LLM);</li>
+<li>per-request trace logging: tool, server, outcome, tokens.</li>
+</ul>
+</li>
+<li><strong>Dependencies:</strong> S3.</li>
+<li><strong>Acceptance:</strong> <code>pytest -m live tests/integration -q</code> checks:
+<ul>
+<li>a conceptual question makes 0 tool calls;</li>
+<li>a repo question makes at least 1 GitHub call;</li>
+<li>a manifest-to-docs question makes at least 2 calls, where the second call's arguments contain a value taken from the first result;</li>
+<li>a research question calls Tavily.</li>
+<li>Results are reported as counts, not just pass/fail.</li>
+</ul>
+</li>
+<li><strong>Evidence:</strong> <code>docs/evidence/s4/selection_run_&lt;date&gt;.jsonl</code>.</li>
+<li><strong>Checkpoint trigger:</strong> first verified multi-step chain.</li>
+</ul>
+<h3 id="s5-minimum-readme-3-diagrams-redeploy-g1-m">S5: Minimum README, 3 diagrams, redeploy (G1, M)</h3>
+<ul>
+<li>
+<p><strong>Goal:</strong> meet every rubric line at a basic level.</p>
+</li>
+<li>
+<p><strong>Deliverables:</strong> <code>README.md</code> with:</p>
+<ul>
+<li>setup, run, deploy;</li>
+<li>cost disclosure;</li>
+<li>attribution for the 3 MCP servers and the rationale for the third [V: P §7.5];</li>
+<li>Diagrams 1–3 <strong>redrawn from the S1–S4 code</strong>;</li>
+<li>the <code>LLM_*</code> vs. <code>OPENAI_*</code> mapping (C8);</li>
+<li>the &quot;suggested demo repos — not a limit&quot; section (D19).</li>
+</ul>
+<p>The student also drafts <code>PROCESS_LOG.md</code> themselves.</p>
+</li>
+<li>
+<p><strong>Dependencies:</strong> S2–S4.</p>
+</li>
+<li>
+<p><strong>Acceptance:</strong></p>
+<ul>
+<li>Every node and server named in the diagrams exists in the code (manual check against <code>app/graph.py</code> and <code>app/mcp_client.py</code>).</li>
+<li><code>smoke_live.sh</code> passes on the redeployed URL.</li>
+</ul>
+</li>
+<li>
+<p><strong>Evidence:</strong> <code>docs/evidence/s5/diagram_code_check.md</code>.</p>
+</li>
+<li>
+<p><strong>Checkpoint trigger:</strong> milestone. The student updates <code>PROCESS_LOG.md</code>.</p>
+</li>
+</ul>
+<blockquote>
+<p><strong>MINIMUM-COMPLIANCE LINE.</strong> After S5, the submission meets every binding rubric line at a basic level [V: P §7.1–7.5]: 3 real servers, all 3 failure categories, semantic selection and chaining, native session memory, a live URL, a README with 3 diagrams, and a process log. If time runs out, jump straight to S10 (cost controls) and then S14–S15.</p>
+</blockquote>
+<h3 id="s6-evidence-model-budget-ledger-coverage-disclosure-g1-l">S6: Evidence model, budget ledger, coverage disclosure (G1, L)</h3>
+<ul>
+<li><strong>Goal:</strong> the core of v2 §3.3.</li>
+<li><strong>Deliverables:</strong>
+<ul>
+<li><code>app/evidence.py</code>: pydantic records and result adapters;</li>
+<li><code>app/budget.py</code>: a per-request ledger, size tiers chosen from repo metadata returned by a tool, and a &quot;Read / Listed-not-read / Not explored / Why stopped&quot; block built deterministically;</li>
+<li>an <code>apply_update</code> node;</li>
+<li>unit tests.</li>
+</ul>
+</li>
+<li><strong>Dependencies:</strong> S5.</li>
+<li><strong>Acceptance:</strong>
+<ul>
+<li><code>pytest tests/unit/test_budget.py tests/unit/test_evidence.py -q</code> passes.</li>
+<li>On a large live repo, the &quot;Read&quot; list exactly matches the GitHub calls in the trace. Disclosure accuracy target 100% [T].</li>
+</ul>
+</li>
+<li><strong>Evidence:</strong> <code>docs/evidence/s6/coverage_large_repo.txt</code>.</li>
+<li><strong>Checkpoint trigger:</strong> milestone.</li>
+</ul>
+<h3 id="s7-synthesize-and-verify_citations-closes-g1-m">S7: Synthesize and verify_citations (closes G1, M)</h3>
+<ul>
+<li><strong>Goal:</strong> grounded answers.</li>
+<li><strong>Deliverables:</strong>
+<ul>
+<li><code>app/citations.py</code>;</li>
+<li><code>synthesize</code>, <code>verify_citations</code> and <code>render</code> nodes;</li>
+<li><code>tests/unit/test_citations.py</code>, with fixtures for an invalid ID, a quote mismatch, and a repair.</li>
+</ul>
+</li>
+<li><strong>Dependencies:</strong> S6.</li>
+<li><strong>Acceptance:</strong>
+<ul>
+<li>Unit tests pass.</li>
+<li>Live cited analyses run on 2 repos: one Python and one non-Python. Each citation's quote matches the file at the SHA (checked by script).</li>
+<li>G1 is complete when this is done together with S2–S4.</li>
+</ul>
+</li>
+<li><strong>Evidence:</strong> <code>docs/evidence/s7/&lt;repo&gt;_answer.md</code> plus the citation-check output.</li>
+<li><strong>Checkpoint trigger:</strong> G1 complete.</li>
+</ul>
+<h3 id="s8-python-ast-structural-pass-and-inferred-edge-checks-g2-m">S8: Python ast structural pass and inferred-edge checks (G2, M)</h3>
+<ul>
+<li><strong>Goal:</strong> D8.</li>
+<li><strong>Deliverables:</strong>
+<ul>
+<li><code>app/structure.py</code>;</li>
+<li>edge provenance labels;</li>
+<li>a lexical identifier check for <code>inferred</code> edges;</li>
+<li>unit tests on small fixed source snippets.</li>
+</ul>
+</li>
+<li><strong>Dependencies:</strong> S7.</li>
+<li><strong>Acceptance:</strong> unit tests pass for:
+<ul>
+<li>imports, defs, calls and decorators;</li>
+<li>dynamic dispatch recorded as a limitation;</li>
+<li>an inferred edge with a bad quote rejected.</li>
+</ul>
+</li>
+<li><strong>Evidence:</strong> <code>docs/evidence/s8/edge_samples.md</code>.</li>
+<li><strong>Checkpoint trigger:</strong> milestone.</li>
+</ul>
+<h3 id="s9-assumption-ledger-corrections-scenarios-g2-m">S9: Assumption ledger, corrections, scenarios (G2, M)</h3>
+<ul>
+<li><strong>Goal:</strong> Workflow B from the brief.</li>
+<li><strong>Deliverables:</strong> <code>update_investigation</code> handling, supersede-with-history logic, Scenario records, and <code>tests/integration/test_multiturn.py</code>.</li>
+<li><strong>Dependencies:</strong> S8.</li>
+<li><strong>Acceptance:</strong>
+<ul>
+<li>A 3-turn session runs: investigate, then correct an assumption, then ask for tests. The corrected assumption shows as superseded with its history.</li>
+<li>Two interleaved sessions on the same repo show no leak.</li>
+</ul>
+</li>
+<li><strong>Evidence:</strong> <code>docs/evidence/s9/multiturn_&lt;date&gt;.txt</code>.</li>
+<li><strong>Checkpoint trigger:</strong> G2 complete.</li>
+</ul>
+<h3 id="s10-admission-and-cost-controls-g2-m-required-before-graders">S10: Admission and cost controls (G2, M; required before graders)</h3>
+<ul>
+<li><strong>Goal:</strong> the allowed controls from v2 §3.9.</li>
+<li><strong>Deliverables:</strong>
+<ul>
+<li><code>app/admission.py</code>: semaphore, lenient rate limit, query-length cap, daily token budget with a reserved grading floor, and lite mode;</li>
+<li>Cloud Run <code>--concurrency</code> set in <code>deploy.sh</code> [A];</li>
+<li>D20 resolved.</li>
+</ul>
+</li>
+<li><strong>Dependencies:</strong> S6. This stage can run before S8 or S9 if needed.</li>
+<li><strong>Acceptance:</strong>
+<ul>
+<li>Unit tests show that budget exhaustion leads to lite mode, which <strong>still uses tools</strong>.</li>
+<li>An oversized query gets a 200 with an explanation.</li>
+<li>A burst of 5 concurrent requests completes without any 5xx.</li>
+</ul>
+</li>
+<li><strong>Evidence:</strong> <code>docs/evidence/s10/burst.txt</code>, <code>lite_mode.txt</code>.</li>
+<li><strong>Checkpoint trigger:</strong> milestone.</li>
+</ul>
+<h3 id="s11-html-report-g3-m-optional-o">S11: HTML report (G3, M, optional [O])</h3>
+<ul>
+<li><strong>Goal:</strong> the optional HTML view, plus the endpoint <code>GET /reports/{token}</code>.</li>
+<li><strong>Deliverables:</strong> templates with autoescaping, a CSP header, tokens with a TTL, and size caps.</li>
+<li><strong>Acceptance:</strong> an escaping test passes on <code>&lt;script&gt;</code> inside a repo excerpt; an expired token returns 404.</li>
+<li><strong>Evidence:</strong> <code>docs/evidence/s11/</code>.</li>
+<li><strong>Checkpoint trigger:</strong> milestone.</li>
+</ul>
+<h3 id="s12-planner-flag-and-ablation-g4-s-optional-o">S12: Planner flag and ablation (G4, S, optional [O])</h3>
+<ul>
+<li><strong>Goal:</strong> the <code>plan</code> node behind a flag (D7).</li>
+<li><strong>Acceptance:</strong> selection accuracy compared with the flag on and off, on the same S13 cases, with the denominators reported.</li>
+</ul>
+<h3 id="s13-evaluation-harness-and-corpus-g4-l">S13: Evaluation harness and corpus (G4, L)</h3>
+<ul>
+<li><strong>Goal:</strong> the v2 §4 metrics. This is a project goal, not a rubric line.</li>
+<li><strong>Deliverables:</strong>
+<ul>
+<li><code>eval/corpus.yaml</code>: 8–10 repos, at least 3 languages, at least 5 feature types, size tiers, pinned SHAs, 2 held out;</li>
+<li><code>eval/cases/*.jsonl</code>;</li>
+<li><code>eval/run_eval.py</code> and <code>eval/score.py</code>.</li>
+</ul>
+</li>
+<li><strong>Dependencies:</strong> S9, S10.</li>
+<li><strong>Acceptance:</strong>
+<ul>
+<li>Every metric reports its denominator, baseline, strata and raw traces. Met or missed is stated honestly.</li>
+<li>Smaller samples are acceptable if they are disclosed.</li>
+</ul>
+</li>
+<li><strong>Evidence:</strong> <code>docs/evidence/eval/&lt;date&gt;/</code>.</li>
+<li><strong>Checkpoint trigger:</strong> each metric run.</li>
+</ul>
+<h3 id="s14-final-readme-diagrams-redrawn-from-code-attribution-cost-g5-m">S14: Final README, diagrams redrawn from code, attribution, cost (G5, M)</h3>
+<ul>
+<li><strong>Goal:</strong> documentation that matches the final code.</li>
+<li><strong>Deliverables:</strong>
+<ul>
+<li>Diagrams 1–3 in README, redrawn from the final graph. Diagrams 4–5 may live in <code>docs/design.md</code>.</li>
+<li>Cost disclosure with dated prices and measured usage, or &quot;not measured&quot;.</li>
+<li>Attribution comments in code and in <code>PROCESS_LOG.md</code> [V: P §6].</li>
+</ul>
+</li>
+<li><strong>Dependencies:</strong> all implemented stages.</li>
+<li><strong>Acceptance:</strong> the diagram-to-code checklist passes, and the README has setup, run, deploy, cost, attribution and the third-server rationale.</li>
+<li><strong>Checkpoint trigger:</strong> documentation milestone.</li>
+</ul>
+<h3 id="s15-submission-readiness-g5-s">S15: Submission readiness (G5, S)</h3>
+<ul>
+<li><strong>Goal:</strong> a clean, safe ZIP and a live service.</li>
+<li><strong>Acceptance:</strong>
+<ul>
+<li>A fresh clone with <code>docker build</code> succeeds.</li>
+<li><code>git grep -nE 'nvapi-|ghp_|github_pat_|tvly-'</code> finds nothing.</li>
+<li>The ZIP is built excluding <code>.env</code>, <code>.venv</code> and <code>node_modules</code>; <code>unzip -l</code> confirms it.</li>
+<li>Ten rephrased unseen queries on the live URL, including at least 2 repos not in the suggested list, a no-tool query and a memory check, all return 200 with a valid contract.</li>
+<li>The spend floor and key validity are confirmed for the grading window.</li>
+<li>The student finalizes <code>PROCESS_LOG.md</code>.</li>
+</ul>
+</li>
+<li><strong>Evidence:</strong> <code>docs/evidence/s15/readiness_&lt;date&gt;.md</code>.</li>
+<li><strong>Checkpoint trigger:</strong> pre-submission.</li>
+</ul>
+<h2 id="open-items-that-affect-the-stages">Open items that affect the stages</h2>
+<ul>
+<li><strong>G0 blockers:</strong> the API keys and the gcloud install.</li>
+<li><strong>Missing:</strong>
+<ul>
+<li>the NIM model IDs for the PDF-tested models;</li>
+<li>the GitHub MCP tree and search tool names;</li>
+<li>the error representation in adapters 0.3.2;</li>
+<li>the Cloud Run timeout value and the grader's HTTP timeout (D10).</li>
+</ul>
+</li>
+<li><strong>Stage-level fallbacks:</strong>
+<ul>
+<li>If Context7 fails G0, swap in <code>mcp-server-fetch</code> and redo S0b for it.</li>
+<li>If no NIM model passes S0c, use a low-cost paid OpenAI-compatible model with a spend limit, set through <code>LLM_BASE_URL</code> / <code>LLM_MODEL</code> only.</li>
+</ul>
+</li>
+</ul>
+
+</main>
+</div>
+<script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+<script>
+var dark = document.documentElement.dataset.theme ? document.documentElement.dataset.theme === 'dark' : window.matchMedia('(prefers-color-scheme: dark)').matches;
+mermaid.initialize({ startOnLoad: true, theme: dark ? 'dark' : 'default', securityLevel: 'strict' });
+</script>
+</body>
+</html>
