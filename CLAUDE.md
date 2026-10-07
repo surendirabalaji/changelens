@@ -11,6 +11,14 @@ The final tech stack, framework, MCP servers, memory approach, and architecture 
 
 The layout and setup commands below assume Python provisionally. Update them after the stack is selected.
 
+**Current design:** `docs/architecture-plan-v3.md`. The stack in it:
+- Python, LangGraph and FastAPI, with `langchain-mcp-adapters`.
+- GitHub, Context7 and Tavily as remote MCP servers.
+- NIM Nemotron as the main LLM.
+- Jev as the triage classifier.
+
+It is a design only. Nothing is built yet.
+
 - `requirements.md` — Binding assignment requirements and rubric (read this first for any compliance claim)
 - `main.py` — Application entrypoint
 - `deploy.sh` — Build & deploy script

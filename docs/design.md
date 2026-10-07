@@ -1,5 +1,13 @@
 # ChangeLens v2: Provisional Design Diagrams and Staged Development Plan
 
+> **Superseded (2026-10-06):** the current design is [architecture-plan-v3.md](architecture-plan-v3.md), the decision-memory redesign.
+>
+> **Carried into v3:** D1, D2 (still to be re-checked in S0d), D3–D5, D6, D8, D15 and D17, plus the raw `ClientSession` executor.
+>
+> **New in v3:** decision records, Workflows A/B/C, the triage-plus-modes graph and D18 (Jev triage).
+>
+> This file is kept for history. Its diagrams do not describe v3.
+
 > Produced by the `research-architect` subagent on 2026-10-05 from [architecture-plan.md](architecture-plan.md) (v2).
 > **Status:** design only. Every diagram below is **PROVISIONAL** and must be redrawn from the final code before submission [V: P §4.6, §7.4]. Nothing here has been implemented, run or measured.
 

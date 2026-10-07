@@ -56,3 +56,78 @@ Each entry: ID, date, type, summary, evidence paths, AI tools, status, open ques
   - Q2: Do you have the professor's clarification or the concept HTML? What do they say about hosted third-party servers?
 - **Next baseline:** CP-001. The next checkpoint should cover the first G0 evidence (`tools/list` dumps, the PAT denial test, the non-root Dockerfile check) or any change to the plan.
 - **Evidence gaps:** no commit refs; the coach did not re-read the PDF; the professor's clarification is missing; outside tool use is unconfirmed.
+
+---
+
+## CP-002 | 2026-10-06 | Architecture decision (v3 redesign, D18 Jev triage)
+
+- **Baseline:** CP-001. Commits since CP-001:
+  - 9017e7b: S0b probes.
+  - 24e0aa4: S0b corpus check and the S0c harness.
+  - 0b4a13f: S0c partial bake-off and the D2 decision.
+
+  The v3 changes are committed on branch `design-v3-changelens`, branched from 0b4a13f. Time of day unknown.
+- **Milestone:** the student pasted a redesign brief:
+  - ChangeLens as a decision-memory layer for code review;
+  - Workflows A, B and C;
+  - DecisionRecord, Assumption and Evidence schemas;
+  - evaluation batched by stack;
+  - a comparison with Claude Code;
+  - 11 deliverables.
+
+  research-architect (Opus) produced `docs/architecture-plan-v3.md`. It kept D1, D2, D3–D5, D6, D8, D15, D17 and the raw ClientSession executor, and flagged conflicts F1–F9. The student rejected the first approval and added D18. No application code, tests or deployment this session.
+- **Prompt (student, excerpt):**
+  > "Before we begin building I want you to rework on the system and the design we have. The below is the redesign path I had in my mind. Read the existing sytstem design and rework to accomodate the below."
+- **Student correction (student-reported, rejected first approval):**
+  > "for request classifer let us try to use jev. Heard that it is doing a good job.What is the budget thing in the design?"
+  - Claude explained the per-turn tool and time budget, the budget ledger and the daily cost cap.
+  - The student supplied https://typesafe.ai/blog/introducing-system-one-models-and-jev. Claude fetched it:
+    - a cloud "System One" model;
+    - schema-typed outputs with confidence scores;
+    - claimed 70–500 ms;
+    - $0.042/MTok input.
+
+    These are vendor claims only and are UNVERIFIED.
+  - D18: Jev for the triage node, a Nemotron structured-output fallback, a `TRIAGE_BACKEND` switch, a Jev probe in M0 and a Jev-vs-Nemotron ablation.
+  - Missing evidence: Jev API docs, rate limits, runtime labels, data retention.
+  - The student then approved the revised plan.
+- **Architect flags (raised by the AI):**
+  - F1: the classifier vs the no-keyword-routing rule.
+  - F2: a per-project ledger vs session-scoped memory, so the ledger is session-scoped only.
+  - F3: "Tavily or Fetch". Keep Tavily, which was probed; Fetch is not probed.
+  - F4: only `full-stack-fastapi-template` is a real backend app in the checked corpus.
+  - F5: GitHub MCP has no compare or range-diff tool.
+  - F6: 3 LLM nodes instead of 11, because of the NIM limit of about 40 requests/min.
+  - F7: "reviewer effort" needs a human study. It is optional and no claim is made.
+  - F8: the professor's clarification is still only paraphrased.
+  - F9: `search_code` searches all of GitHub, so the design requires a `repo:` qualifier.
+- **Evidence:**
+  - `docs/architecture-plan-v3.md` (the full design is in the project).
+  - `docs/design.md` (superseded note).
+  - `.env.example` (placeholders for `JEV_API_KEY` and `TRIAGE_BACKEND`).
+  - `CLAUDE.md` (current-design pointer).
+  - Plan file: `/Users/surensfolder/.claude/plans/research-architect-agent-before-rustling-muffin.md`, outside the project.
+  - Inputs the architect read: `docs/evidence/g0/**` (the S0b probes and `summary_partial.md`).
+- **AI tools observed:**
+  - Main session: Claude Code on Opus 5.5 (`claude-opus-5-5`).
+  - research-architect subagent: `model: opus`.
+  - process-log-coach: Sonnet 5.5 (`claude-sonnet-5-5`).
+  - Jev: planned component only, not used yet.
+  - Nemotron on NIM: planned and bake-off LLM. Confirm the exact model list for the S0c bake-off from `docs/evidence/g0/`.
+- **Verification performed:** NONE for v3, which is design only. The S0b and S0c results exist in commits but the coach did not review them.
+- **Reminder:** delivered 2026-10-06.
+- **Status:**
+  - v3 redesign and D18: PENDING. The student reported the rejection and the Jev decision; neither is in PROCESS_LOG.md yet.
+  - S0b MCP probes (9017e7b, 24e0aa4): PENDING, undocumented.
+  - S0c partial bake-off and D2 decision (0b4a13f): PENDING, undocumented.
+  - PROCESS_LOG.md still reflects only the CP-001 design phase. The §2 narrative is estimated at about 210–230 words, so new entries will need condensing to stay within 200–300.
+- **Open student questions:**
+  - Q1 (carried over from CP-001): did you change or reject anything in the plan before approving it? Partly answered by the Jev change. D14 vs "deploy last" is still open.
+  - Q2 (carried over from CP-001): do you have the professor's clarification or the concept HTML? F8 is still open.
+  - Q3: why Jev for triage, and did the architect's answer change your mind about anything else?
+  - Q4: which S0b and S0c results surprised you or changed D2?
+- **Next baseline:** CP-002. The next checkpoint should cover the M0 evidence top-up (PR and commit tool traces, Context7 coverage, batch repos, S0d bake-off re-run, Jev probe) or any change to the plan.
+- **Evidence gaps:**
+  - Jev API docs, limits and data retention.
+  - The coach did not read the contents of `docs/evidence/g0/**`.
+  - Commit dates are unknown.
