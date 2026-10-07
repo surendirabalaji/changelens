@@ -56,6 +56,7 @@ Source: https://typesafe.ai/blog/introducing-system-one-models-and-jev
 - https://www.langchain.com/blog/building-a-harness-with-jev
 - https://www.langchain.com/blog/building-prod-with-jev-and-langgraph
 - https://docs.typesafe.ai/introduction (overview page only)
+- TypeSafe's `typesafe-ai` skill guide, pasted by the student (MIT licence). It is vendor guidance on how to write questions, read confidence and use patterns.
 
 What the sources show:
 - **Package:** LangChain package `langchain-typesafe`, class `TypeSafeClassifier`. The API key comes from `TYPESAFE_API_KEY`. The docs say `classifier.invoke({"state": ..., "questions": {...}})`, so it can be called directly from inside the `triage` node. No custom wrapper is needed.
@@ -76,7 +77,24 @@ What the sources show:
 - `target_decision`: a `Choice` over the session's current `decision_id`s plus `none`. It is asked only when the ledger is not empty.
 - `needs_clarification`: a `Noul`.
 
-If `intent.confidence` is below a threshold (tuned in M0), or the call errors or times out, the Nemotron structured-output call runs instead. The routers read only these typed fields.
+**How the questions are written** (from TypeSafe's `typesafe-ai` skill guide, supplied by the student on 2026-10-06; vendor guidance):
+- Each question has **instructions** for the judgement and **criteria** that define each option. Question IDs are not sent to the model, so the full meaning goes into the question itself.
+- Every `Choice` includes a no-match outcome: `none` for `target_decision`, and `out_of_scope` for `intent`.
+- `state` uses named JSON fields: `{query, ledger_summaries[{decision_id, proposed_change, status}], recent_turns}`. Questions refer to these with backticked paths.
+- Independent questions go in **one** call and run in parallel. A second call is made only when an earlier answer is needed to build new state.
+
+**Fallback policy.** `Choice` confidence measures how concentrated the probabilities are, not whether the answer is correct. So a low score alone does not trigger the fallback. Nemotron runs instead only when one of these holds:
+- the top two intents fall on **different sides of the tool / no-tool split** and the margin between them is below a threshold (tuned in M0 on our labelled set);
+- `target_decision` is uncertain between two real decisions;
+- `needs_clarification` is near 0.5;
+- the call errors or times out.
+
+A near-tie between two harmless options, such as `conceptual` vs `clarify`, is accepted. The routers read only these typed fields.
+
+**Optional Jev uses, after M6 [O].** These are not part of the build. Each must beat its Nemotron or code version in an ablation before it is adopted.
+- **Workflow C impact filter.** One `Noul` per (assumption, changed-file summary): "does this change touch the condition this assumption depends on?". It runs before the LLM judgement and cuts the LLM calls in recheck. This follows the vendor's "verify and escalate" and "respond to changing state" patterns.
+- **Citation pre-check in `check_decision`.** A `Noul` asks "does this excerpt support this claim?". Unclear cases go on to the existing deterministic checks and LLM repair. This follows the vendor's citation-check cookbook.
+- **Repo-reference selection.** When the query contains several URLs, code finds the candidates and a `Choice` picks the one the user meant. The model selects; it never generates. This follows the vendor's "select instead of generate" pattern.
 
 **Scope:**
 - Jev only picks the mode. All allowlisted tools stay bound to Nemotron in `agent`, so the LLM still makes the final tool choice (R §3.2).
@@ -84,7 +102,12 @@ If `intent.confidence` is below a threshold (tuned in M0), or the call errors or
 - Placeholder in `.env.example`: `TYPESAFE_API_KEY`. The SDK expects this name.
 
 **Missing evidence (the student is supplying sources):**
-- Whether `Choice` options can be set **at runtime on each request**. The decision IDs depend on this. The `invoke` shape suggests they can, because questions are passed per call, but it is not confirmed. If they can't, `target_decision` is resolved by Nemotron or deterministically. When there is only one decision there is nothing to resolve.
+- Whether `Choice` options can be set **at runtime on each request**. The decision IDs depend on this. It is likely: the skill guide says criteria are defined in each question, and questions are passed per call. Confirm it on the Choice page or in the SDK types. If they can't, `target_decision` is resolved by Nemotron or deterministically. When there is only one decision there is nothing to resolve.
+- Docs to read in M0, as Markdown by adding `.md`, starting from https://docs.typesafe.ai/llms.txt:
+  - `sdk/python.md` and `api.md`: version, async, errors, limits;
+  - `primitives/choice.md`, `primitives/noul.md` and `confidence.md`;
+  - `concepts/state.md`;
+  - `cookbooks/function_calling.md` and `cookbooks/citation_check.md`.
 - The pinned package version, async support (`ainvoke`) and the error types it raises. These decide how transport and tool errors map onto §Failure handling.
 - The input-size limit for `state`.
 - Rate limits, free credit, pricing on our volume, and availability through the grading window.
