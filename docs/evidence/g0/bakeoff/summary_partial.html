@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>S0c LLM bake-off: partial results (2026-10-06)</title>
+<style>
+:root {
+  --bg: #fbfbfa; --surface: #ffffff; --text: #1f2328; --muted: #59636e; --border: #d8dee4;
+  --accent: #0b6bcb; --code-bg: #f2f4f6; --row-alt: #f6f8fa; --mark: #fff3c4;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1115; --surface: #161a20; --text: #e6e8eb; --muted: #9aa4af; --border: #2c333c;
+    --accent: #6cb6ff; --code-bg: #1d232b; --row-alt: #1a1f26; --mark: #4a3f12;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1115; --surface: #161a20; --text: #e6e8eb; --muted: #9aa4af; --border: #2c333c;
+  --accent: #6cb6ff; --code-bg: #1d232b; --row-alt: #1a1f26; --mark: #4a3f12;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+.layout { display: grid; grid-template-columns: 1fr; max-width: 1280px; margin: 0 auto; padding: 0 16px; }
+@media (min-width: 1100px) { .layout { grid-template-columns: 260px minmax(0, 1fr); gap: 40px; } }
+nav.toc { display: none; }
+@media (min-width: 1100px) {
+  nav.toc { display: block; position: sticky; top: 0; align-self: start; max-height: 100vh; overflow-y: auto;
+    padding: 24px 0; font-size: 14px; }
+}
+nav.toc a { color: var(--muted); text-decoration: none; display: block; padding: 3px 0; }
+nav.toc a:hover { color: var(--accent); }
+nav.toc .h3 { padding-left: 14px; font-size: 13px; }
+nav.toc .home { font-weight: 600; color: var(--text); margin-bottom: 10px; }
+main { min-width: 0; padding: 24px 0 80px; }
+.banner { font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 10px;
+  margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between; }
+.banner button { font: inherit; color: var(--muted); background: none; border: 1px solid var(--border);
+  border-radius: 6px; padding: 2px 10px; cursor: pointer; }
+h1 { font-size: 2em; line-height: 1.25; margin: 0.2em 0 0.6em; }
+h2 { font-size: 1.5em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; margin-top: 2em; }
+h3 { font-size: 1.2em; margin-top: 1.6em; }
+h1, h2, h3, h4 { scroll-margin-top: 16px; }
+a { color: var(--accent); }
+p, li { overflow-wrap: anywhere; }
+code { background: var(--code-bg); border-radius: 4px; padding: 0.1em 0.35em; font-size: 0.88em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+pre { background: var(--code-bg); border-radius: 8px; padding: 14px 16px; overflow-x: auto; font-size: 13.5px;
+  line-height: 1.5; }
+pre code { background: none; padding: 0; font-size: inherit; }
+pre.mermaid { background: var(--surface); border: 1px solid var(--border); text-align: center; }
+blockquote { margin: 1em 0; padding: 0.4em 1em; border-left: 4px solid var(--accent); color: var(--muted);
+  background: var(--surface); border-radius: 0 6px 6px 0; }
+.table-wrap { overflow-x: auto; margin: 1em 0; border: 1px solid var(--border); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; background: var(--surface); }
+th, td { border-bottom: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+th { background: var(--row-alt); font-weight: 600; }
+tr:nth-child(even) td { background: var(--row-alt); }
+tr:last-child td { border-bottom: none; }
+del { color: var(--muted); }
+hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+.index-list { list-style: none; padding: 0; }
+.index-list li { padding: 12px 0; border-bottom: 1px solid var(--border); }
+.index-list .path { color: var(--muted); font-size: 13px; }
+</style>
+
+<script>
+(function () {
+  var key = "changelens-docs-theme";
+  try { var saved = localStorage.getItem(key); if (saved) document.documentElement.dataset.theme = saved; } catch (e) {}
+  window.toggleTheme = function () {
+    var dark = document.documentElement.dataset.theme
+      ? document.documentElement.dataset.theme === "dark"
+      : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var next = dark ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem(key, next); } catch (e) {}
+  };
+})();
+</script>
+
+</head>
+<body>
+<div class="layout">
+<nav class="toc"><a class="home" href="../../../index.html">ChangeLens docs</a><a class="h2" href="#setup">Setup</a><a class="h2" href="#results">Results</a><a class="h2" href="#decision-d2">Decision (D2)</a></nav>
+<main>
+<div class="banner"><span>Generated from <code>docs/evidence/g0/bakeoff/summary_partial.md</code>. Edit the .md file, then run
+<code>python scripts/render_docs.py</code>.</span><span><a href="../../../index.html">All docs</a>
+<button type="button" onclick="toggleTheme()">Light / dark</button></span></div>
+<h1 id="s0c-llm-bake-off-partial-results-2026-10-06">S0c LLM bake-off: partial results (2026-10-06)</h1>
+<p><strong>Status:</strong> partial. The run was stopped by the student after 4 of 6 models, at about 37 minutes in. <code>moonshotai/kimi-k3</code> and <code>mistralai/mistral-large</code> were not tested. The script (<code>scripts/bakeoff_llm.py</code>) writes its CSV and JSON only when it finishes, so per-prompt rows were not saved. The table below is copied from the script's printed per-model summaries.</p>
+<h2 id="setup">Setup</h2>
+<ul>
+<li><strong>Prompts:</strong> 18 labelled prompts in <code>eval/bakeoff_prompts.jsonl</code>:
+<ul>
+<li>4 no-tool;</li>
+<li>4 GitHub;</li>
+<li>3 Context7;</li>
+<li>3 Tavily;</li>
+<li>2 clarify;</li>
+<li>2 chained first steps (expected first call: GitHub).</li>
+</ul>
+</li>
+<li><strong>Tools bound:</strong> 8 real schemas from the S0b <code>tools/list</code> dumps:
+<ul>
+<li>GitHub: <code>get_file_contents</code>, <code>search_code</code>, <code>list_commits</code>, <code>search_issues</code>;</li>
+<li>Context7: <code>resolve-library-id</code>, <code>query-docs</code>;</li>
+<li>Tavily: <code>tavily_search</code>, <code>tavily_extract</code>.</li>
+</ul>
+</li>
+<li><strong>Scoring:</strong> only the model's first decision. No tool was executed, so this is a selection test, not MCP integration evidence.
+<ul>
+<li>A reply with no tool call counts as &quot;clarify&quot; if it contains a <code>?</code>, and &quot;none&quot; otherwise.</li>
+<li>Tool arguments are validated with <code>jsonschema</code> against the server's declared <code>inputSchema</code>.</li>
+</ul>
+</li>
+<li><strong>Endpoint and settings:</strong> NVIDIA NIM through its OpenAI-compatible endpoint; <code>temperature=0</code>, <code>max_tokens=512</code>, 90 s timeout, about 1.6 s pause between calls.</li>
+<li><strong>Sample:</strong> one run per model. With n=18, differences of one or two prompts are within noise.</li>
+</ul>
+<h2 id="results">Results</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Selection correct</th>
+<th>No-tool correct</th>
+<th>Schema-valid tool calls</th>
+<th>API errors</th>
+<th>HTTP 429</th>
+<th>Median latency</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>nvidia/nemotron-3-ultra-550b-a55b</code> (PDF-tested)</td>
+<td>15/18</td>
+<td>2/4</td>
+<td>11/11</td>
+<td>1</td>
+<td>0</td>
+<td>4.91 s</td>
+</tr>
+<tr>
+<td><code>nvidia/nemotron-3.5-lightning-30b-a3b</code> (PDF-tested)</td>
+<td>16/18</td>
+<td>3/4</td>
+<td>12/13</td>
+<td>0</td>
+<td>0</td>
+<td>5.12 s</td>
+</tr>
+<tr>
+<td><code>nvidia/nemotron-3-super-120b-a12b</code> (current default)</td>
+<td><strong>17/18</strong></td>
+<td><strong>4/4</strong></td>
+<td><strong>12/12</strong></td>
+<td>0</td>
+<td>0</td>
+<td><strong>1.36 s</strong></td>
+</tr>
+<tr>
+<td><code>openai/gpt-oss-20b</code></td>
+<td>15/18</td>
+<td>4/4</td>
+<td>7/10</td>
+<td>0</td>
+<td>0</td>
+<td>2.46 s</td>
+</tr>
+</tbody>
+</table></div>
+<p>The cause of the one API error for Nemotron 3 Ultra was not captured, because per-row details were lost when the run was stopped.</p>
+<h2 id="decision-d2">Decision (D2)</h2>
+<ul>
+<li>Keep <code>nvidia/nemotron-3-super-120b-a12b</code> as the model, which is already the default in <code>.env.example</code>. It had the best selection, no-tool and schema-validity scores, and the lowest latency, in this sample.</li>
+<li><strong>Caveat:</strong> this rests on a small, single run. S4's live selection tests continue to check the choice, and D2 can be revisited if they show problems.</li>
+</ul>
+
+</main>
+</div>
+</body>
+</html>

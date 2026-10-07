@@ -1,0 +1,896 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ChangeLens v3: Decision-Memory Code Review — Architecture Plan</title>
+<style>
+:root {
+  --bg: #fbfbfa; --surface: #ffffff; --text: #1f2328; --muted: #59636e; --border: #d8dee4;
+  --accent: #0b6bcb; --code-bg: #f2f4f6; --row-alt: #f6f8fa; --mark: #fff3c4;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1115; --surface: #161a20; --text: #e6e8eb; --muted: #9aa4af; --border: #2c333c;
+    --accent: #6cb6ff; --code-bg: #1d232b; --row-alt: #1a1f26; --mark: #4a3f12;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1115; --surface: #161a20; --text: #e6e8eb; --muted: #9aa4af; --border: #2c333c;
+  --accent: #6cb6ff; --code-bg: #1d232b; --row-alt: #1a1f26; --mark: #4a3f12;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+.layout { display: grid; grid-template-columns: 1fr; max-width: 1280px; margin: 0 auto; padding: 0 16px; }
+@media (min-width: 1100px) { .layout { grid-template-columns: 260px minmax(0, 1fr); gap: 40px; } }
+nav.toc { display: none; }
+@media (min-width: 1100px) {
+  nav.toc { display: block; position: sticky; top: 0; align-self: start; max-height: 100vh; overflow-y: auto;
+    padding: 24px 0; font-size: 14px; }
+}
+nav.toc a { color: var(--muted); text-decoration: none; display: block; padding: 3px 0; }
+nav.toc a:hover { color: var(--accent); }
+nav.toc .h3 { padding-left: 14px; font-size: 13px; }
+nav.toc .home { font-weight: 600; color: var(--text); margin-bottom: 10px; }
+main { min-width: 0; padding: 24px 0 80px; }
+.banner { font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 10px;
+  margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between; }
+.banner button { font: inherit; color: var(--muted); background: none; border: 1px solid var(--border);
+  border-radius: 6px; padding: 2px 10px; cursor: pointer; }
+h1 { font-size: 2em; line-height: 1.25; margin: 0.2em 0 0.6em; }
+h2 { font-size: 1.5em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; margin-top: 2em; }
+h3 { font-size: 1.2em; margin-top: 1.6em; }
+h1, h2, h3, h4 { scroll-margin-top: 16px; }
+a { color: var(--accent); }
+p, li { overflow-wrap: anywhere; }
+code { background: var(--code-bg); border-radius: 4px; padding: 0.1em 0.35em; font-size: 0.88em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+pre { background: var(--code-bg); border-radius: 8px; padding: 14px 16px; overflow-x: auto; font-size: 13.5px;
+  line-height: 1.5; }
+pre code { background: none; padding: 0; font-size: inherit; }
+pre.mermaid { background: var(--surface); border: 1px solid var(--border); text-align: center; }
+blockquote { margin: 1em 0; padding: 0.4em 1em; border-left: 4px solid var(--accent); color: var(--muted);
+  background: var(--surface); border-radius: 0 6px 6px 0; }
+.table-wrap { overflow-x: auto; margin: 1em 0; border: 1px solid var(--border); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; background: var(--surface); }
+th, td { border-bottom: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+th { background: var(--row-alt); font-weight: 600; }
+tr:nth-child(even) td { background: var(--row-alt); }
+tr:last-child td { border-bottom: none; }
+del { color: var(--muted); }
+hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+.index-list { list-style: none; padding: 0; }
+.index-list li { padding: 12px 0; border-bottom: 1px solid var(--border); }
+.index-list .path { color: var(--muted); font-size: 13px; }
+</style>
+
+<script>
+(function () {
+  var key = "changelens-docs-theme";
+  try { var saved = localStorage.getItem(key); if (saved) document.documentElement.dataset.theme = saved; } catch (e) {}
+  window.toggleTheme = function () {
+    var dark = document.documentElement.dataset.theme
+      ? document.documentElement.dataset.theme === "dark"
+      : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var next = dark ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem(key, next); } catch (e) {}
+  };
+})();
+</script>
+
+</head>
+<body>
+<div class="layout">
+<nav class="toc"><a class="home" href="index.html">ChangeLens docs</a><a class="h2" href="#context">Context</a><a class="h2" href="#changes-from-v2">Changes from v2</a><a class="h3" href="#new-decision-d18-jev-for-request-classification-students-choice">New decision D18: Jev for request classification (student&#x27;s choice)</a><a class="h3" href="#conflicts-found">Conflicts found</a><a class="h2" href="#requirements-summary-requirementsmd">Requirements summary (requirements.md)</a><a class="h2" href="#vision">Vision</a><a class="h2" href="#system-design">System design</a><a class="h2" href="#langgraph-nodes-and-edges">LangGraph nodes and edges</a><a class="h2" href="#mcp-plan">MCP plan</a><a class="h2" href="#memory-design">Memory design</a><a class="h2" href="#failure-handling">Failure handling</a><a class="h2" href="#api-mapping">API mapping</a><a class="h2" href="#evaluation-batched">Evaluation (batched)</a><a class="h2" href="#risks">Risks</a><a class="h2" href="#readme-diagrams">README diagrams</a><a class="h2" href="#phased-build-plan">Phased build plan</a><a class="h2" href="#missing-evidence-for-the-student-or-claude-to-obtain">Missing evidence (for the student or Claude to obtain)</a><a class="h2" href="#the-budget-in-this-design">The &quot;budget&quot; in this design</a><a class="h3" href="#latency-constraint-f10-staying-under-60-s">Latency constraint (F10): staying under 60 s</a></nav>
+<main>
+<div class="banner"><span>Generated from <code>docs/architecture-plan-v3.md</code>. Edit the .md file, then run
+<code>python scripts/render_docs.py</code>.</span><span><a href="index.html">All docs</a>
+<button type="button" onclick="toggleTheme()">Light / dark</button></span></div>
+<h1 id="changelens-v3-decision-memory-code-review--architecture-plan">ChangeLens v3: Decision-Memory Code Review — Architecture Plan</h1>
+<blockquote>
+<p>Produced by the <code>research-architect</code> subagent on 2026-10-06 from the student's redesign brief, then revised with the student (D18: Jev triage).
+Replaces <a href="architecture-plan.html">architecture-plan.md</a> (v2) and <a href="design.html">design.md</a> as the current design. v2 is kept for history.
+<strong>Status:</strong> design only. Nothing here is built, measured or deployed. <strong>[V: src]</strong> = checked against a file in this repo; <strong>[A]</strong> = assumption; <strong>[O]</strong> = optional; <strong>[T]</strong> = target to test, not a result. &quot;Missing evidence&quot; marks what still has to be obtained.
+Evidence read: <code>requirements.md</code>, <code>docs/architecture-plan.md</code>, <code>docs/design.md</code>, <code>docs/evidence/g0/**</code> (S0b probes, S0c bake-off <code>bakeoff/summary_partial.md</code>), <code>requirements.txt</code>, <code>.env.example</code>.</p>
+</blockquote>
+<h2 id="context">Context</h2>
+<p>The student asked to rework the v2 design (<code>docs/architecture-plan.md</code>, <code>docs/design.md</code>) before building starts. The new framing:</p>
+<ul>
+<li>ChangeLens is a stack-open, decision-memory layer for code review.</li>
+<li>It has three workflows: A (initial review), B (correction) and C (recheck against a later PR or commit).</li>
+<li>Decisions, assumptions and evidence are stored as structured records.</li>
+<li>Measured claims are limited to the benchmark batches.</li>
+</ul>
+<p>The research-architect read <code>requirements.md</code> (present, authoritative), the v2 docs, the S0b MCP probe evidence (<code>docs/evidence/g0/**</code>) and the S0c bake-off (<code>docs/evidence/g0/bakeoff/summary_partial.md</code>). This plan records its redesign.</p>
+<p><strong>Status:</strong> this is a design only. Nothing is built, measured or deployed. Numbers marked [T] are targets to test.</p>
+<h2 id="changes-from-v2">Changes from v2</h2>
+<p><strong>Carried over:</strong></p>
+<ul>
+<li><strong>D1:</strong> LangGraph, FastAPI and <code>langchain-mcp-adapters</code> (langgraph 1.2.13, adapters 0.3.2, mcp 1.30.0).</li>
+<li><strong>D2:</strong> NIM <code>nemotron-3-super-120b-a12b</code>. Bake-off: 17/18 correct selections, 4/4 no-tool, 12/12 schema-valid, 1.36 s median. It still needs to be re-checked for the PR tools and long structured output (S0d).</li>
+<li><strong>D3–D5:</strong> GitHub, Context7 and Tavily as remote streamable-HTTP servers, all probed with real calls.</li>
+<li><strong>D6:</strong> <code>InMemorySaver</code> with <code>thread_id = session_id</code>.</li>
+<li><strong>D8:</strong> <code>structural</code> edges come from <code>ast</code>; every other edge is <code>inferred</code> and must cite its evidence.</li>
+<li><strong>D15:</strong> any public repo.</li>
+<li><strong>D17:</strong> no cache shared across sessions.</li>
+<li><strong>Carried-over mechanisms:</strong> citation check, budget ledger, coverage disclosure, test-only stub server for fault injection.</li>
+<li><strong>Tool-calling path, updated after M0 (E11 and E12 in <code>docs/evidence/m0/README.md</code>):</strong>
+<ul>
+<li>The guarded executor is a <code>ToolCallInterceptor</code> from adapter 0.3.2. It receives the raw <code>CallToolResult</code> (<code>isError</code> and the SHA resource URI) before the adapter converts it. This replaces the S0b plan to bypass the adapter with the raw <code>ClientSession</code>.</li>
+<li>One MCP session per server per turn is passed to <code>load_mcp_tools(session=...)</code>. This avoids a new handshake on every call: about 0.25 s each, and GitHub calls are about 2× slower on a fresh session.</li>
+</ul>
+</li>
+</ul>
+<p><strong>Changed:</strong></p>
+<ol>
+<li>
+<p>A first-class <code>DecisionRecord</code>, <code>Assumption</code> and <code>Evidence</code> schema in checkpoint state. Workflows A, B and C; C is new.</p>
+</li>
+<li>
+<p>The graph becomes triage plus modes. There are 9 nodes and only 3 call the LLM, which covers all 11 roles from the brief.</p>
+</li>
+<li>
+<p>The GitHub allowlist grows: <code>pull_request_read</code> (<code>get</code>, <code>get_files</code>, <code>get_diff</code>), <code>get_commit</code> and <code>list_branches</code>. They are listed in <code>tools_list.json</code> but have <strong>never been called</strong>.</p>
+</li>
+<li>
+<p>Evaluation is organised by batch:</p>
+<ul>
+<li>B1 Python/FastAPI;</li>
+<li>B2 Node/Express or NestJS;</li>
+<li>B3 Java/Spring (optional).</li>
+</ul>
+<p>The libraries already checked for access become an off-batch smoke set.</p>
+</li>
+<li>
+<p>A new headline metric: stale-assumption detection, compared against the same model with message-only memory.</p>
+</li>
+</ol>
+<h3 id="new-decision-d18-jev-for-request-classification-students-choice">New decision D18: Jev for request classification (student's choice)</h3>
+<p>Source: https://typesafe.ai/blog/introducing-system-one-models-and-jev</p>
+<p><strong>What the post says:</strong></p>
+<ul>
+<li>Jev is a cloud-API model that returns schema-typed outputs with confidence scores.</li>
+<li>It is trained with RL for calibrated decisions. It is not keyword-based, so it complies with R §3.2.</li>
+<li>Speed: 70–500 ms.</li>
+<li>Price: $0.042 per million input tokens; output is free.</li>
+</ul>
+<p><strong>Why use it:</strong></p>
+<ul>
+<li><code>triage</code> runs on every turn. Moving it off NIM saves about 1 call per turn against the ~40 requests-a-minute limit, and should cut no-tool latency.</li>
+</ul>
+<p><strong>Integration (2026-10-06).</strong> Sources:</p>
+<ul>
+<li>https://www.langchain.com/blog/building-a-harness-with-jev</li>
+<li>https://www.langchain.com/blog/building-prod-with-jev-and-langgraph</li>
+<li>https://docs.typesafe.ai/introduction (overview page only)</li>
+<li>TypeSafe's <code>typesafe-ai</code> skill guide, pasted by the student (MIT licence). It is vendor guidance on how to write questions, read confidence and use patterns.</li>
+</ul>
+<p>What the sources show:</p>
+<ul>
+<li>
+<p><strong>Packages:</strong></p>
+<ul>
+<li>LangChain package: <code>langchain-typesafe</code>, class <code>TypeSafeClassifier</code>.</li>
+<li>Official SDK: <code>typesafe-sdk</code>. <strong>We use the official SDK</strong> (see the docs check below).</li>
+<li>Both read the API key from <code>TYPESAFE_API_KEY</code>.</li>
+</ul>
+</li>
+<li>
+<p><strong>Question types:</strong></p>
+<ul>
+<li><code>Choice</code> returns <code>choice</code>, <code>probabilities</code> and <code>confidence</code>.</li>
+<li><code>Score</code> returns <code>score</code>, <code>probabilities</code> and <code>confidence</code>.</li>
+<li><code>Noul</code> is a yes/no that returns a value from 0 to 1.</li>
+</ul>
+<p>Questions can be mixed in one call and are evaluated in parallel and in isolation. <code>state</code> can be text, structured data or LangChain messages.</p>
+</li>
+<li>
+<p><strong>Typed answers only. Jev does not extract free text.</strong> This confirms the design: the repo URL, SHA and PR number are parsed deterministically, and the proposed change and constraints are read by <code>agent</code>.</p>
+</li>
+<li>
+<p><strong>Reported speed (vendor and partner claims, UNVERIFIED for this workload):</strong></p>
+<ul>
+<li>5–6× faster than Claude Sonnet on a document-classification step.</li>
+<li>Browserbase's median <code>act()</code> time fell from 1.97 s to 0.46 s.</li>
+<li>LangChain's post also links to related middleware (<code>ModelRouterMiddleware</code>, <code>AutoModeMiddleware</code>). Not used here.</li>
+</ul>
+</li>
+</ul>
+<p><strong><code>triage</code> as one Jev call.</strong> The state is the query, a summary of the stored decision ledger and the last few messages. The questions:</p>
+<ul>
+<li><code>intent</code>: a <code>Choice</code> over {conceptual, repo_review, revise_decision, recheck, memory_recall, clarify, out_of_scope}.</li>
+<li><code>target_decision</code>: a <code>Choice</code> over the session's current <code>decision_id</code>s plus <code>none</code>. It is asked only when the ledger is not empty.</li>
+<li><s><code>needs_clarification</code>: a <code>Noul</code>.</s> <strong>Dropped after M0 (E14).</strong> It was poorly calibrated for this task: 0.39–0.58 on clear-cut cases. Clarification now comes from the <code>clarify</code> intent and the code rule below.</li>
+</ul>
+<p><strong>How the questions are written</strong> (from TypeSafe's <code>typesafe-ai</code> skill guide, supplied by the student on 2026-10-06; vendor guidance):</p>
+<ul>
+<li>Each question has <strong>instructions</strong> for the judgement and <strong>criteria</strong> that define each option. Question IDs are not sent to the model, so the full meaning goes into the question itself.</li>
+<li>Every <code>Choice</code> includes a no-match outcome: <code>none</code> for <code>target_decision</code>, and <code>out_of_scope</code> for <code>intent</code>.</li>
+<li><code>state</code> uses named JSON fields: <code>{query, ledger_summaries[{decision_id, proposed_change, status}], recent_turns}</code>. Questions refer to these with backticked paths.</li>
+<li>Independent questions go in <strong>one</strong> call and run in parallel. A second call is made only when an earlier answer is needed to build new state.</li>
+</ul>
+<p><strong>Fallback policy.</strong> <code>Choice</code> confidence measures how concentrated the probabilities are, not whether the answer is correct. So a low score alone does not trigger the fallback. Nemotron runs instead only when one of these holds:</p>
+<ul>
+<li>the top two intents fall on <strong>different sides of the tool / no-tool split</strong> and the margin between them is below a threshold (tuned in M0 on our labelled set);</li>
+<li><code>target_decision</code> is uncertain between two real decisions;</li>
+<li>the call errors or times out.</li>
+</ul>
+<p>A near-tie between two harmless options, such as <code>conceptual</code> vs <code>clarify</code>, is accepted. The routers read only these typed fields.</p>
+<p><strong>Ambiguous targets (policy v3; the student's call on 2026-10-06):</strong> a recheck with <code>target_decision = none</code> stays a <code>recheck</code>. Triage does not turn it into <code>clarify</code>.</p>
+<ul>
+<li>The agent resolves the PR's repository from the query and the ledger, then rechecks every active decision on that repository.</li>
+<li>It asks a clarifying question only when it can't resolve the repository, for example &quot;latest PR&quot; with decisions on two repos.</li>
+<li>Policy v2's code-side clarify rule is dropped.</li>
+</ul>
+<p><strong>M0 result</strong> (<code>docs/evidence/m0/README.md</code> §7):</p>
+<ul>
+<li>Jev <code>jev-1.13.0</code> and Nemotron super were equally accurate: 29/30 request types and 27/27 targets.</li>
+<li>Jev's p95 was <strong>0.20 s</strong> against Nemotron's 4.54 s.</li>
+<li>After the student relabelled <code>q2</code> as <code>recheck</code>, Jev, Nemotron and policy v3 each score 30/30, with 0 fallbacks and 0 tool/no-tool crossings. The label changed after the results were seen, so held-out validation in M3 decides.</li>
+<li><strong>D18: GO.</strong> Triage uses <code>RetryPolicy(max_retries=1, timeout≈2 s)</code> (E15).</li>
+</ul>
+<p><strong>Optional Jev uses, after M6 [O].</strong> These are not part of the build. Each must beat its Nemotron or code version in an ablation before it is adopted.</p>
+<ul>
+<li><strong>Workflow C impact filter.</strong> One <code>Noul</code> per (assumption, changed-file summary): &quot;does this change touch the condition this assumption depends on?&quot;. It runs before the LLM judgement and cuts the LLM calls in recheck. This follows the vendor's &quot;verify and escalate&quot; and &quot;respond to changing state&quot; patterns.</li>
+<li><strong>Citation pre-check in <code>check_decision</code>.</strong> A <code>Noul</code> asks &quot;does this excerpt support this claim?&quot;. Unclear cases go on to the existing deterministic checks and LLM repair. This follows the vendor's citation-check cookbook.</li>
+<li><strong>Repo-reference selection.</strong> When the query contains several URLs, code finds the candidates and a <code>Choice</code> picks the one the user meant. The model selects; it never generates. This follows the vendor's &quot;select instead of generate&quot; pattern.</li>
+</ul>
+<p><strong>Scope:</strong></p>
+<ul>
+<li>Jev only picks the mode. All allowlisted tools stay bound to Nemotron in <code>agent</code>, so the LLM still makes the final tool choice (R §3.2).</li>
+<li>This adds a second model provider. It is <strong>not</strong> a framework and <strong>not</strong> an MCP server, so it adds no MCP credit.</li>
+<li>Placeholder in <code>.env.example</code>: <code>TYPESAFE_API_KEY</code>. The SDK expects this name.</li>
+</ul>
+<p><strong>Checked against the TypeSafe docs (2026-10-06).</strong> Pages read: <code>sdk/python.md</code>, <code>api.md</code>, <code>primitives/choice.md</code>, <code>primitives/noul.md</code>, <code>confidence.md</code>, <code>concepts/state.md</code>.</p>
+<ul>
+<li><strong>SDK: we use the official <code>typesafe-sdk</code>, not <code>langchain-typesafe</code>.</strong>
+<ul>
+<li>It provides <code>AsyncTypeSafeClient</code> (async context manager) with <code>system_one(state=..., questions=...)</code>.</li>
+<li>The <code>triage</code> node calls it directly. LangGraph nodes are already async, so no LangChain wrapper is needed and there is one less dependency.</li>
+<li>Optional extra: <code>[http2]</code>.</li>
+</ul>
+</li>
+<li><strong>HTTP API.</strong>
+<ul>
+<li>Endpoint: <code>POST https://api.typesafe.ai/v1/systemone</code>, authenticated with <code>Authorization: Bearer &lt;TYPESAFE_API_KEY&gt;</code>.</li>
+<li>The <code>model</code> field takes <code>&quot;jev-latest&quot;</code>. The docs list no pinned version, so we record the <code>model</code> string from each response in traces for reproducibility.</li>
+<li>Responses include <code>usage.input_tokens</code> and <code>usage.output_tokens</code>, which go into the budget ledger.</li>
+</ul>
+</li>
+<li><strong>Runtime labels: CONFIRMED.</strong> <code>Choice</code> criteria are a map in each request: option → description, which can be a string, a <code>{what, not_for, examples}</code> object, or null. The limit is ≤255 options. So <code>target_decision</code> options are built from the session's ledger on every call.</li>
+<li><strong>Outputs.</strong>
+<ul>
+<li><code>Choice</code>: <code>choice</code>, <code>probabilities</code> (they sum to 1) and <code>confidence</code> = <code>(p_max − 1/n)/(1 − 1/n)</code>, which is 0 for an even split and 1 for certainty.</li>
+<li><code>Noul</code>: the probability of yes, from 0 to 1. A value near 0.5 means uncertain, not &quot;medium&quot;.</li>
+<li>The SDK docs name the response fields in two ways: <code>response.choices[k]</code> and <code>response.answers[k]</code>. The SDK summary also called a Noul &quot;boolean&quot;. We confirm the actual types against the installed SDK in M0.</li>
+</ul>
+</li>
+<li><strong>Error mapping into §Failure handling.</strong>
+<ul>
+<li>401 (bad key): tool-execution error. No retry; use the Nemotron fallback.</li>
+<li>422 (validation): malformed request. This is a code bug, so log it and use the fallback.</li>
+<li>429 (rate limit) and 529 (overloaded): one retry with exponential backoff if the deadline allows, as the docs advise. Otherwise use the fallback.</li>
+<li>Connection errors or timeouts: transport error. Use the fallback.</li>
+<li>Jev failing never fails the turn.</li>
+</ul>
+</li>
+<li><strong>State.</strong>
+<ul>
+<li>Text only: a string, an object or an array of text. We use an object with named fields, as the docs recommend.</li>
+<li>Accuracy is lower for non-English text, including CJK.</li>
+</ul>
+</li>
+<li><strong>Confidence thresholds.</strong> The docs suggest proceeding above 0.9 and escalating or clarifying below 0.5, set separately for each action according to its cost. This matches our fallback policy, and the actual thresholds are tuned in M0.</li>
+</ul>
+<p><strong>Still missing evidence:</strong></p>
+<ul>
+<li>Rate-limit numbers.</li>
+<li>The maximum size of <code>state</code>. The docs list none, so we cap it ourselves at about 4k characters by trimming <code>recent_turns</code>.</li>
+<li>Data retention and privacy for text sent as <code>state</code>. It is public repo text, but that should be confirmed.</li>
+<li>Pricing and free credit, and whether the key stays valid through the grading window.</li>
+<li>Prompt-injection behaviour. The docs give no guidance. Because Jev only picks among options and the routers read only typed fields, injected text can at worst cause a misroute, never a tool call.</li>
+<li>Cookbooks to read when the optional uses are taken up: <code>cookbooks/function_calling.md</code>, <code>cookbooks/citation_check.md</code>.</li>
+</ul>
+<p><strong>Risk:</strong></p>
+<ul>
+<li>It is a new vendor, and the claims come from its own marketing.</li>
+<li>Mitigation: Nemotron fallback, the comparison in the evaluation, and a config switch <code>TRIAGE_BACKEND=jev|nemotron</code>.</li>
+</ul>
+<h3 id="conflicts-found">Conflicts found</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Conflict</th>
+<th>Resolution</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>F1</td>
+<td>A &quot;request classifier&quot; vs the ban on keyword routing in R §3.2</td>
+<td><code>triage</code> is a learned classifier: Jev, with a Nemotron structured-output fallback (see D18). It never matches on keywords. All allowlisted tools stay bound in <code>agent</code>, so the LLM makes the final tool choice.</td>
+</tr>
+<tr>
+<td>F2</td>
+<td>A &quot;per project&quot; ledger and &quot;later&quot; rechecks vs session-scoped memory</td>
+<td>The ledger is session-scoped and lasts only while the instance runs. The pitch says rechecks happen &quot;later in the same session&quot;. A pasteable decision summary is optional.</td>
+</tr>
+<tr>
+<td>F3</td>
+<td>&quot;Tavily or Fetch&quot;</td>
+<td>Keep Tavily, which was probed. Fetch is a fallback only and is not probed.</td>
+</tr>
+<tr>
+<td>F4</td>
+<td>Evaluated stacks vs the corpus that was checked</td>
+<td>Only <code>full-stack-fastapi-template</code> is a real backend app. More app repos and PRs are needed.</td>
+</tr>
+<tr>
+<td>F5</td>
+<td>There is no compare or range-diff tool</td>
+<td>Recheck uses the PR <code>get_files</code> and <code>get_diff</code>, or <code>get_commit full_patch</code>, plus a drift check on cited excerpts at the new SHA.</td>
+</tr>
+<tr>
+<td>F6</td>
+<td>11 LLM nodes vs the NIM limit of about 40 requests per minute</td>
+<td>Only 3 nodes call the LLM.</td>
+</tr>
+<tr>
+<td>F7</td>
+<td>&quot;Reviewer effort&quot; needs a study with people</td>
+<td>Optional and qualitative; no claim made.</td>
+</tr>
+<tr>
+<td>F8</td>
+<td>The professor's clarification (<strong>RESOLVED 2026-10-06</strong>; the student supplied the professor's answer)</td>
+<td>Verbatim: <em>&quot;Does not count as real MCP integration, as it can be very few lines of code, and fails the test as 'Hard-coded / simulated tool responses that never touch the wire = zero credit on MCP integration'. All MCP servers that will count must 'wrap real external systems or data sources'. What you suggest I would consider 'gaming' the system.&quot;</em> (This was the answer to whether a student-built FastMCP server returning seeded or simulated data counts.) <strong>Effect:</strong> GitHub, Context7 and Tavily all wrap real external systems, so all three count. No student-built server is counted. The fault-injection stub server is test-only. It is never deployed, never listed in the runtime server manifest and never claimed as an integration.</td>
+</tr>
+<tr>
+<td>F10</td>
+<td>The grader expects a response in <strong>under 60 s</strong> (student, 2026-10-06; &quot;preferably&quot;). v2 and v3 allowed 90 s for Workflow A.</td>
+<td>Hard internal deadline of <strong>50 s</strong> for each turn. See &quot;Latency constraint&quot; under the budget section. Workflow A gets fewer tool calls, reads in parallel, and can <strong>continue across turns</strong>.</td>
+</tr>
+<tr>
+<td>F9</td>
+<td><code>search_code</code> searches all of GitHub and probably only default branches</td>
+<td>Require a <code>repo:</code> qualifier. Recheck never uses search for PR-head code.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="requirements-summary-requirementsmd">Requirements summary (<code>requirements.md</code>)</h2>
+<ul>
+<li><strong>R1:</strong> exactly one framework (LangGraph).</li>
+<li><strong>R2:</strong> at least 2 real MCP servers, at least 3 for the additional-server credit, and nothing simulated.</li>
+<li><strong>R3:</strong> the LLM chooses tools by meaning, can answer with no tool, can chain calls, and does no keyword routing.</li>
+<li><strong>R4:</strong> checkpointer memory scoped by <code>session_id</code>, across at least 2 turns.</li>
+<li><strong>R5:</strong> handles transport, tool-execution and malformed-response failures without crashing.</li>
+<li><strong>R6:</strong> <code>POST /chat</code> takes <code>{query, session_id}</code> and returns <code>{response}</code>.</li>
+<li><strong>R7:</strong> Cloud Run with a multi-stage build, a non-root user and <code>0.0.0.0:$PORT</code>.</li>
+<li><strong>R8:</strong> secrets only in environment variables.</li>
+<li><strong>R9:</strong> the README has 3 diagrams that match the code, plus cost and attribution.</li>
+<li><strong>R10:</strong> the student writes <code>PROCESS_LOG.md</code>.</li>
+<li><strong>R11:</strong> adapted code is attributed.</li>
+<li><strong>Also:</strong> &quot;what did I ask last&quot; must work, <code>--allow-unauthenticated</code>, and a runtime server manifest.</li>
+</ul>
+<h2 id="vision">Vision</h2>
+<p>ChangeLens is a decision-memory layer for code review.</p>
+<ul>
+<li><strong>Workflow A:</strong> it maps the affected workflow, extracts assumptions, grounds them in evidence pinned to a SHA or version, suggests tests, and stores the decision.</li>
+<li><strong>Workflow C:</strong> it compares each assumption against the PR or commit and returns supported, weakened, contradicted or unaffected, citing the changed evidence.</li>
+<li><strong>Stack-open:</strong> every response carries a support-boundary label, either &quot;evaluated batch&quot; or &quot;unevaluated stack, best-effort&quot;.</li>
+</ul>
+<h2 id="system-design">System design</h2>
+<pre><code>Client → FastAPI POST /chat (validate, query cap, per-session lock, semaphore, deadline)
+ → LangGraph StateGraph ⇄ InMemorySaver(thread_id=session_id)
+ → Guarded MCP executor (adapter ToolCallInterceptor on raw CallToolResult; one session per server per turn; tools/list discovery)
+     → GitHub (api.githubcopilot.com/mcp, X-MCP-Readonly, public-only PAT)
+     → Context7 (mcp.context7.com/mcp, API key)
+     → Tavily (mcp.tavily.com/mcp, Bearer)
+ → NIM nemotron-3-super-120b-a12b (agent, synthesize, triage fallback)
+ → Jev (TypeSafe AI) for triage classification (D18)
+ → [optional] HTML report store (TTL, random tokens, never read by the graph — not memory)
+</code></pre>
+<p><strong>The models handle:</strong> intent (Jev, with a Nemotron fallback), evidence planning, tool choice, inferred edges, assumptions, judgements, decision and tests.</p>
+<p><strong>Deterministic code handles:</strong></p>
+<ul>
+<li>URL and scope validation;</li>
+<li>schema checks;</li>
+<li>retries and the circuit breaker;</li>
+<li>evidence normalisation;</li>
+<li>stack detection from manifests;</li>
+<li><code>ast</code> edges;</li>
+<li>impact matching and drift checks;</li>
+<li>citation and status rules;</li>
+<li>ledger merges;</li>
+<li>budget and coverage;</li>
+<li>rendering.</li>
+</ul>
+<h2 id="langgraph-nodes-and-edges">LangGraph nodes and edges</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Node</th>
+<th>Type</th>
+<th>Role from the brief</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>ingest</code></td>
+<td>Deterministic</td>
+<td>Loads state, sets budget and deadline, caps the query</td>
+</tr>
+<tr>
+<td><code>triage</code></td>
+<td><strong>Jev</strong> (TypeSafe AI's System One model) as the classifier, with Nemotron structured output as the fallback</td>
+<td>Intent ∈ {conceptual, repo_review, revise_decision, recheck, memory_recall, clarify, out_of_scope}, plus a confidence score and <code>target_decision_id</code> (picked from the stored ledger summaries). The free-text fields (repo URL, SHA, PR number) are parsed deterministically. That counts as input parsing, not routing. The proposed change and constraints are left for <code>agent</code> to read. If Jev's confidence is low, or Jev fails, the Nemotron structured call runs instead.</td>
+</tr>
+<tr>
+<td><code>agent</code></td>
+<td>LLM with all tools bound; the prompt depends on the mode</td>
+<td>Repo resolver, evidence planner, tool selection</td>
+</tr>
+<tr>
+<td><code>tools</code></td>
+<td>Deterministic</td>
+<td>MCP executor: schema pre-check, scope guard, retries and circuit breaker, error classification (<code>isError</code> and <code>McpError</code>), Evidence, budget</td>
+</tr>
+<tr>
+<td><code>apply_update</code></td>
+<td>Deterministic</td>
+<td>Stack detector, revision pinning, <code>ast</code> edges, impact matcher and excerpt drift check</td>
+</tr>
+<tr>
+<td><code>synthesize</code></td>
+<td>LLM, structured output</td>
+<td>Assumption extractor, inferred edges, contradiction judgement, decision and tests. Output depends on the mode: a new record, patch operations, or a status per assumption.</td>
+</tr>
+<tr>
+<td><code>check_decision</code></td>
+<td>Deterministic</td>
+<td>Cited IDs must exist and quotes must match exactly. Status rules: contradicted needs a contradicting citation; supported needs a supporting citation; mixed evidence is at most weakened. One repair loop.</td>
+</tr>
+<tr>
+<td><code>commit_memory</code></td>
+<td>Deterministic, through reducers</td>
+<td>Creates or revises the record, adds <code>revision_history</code>, marks superseded items</td>
+</tr>
+<tr>
+<td><code>render</code></td>
+<td>Deterministic</td>
+<td>Markdown and Mermaid report, coverage, support label, optional HTML link</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Edges.</strong> Every router is a pure function of state.</p>
+<ul>
+<li><code>ingest→triage</code>.</li>
+<li><code>triage→agent</code>, or <code>triage→render</code> for clarify or out-of-scope.</li>
+<li><code>agent→tools</code> when there are tool calls and the budget allows.</li>
+<li><code>agent→synthesize</code> in review, revise or recheck mode, or when the budget runs out (the answer is marked partial).</li>
+<li><code>agent→render</code> in conceptual or memory-recall mode. <strong>This is the no-tool path.</strong></li>
+<li><code>tools→apply_update→agent</code>.</li>
+<li><code>synthesize→check_decision</code>. Then <code>commit_memory</code> if it passes, back to <code>synthesize</code> once for a repair, or on to <code>commit_memory</code> with the failing claims flagged.</li>
+<li><code>commit_memory→render→END</code>.</li>
+</ul>
+<p><strong>Typical chains:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Workflow</th>
+<th>Chain</th>
+<th>Budget</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>A</td>
+<td>manifest at the SHA → version → Context7 <code>resolve-library-id</code> → <code>query-docs</code> → route, service and test reads → Tavily only if needed</td>
+<td>≤10 calls, ≤1 Tavily; independent reads in parallel</td>
+</tr>
+<tr>
+<td>B</td>
+<td>Mostly no tools</td>
+<td>≤4 calls</td>
+</tr>
+<tr>
+<td>C</td>
+<td>PR <code>get</code> (head and base SHA) → <code>get_files</code> → impact match → reads at the head SHA, plus <code>get_diff</code></td>
+<td>≤10 calls</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="mcp-plan">MCP plan</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Server</th>
+<th>Verified</th>
+<th>Still missing</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GitHub</td>
+<td>29 read-only tools. <code>get_file_contents</code> with a SHA URI works. Not-found, bad-argument and private-repo cases all return <code>isError</code>.</td>
+<td>Successful traces for <code>pull_request_read</code> (get, get_files, get_diff), <code>get_commit full_patch</code> and <code>list_commits perPage=1</code>. Diff truncation. Branch behaviour and pagination of <code>search_code</code>. Rate limits, including the separate code-search limit.</td>
+</tr>
+<tr>
+<td>Context7</td>
+<td>Resolve and query work; versions pin (httpx 0.28.1)</td>
+<td>Coverage and versions for FastAPI, Starlette, Express and NestJS; quota</td>
+</tr>
+<tr>
+<td>Tavily</td>
+<td>Search works; bad arguments raise <code>McpError</code></td>
+<td>Credits per search and extract; rate limit</td>
+</tr>
+<tr>
+<td>Fetch (fallback)</td>
+<td>Not probed</td>
+<td>README, transport, runtime image</td>
+</tr>
+</tbody>
+</table></div>
+<p>Also still missing:</p>
+<ul>
+<li>whether adapter 0.3.2 has an interceptor hook (which would avoid the raw-session path);</li>
+<li>the session lifecycle on streamable HTTP.</li>
+</ul>
+<p>Each server provides something the others don't:</p>
+<ul>
+<li>GitHub: code at a revision.</li>
+<li>Context7: documented behaviour at a version.</li>
+<li>Tavily: upstream reality outside the repo.</li>
+</ul>
+<p>The test cases are designed so that each server is genuinely needed.</p>
+<h2 id="memory-design">Memory design</h2>
+<p><strong>Checkpoint state</strong> (<code>thread_id = session_id</code>):</p>
+<ul>
+<li><code>messages</code>: <code>add_messages</code> reducer, trimmed. Tool outputs are truncated because the full content is in <code>evidence</code>.</li>
+<li><code>repo_context</code>: owner and name, <code>base_revision</code>, stack (frameworks with versions and manifest evidence, confidence, support boundary).</li>
+<li><code>evidence</code>: dict keyed by ID. Immutable and appended only. Excerpts ≤1.5k characters, ≤150 entries, unreferenced entries evicted first.</li>
+<li><code>decisions</code>: dict, with a patch-operations reducer.</li>
+<li><code>active_decision_id</code>, <code>workflow_graph</code> (each edge has a provenance), <code>last_turn</code>.</li>
+</ul>
+<p>There is no store shared across threads and no project ledger. The HTML store is not memory.</p>
+<p><strong>Schemas.</strong> The brief's fields are kept, plus:</p>
+<ul>
+<li><strong>DecisionRecord</strong> + <code>acceptance ∈ {proposed, user_accepted}</code>. Each <code>revision_history</code> entry holds <code>{turn, at_revision, cause, prior/new status, summary}</code>.</li>
+<li><strong>Assumption</strong> + typed <code>invalidation_triggers {kind: path_glob|symbol|concept, value}</code> and <code>superseded_by</code>.</li>
+<li><strong>Evidence:</strong> the <code>evidence_id</code> is a hash of (url, revision, path, lines), plus <code>extraction_method</code>, <code>excerpt_sha256</code> and <code>trust=untrusted_data</code>.</li>
+<li><strong>TestScenario:</strong> <code>setup</code>, <code>action</code>, <code>expected</code>, basis evidence, <code>tests_assumption_id</code>, <code>execution_status=not_executed</code>.</li>
+</ul>
+<p><strong>Workflow B:</strong> <code>triage</code> picks the target decision; <code>synthesize</code> emits patch operations (supersede A2 with A2′ whose origin is <code>user</code>); <code>commit_memory</code> records the history; at most 4 tool calls.</p>
+<p><strong>Workflow C:</strong> <code>unaffected</code> moves only <code>current_revision_checked</code> forward. <code>concept</code> triggers catch semantic changes such as discount logic added in a new file.</p>
+<p><strong>Measured in M0 (E13):</strong></p>
+<ul>
+<li><code>InMemorySaver</code> stores the full message list in every checkpoint and has <strong>no pruning API</strong>; only <code>delete_thread</code> exists.</li>
+<li>In a synthetic test, one session reached 98 MB after 50 turns when tool output stayed in <code>messages</code>, and 27 MB when it was trimmed.</li>
+</ul>
+<p><strong>Rules:</strong></p>
+<ul>
+<li>Tool output never goes into <code>messages</code>. It lives in <code>evidence</code>.</li>
+<li>Keep only the last N messages.</li>
+<li>Cap <code>evidence</code> at 150 entries.</li>
+<li>Evict sessions idle past a TTL with <code>delete_thread</code>.</li>
+<li>M7 measures memory under load to choose 512Mi or 1Gi.</li>
+</ul>
+<h2 id="failure-handling">Failure handling</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Handling</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Transport</td>
+<td>One retry with jitter, then the circuit opens. &quot;Source unavailable&quot; goes to the LLM. Evidence gathered so far is kept and the answer is labelled partial.</td>
+</tr>
+<tr>
+<td>Tool execution (<code>isError</code> or <code>McpError</code>)</td>
+<td>Auth error: explain, no retry. Not found: ask the user. 429: retry once if time allows, else partial. Invalid arguments: one LLM repair. Unsupported: explain.</td>
+</tr>
+<tr>
+<td>Malformed</td>
+<td>Rejected as evidence and never citable. Retry once if safe. LLM output gets one repair, then a text fallback from validated evidence.</td>
+</tr>
+<tr>
+<td>Domain</td>
+<td>Oversized repo: expand from the entry point and disclose. Ambiguous stack: best-effort label. No entry point: ask. Conflicting evidence: show both, mark weakened. Moved head: pin the SHA from <code>get</code>. Docs missing: Tavily plus a disclosed gap. Budget out: partial plus coverage.</td>
+</tr>
+<tr>
+<td>Injection</td>
+<td>Excerpts treated as untrusted data. Allowlist and scope guard outside the prompt. No secrets in context. Tools read-only.</td>
+</tr>
+<tr>
+<td>LLM 429 or 5xx</td>
+<td>One retry, then safe failure. Top-level handler always returns <code>{response}</code>.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Faults are injected with a test-only stub server, and by overriding a real server URL to an unreachable address. Never on the graded live revision.</p>
+<h2 id="api-mapping">API mapping</h2>
+<ul>
+<li><code>POST /chat</code> takes <code>{query, session_id}</code>; the pydantic model forbids extra fields. It returns <code>{response}</code>.</li>
+<li>The repo, PR, commit, change and constraints all go inside <code>query</code>.</li>
+<li>An invalid body gets a 4xx whose body is still <code>{response}</code>.</li>
+<li>An oversized query gets a 200 with an explanation.</li>
+<li>Extra routes: <code>/healthz</code> and <code>/reports/{token}</code> (optional).</li>
+</ul>
+<h2 id="evaluation-batched">Evaluation (batched)</h2>
+<p><strong>Batches:</strong></p>
+<ul>
+<li><strong>B1</strong> FastAPI: 3 repos, 1 confirmed.</li>
+<li><strong>B2</strong> Express or NestJS: 3 repos.</li>
+<li><strong>B3</strong> Spring: optional.</li>
+<li><strong>Off-batch smoke set:</strong> chi, cobra, ripgrep, hono. Never pooled into batch metrics.</li>
+</ul>
+<p><strong>Issue families:</strong> caching, pagination, auth, validation, rate limiting and timeouts.</p>
+<p><strong>Pinning:</strong> every case uses the pre-change SHA, and post-cutoff Tavily results are screened out.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Method</th>
+<th>Baseline (only this differs)</th>
+<th>Target [T]</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tool selection</td>
+<td>About 48 turns (≥10 no-tool, ≥4 clarification, ≥4 recall) with accepted alternative paths</td>
+<td>(a) <code>triage</code> off. (b) <strong>Jev triage vs Nemotron triage</strong>, everything else identical; also report triage accuracy, p50/p95 latency and cost for each.</td>
+<td>≥85%</td>
+</tr>
+<tr>
+<td>Multi-step</td>
+<td>≥15 tasks with dependent arguments; the chain is present and the answer is correct</td>
+<td>Single-pass planner</td>
+<td>≥70%</td>
+</tr>
+<tr>
+<td>Latency</td>
+<td>p50/p95 per class (no-tool ≥40, A ≥20, B ≥20, C ≥15 runs), ≥10 cold starts, concurrency 1 and 3</td>
+<td>HTML off, <code>triage</code> off</td>
+<td>No-tool p95 ≤8 s, A ≤55 s, B ≤30 s, C ≤55 s; <strong>every class must stay under the 60 s grader limit, including cold starts</strong></td>
+</tr>
+<tr>
+<td>Resilience</td>
+<td>3 categories × 3 servers × {discovery, invocation} × 3 runs, plus LLM faults</td>
+<td>Recovery off</td>
+<td>0 crashes, 0 fabrications, ≥80% full or partial</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>≥20 interleaved sessions; recall, correction, recheck; adversarial isolation</td>
+<td>No checkpointer; messages only</td>
+<td>≥90% pass, 0 leaks</td>
+</tr>
+<tr>
+<td>Groundedness</td>
+<td>≥100 claims labelled by a human</td>
+<td><code>check_decision</code> off</td>
+<td>≥95% supported, 0 fake IDs</td>
+</tr>
+<tr>
+<td>Cost</td>
+<td>Tokens at a stated reference price + Tavily credits + Cloud Run</td>
+<td>B turn vs re-running A; bounded vs fixed context</td>
+<td>Median B ≤30% of A</td>
+</tr>
+<tr>
+<td><strong>Stale-assumption detection</strong></td>
+<td>≥12 (decision, real PR) pairs, ≥4 unaffected controls; precision and recall</td>
+<td>Same model and tools, message memory only</td>
+<td>+20 points recall, no loss in precision</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="risks">Risks</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Too few app repos or PRs</td>
+<td>Probe early in M0; fall back to <code>get_commit</code> rechecks</td>
+</tr>
+<tr>
+<td>Large diffs</td>
+<td><code>get_files</code> first, cap the diff, disclose what was skipped</td>
+</tr>
+<tr>
+<td>Nemotron unreliable at long structured output</td>
+<td>Check in S0d; fall back to per-assumption calls or a model set by config</td>
+</tr>
+<tr>
+<td>NIM limit of about 40 requests per minute</td>
+<td>3 LLM nodes, semaphore, budgets</td>
+</tr>
+<tr>
+<td>Instance replacement wipes decisions</td>
+<td>Document it; pasteable summary; optional <code>min-instances 1</code></td>
+</tr>
+<tr>
+<td>Semantic misses in recheck</td>
+<td>LLM review of diffs plus a measured comparison with the baseline</td>
+</tr>
+<tr>
+<td>Workflow graphs outside Python</td>
+<td>All edges <code>inferred</code> with citations</td>
+</tr>
+<tr>
+<td>Grader timeout (expects under 60 s)</td>
+<td>50 s hard deadline; a synthesis reserve that cannot be skipped; parallel reads; resumable reviews; cold starts measured. If cold-start p95 goes over the limit, the student can consider <code>--min-instances 1</code>, which costs money.</td>
+</tr>
+<tr>
+<td>Scope creep</td>
+<td>Compliance line at M3; HTML and Java optional</td>
+</tr>
+<tr>
+<td>Session leakage</td>
+<td>No cross-thread store; isolation tests</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="readme-diagrams">README diagrams</h2>
+<ol>
+<li><strong>Architecture:</strong> <code>/chat</code>, then the 9 nodes and <code>InMemorySaver</code> (decisions, evidence, messages), then the executor and the 3 servers with URLs and auth, plus NIM. The HTML store is dashed and labelled &quot;not memory&quot;.</li>
+<li><strong>Tool invocation flow:</strong> triage → agent → schema and scope check → <code>tools/call</code> → the 3 failure branches → Evidence → loop; the no-tool and budget exits; <code>synthesize</code> → check → commit. Workflow C shown as an inset.</li>
+<li><strong>Deployment:</strong>
+<ul>
+<li><code>.env</code> → <code>deploy.sh</code>, which <strong>the student runs</strong> (Claude never does) → Cloud Build → Artifact Registry → Cloud Run.</li>
+<li>Cloud Run settings: us-west1, unauthenticated, max 1 instance, env vars, non-root, <code>$PORT</code>.</li>
+<li>Outbound HTTPS to NIM and the 3 MCP servers.</li>
+</ul>
+</li>
+</ol>
+<h2 id="phased-build-plan">Phased build plan</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Milestone</th>
+<th>Scope</th>
+<th>Verification (<code>docs/evidence/&lt;m&gt;/</code>)</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>M0 Evidence top-up</td>
+<td>PR and commit tool traces; Context7 FastAPI, Express and NestJS; ≥5 app repos with PRs; S0d bake-off re-run; <strong>Jev probe</strong>: the student gets a key, Claude reads the API docs, then about 30 labelled triage prompts (including runtime decision-ID labels) run on Jev and on Nemotron</td>
+<td>JSON dumps; go or no-go on D2 and on <strong>D18</strong> (Jev accuracy ≥ Nemotron and p95 lower → keep Jev; otherwise Nemotron becomes primary)</td>
+</tr>
+<tr>
+<td>M1 Skeleton and deploy</td>
+<td>Contract, ingest→triage→agent⇄tools→render, checkpointer, raw executor, Dockerfile, <code>deploy.sh</code> (the student runs it)</td>
+<td>Two-turn recall; isolation; non-root; live smoke test</td>
+</tr>
+<tr>
+<td>M2 Failures</td>
+<td>Classification, retry and circuit breaker, stub server</td>
+<td><code>pytest tests/resilience</code>; real transport failure via URL override</td>
+</tr>
+<tr>
+<td>M3 Selection, chaining, README</td>
+<td>Prompts, traces, 3 diagrams</td>
+<td>No-tool → 0 calls; manifest→Context7 chain; Tavily case. <strong>Compliance line.</strong></td>
+</tr>
+<tr>
+<td>M4 Workflow A</td>
+<td>Evidence, stack, <code>ast</code>, synthesize, check, commit</td>
+<td>Cited reviews on one B1 repo and one B2 repo; quote-vs-SHA script</td>
+</tr>
+<tr>
+<td>M5 Workflow B</td>
+<td>Patch operations, history</td>
+<td>Supersede history; ≤4 calls; no leaks</td>
+</tr>
+<tr>
+<td>M6 Workflow C</td>
+<td>Impact match, drift, verdicts</td>
+<td>One contradicting PR and one unaffected control</td>
+</tr>
+<tr>
+<td>M7 Cost controls</td>
+<td>Semaphore, caps, lite mode</td>
+<td>Burst of 5 causes no 5xx</td>
+</tr>
+<tr>
+<td>M8 HTML (optional)</td>
+<td>Store, CSP, escaping</td>
+<td><code>&lt;script&gt;</code> escape test; expired token returns 404</td>
+</tr>
+<tr>
+<td>M9 Evaluation</td>
+<td>B1 and B2 metrics</td>
+<td>Each metric has a denominator, a baseline and traces; misses reported</td>
+</tr>
+<tr>
+<td>M10 Readiness</td>
+<td>README, attribution, cost, secret scan</td>
+<td>Fresh-clone build; 10 unseen live queries</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="missing-evidence-for-the-student-or-claude-to-obtain">Missing evidence (for the student or Claude to obtain)</h2>
+<ol>
+<li><s>The professor's original clarification text.</s> Resolved; see F8.</li>
+<li><s>GitHub PR and commit tools.</s> Done in M0 (E1, E2, E7). Still open: measured rate limits.</li>
+<li><s>Context7 coverage.</s> Done in M0 (E3–E5). Still open: quota.</li>
+<li>Tavily: responses don't report credits (E6). Still open: published pricing and rate limit.</li>
+<li><s>Batch repos.</s> Proposed and checked in M0 (<code>docs/evidence/m0/corpus/</code>). The student may swap in their own.</li>
+<li><s>Adapter interceptor and session lifecycle.</s> Done in M0 (E11, E12).</li>
+<li><s><code>InMemorySaver</code> growth.</s> Measured in M0 (E13).</li>
+<li>Cold-start time on Cloud Run. The grader expects under 60 s (F10); the Cloud Run request timeout is set above 60 s in <code>deploy.sh</code>.</li>
+<li>Dated prices for LLM tokens, Cloud Run, and NIM credit and expiry.</li>
+<li><s>S0a status.</s> The student confirmed on 2026-10-06 that gcloud setup and the budget alert are done.</li>
+<li>Fetch details, only if it is adopted.</li>
+<li>Jev (D18). Now known from the docs: the SDK (<code>typesafe-sdk</code>, async), the endpoint, auth, error codes, runtime labels (confirmed) and the confidence formula. Still open:
+<ul>
+<li>rate-limit numbers;</li>
+<li>the maximum size of <code>state</code>;</li>
+<li>data retention;</li>
+<li>pricing and credit through grading;</li>
+<li>response field types, checked against the installed SDK.</li>
+</ul>
+</li>
+</ol>
+<h2 id="the-budget-in-this-design">The &quot;budget&quot; in this design</h2>
+<p>These are per-request limits that keep one <code>/chat</code> call within cost, rate-limit and timeout bounds. All numbers are [A] until measured.</p>
+<ul>
+<li>
+<p><strong>Tool-call budget for each turn:</strong> A ≤10 calls (≤1 Tavily), B ≤4, C ≤10.</p>
+</li>
+<li>
+<p><strong>Time limit for each turn:</strong> a hard deadline of 50 s (F10: the grader expects under 60 s).</p>
+<p>When either limit runs out, the graph goes to <code>synthesize</code> using the evidence it already has, marks the answer <strong>partial</strong>, and shows what was not checked.</p>
+</li>
+</ul>
+<h3 id="latency-constraint-f10-staying-under-60-s">Latency constraint (F10): staying under 60 s</h3>
+<ul>
+<li><strong>Deadline budget for each turn</strong> [A, to be tuned in M1 and M4 from measured traces]:
+<ul>
+<li><code>triage</code>: ≤1 s with Jev, ≤4 s with the Nemotron fallback.</li>
+<li>Tool loop: stops at <strong>T+30 s</strong>. This was T+38 s before M0 (E8).</li>
+<li><code>synthesize</code> and <code>check_decision</code>: <strong>reserve of ≥15 s</strong> that the tool loop cannot use. M0 measured Nemotron super at 9.5–14.7 s for a full <code>DecisionRecord</code> in <code>json_schema</code> mode. Output is capped at about 900 tokens: at most 4 assumptions and 4 tests, short strings.</li>
+<li>Every budget is enforced with <code>asyncio.wait_for</code>, and LLM clients use <code>max_retries=0</code>. The OpenAI client applies <code>timeout</code> to each attempt and retries twice by default, so one call took 181 s in M0 (E9).</li>
+<li><code>render</code>: ≤1 s.</li>
+<li>The response is sent by <strong>T+50 s</strong>, which leaves ≥10 s for network time and slow scheduling.</li>
+</ul>
+</li>
+<li><strong>Parallel reads.</strong> When the agent asks for several independent tool calls in one step (for example, route, service and test files at the same SHA), the <code>tools</code> node runs them together with <code>asyncio.gather</code>, under a cap on how many run at once for each server. Dependent chains stay sequential.</li>
+<li><strong>Synthesis cutoff.</strong> If the reserve is reached during <code>synthesize</code>, the turn returns the deterministic report built from validated evidence (the existing text fallback). It never waits past the deadline.</li>
+<li><strong>Resumable reviews.</strong> Evidence and the partly built <code>DecisionRecord</code> (<code>acceptance=proposed</code>, <code>coverage.pending</code>) are saved to the checkpoint even when a turn is partial.
+<ul>
+<li>The response ends with <em>&quot;Reply 'continue' to check: …&quot;</em>.</li>
+<li>On the next turn, <code>triage</code> (intent <code>repo_review</code>, with the same <code>target_decision</code>) picks up from the pending coverage list instead of starting over. A large Workflow A review therefore spans 2–3 turns under 60 s each, instead of one turn that times out.</li>
+<li>This uses framework-native session memory directly, so it also strengthens R4.</li>
+</ul>
+</li>
+<li><strong>Cold starts.</strong> Measure them in M1 using the live URL (≥10 runs). If cold-start p95 plus a Workflow A turn goes over 60 s, the options are:
+<ul>
+<li>lazy MCP sessions with discovery at startup;</li>
+<li>a smaller image;</li>
+<li>the student enabling <code>--min-instances 1</code>, which costs money; the student decides.</li>
+</ul>
+</li>
+<li><strong>Cloud Run request timeout</strong> in <code>deploy.sh</code>: 120 s. It is a safety margin above the internal deadline, never the actual limit.</li>
+<li><strong>Budget ledger:</strong> counts calls, tokens and Tavily credits for each turn. This is the data for the cost metric.</li>
+<li><strong>Daily cost budget (M7):</strong> once it is spent, the service switches to a cheaper mode that still uses tools.</li>
+</ul>
+
+</main>
+</div>
+</body>
+</html>

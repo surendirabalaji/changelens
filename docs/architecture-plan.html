@@ -1,0 +1,923 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ChangeLens: Architecture and Planning Proposal v2 (design phase only)</title>
+<style>
+:root {
+  --bg: #fbfbfa; --surface: #ffffff; --text: #1f2328; --muted: #59636e; --border: #d8dee4;
+  --accent: #0b6bcb; --code-bg: #f2f4f6; --row-alt: #f6f8fa; --mark: #fff3c4;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1115; --surface: #161a20; --text: #e6e8eb; --muted: #9aa4af; --border: #2c333c;
+    --accent: #6cb6ff; --code-bg: #1d232b; --row-alt: #1a1f26; --mark: #4a3f12;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1115; --surface: #161a20; --text: #e6e8eb; --muted: #9aa4af; --border: #2c333c;
+  --accent: #6cb6ff; --code-bg: #1d232b; --row-alt: #1a1f26; --mark: #4a3f12;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+.layout { display: grid; grid-template-columns: 1fr; max-width: 1280px; margin: 0 auto; padding: 0 16px; }
+@media (min-width: 1100px) { .layout { grid-template-columns: 260px minmax(0, 1fr); gap: 40px; } }
+nav.toc { display: none; }
+@media (min-width: 1100px) {
+  nav.toc { display: block; position: sticky; top: 0; align-self: start; max-height: 100vh; overflow-y: auto;
+    padding: 24px 0; font-size: 14px; }
+}
+nav.toc a { color: var(--muted); text-decoration: none; display: block; padding: 3px 0; }
+nav.toc a:hover { color: var(--accent); }
+nav.toc .h3 { padding-left: 14px; font-size: 13px; }
+nav.toc .home { font-weight: 600; color: var(--text); margin-bottom: 10px; }
+main { min-width: 0; padding: 24px 0 80px; }
+.banner { font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 10px;
+  margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between; }
+.banner button { font: inherit; color: var(--muted); background: none; border: 1px solid var(--border);
+  border-radius: 6px; padding: 2px 10px; cursor: pointer; }
+h1 { font-size: 2em; line-height: 1.25; margin: 0.2em 0 0.6em; }
+h2 { font-size: 1.5em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; margin-top: 2em; }
+h3 { font-size: 1.2em; margin-top: 1.6em; }
+h1, h2, h3, h4 { scroll-margin-top: 16px; }
+a { color: var(--accent); }
+p, li { overflow-wrap: anywhere; }
+code { background: var(--code-bg); border-radius: 4px; padding: 0.1em 0.35em; font-size: 0.88em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+pre { background: var(--code-bg); border-radius: 8px; padding: 14px 16px; overflow-x: auto; font-size: 13.5px;
+  line-height: 1.5; }
+pre code { background: none; padding: 0; font-size: inherit; }
+pre.mermaid { background: var(--surface); border: 1px solid var(--border); text-align: center; }
+blockquote { margin: 1em 0; padding: 0.4em 1em; border-left: 4px solid var(--accent); color: var(--muted);
+  background: var(--surface); border-radius: 0 6px 6px 0; }
+.table-wrap { overflow-x: auto; margin: 1em 0; border: 1px solid var(--border); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; background: var(--surface); }
+th, td { border-bottom: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+th { background: var(--row-alt); font-weight: 600; }
+tr:nth-child(even) td { background: var(--row-alt); }
+tr:last-child td { border-bottom: none; }
+del { color: var(--muted); }
+hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+.index-list { list-style: none; padding: 0; }
+.index-list li { padding: 12px 0; border-bottom: 1px solid var(--border); }
+.index-list .path { color: var(--muted); font-size: 13px; }
+</style>
+
+<script>
+(function () {
+  var key = "changelens-docs-theme";
+  try { var saved = localStorage.getItem(key); if (saved) document.documentElement.dataset.theme = saved; } catch (e) {}
+  window.toggleTheme = function () {
+    var dark = document.documentElement.dataset.theme
+      ? document.documentElement.dataset.theme === "dark"
+      : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var next = dark ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem(key, next); } catch (e) {}
+  };
+})();
+</script>
+
+</head>
+<body>
+<div class="layout">
+<nav class="toc"><a class="home" href="index.html">ChangeLens docs</a><a class="h2" href="#changes-from-v1">Changes from v1</a><a class="h2" href="#1-verified-requirements-summary">1. Verified requirements (summary)</a><a class="h2" href="#2-project-vision">2. Project vision</a><a class="h2" href="#3-system-design-a">3. System design [A]</a><a class="h3" href="#31-flow-and-graph">3.1 Flow and graph</a><a class="h3" href="#32-mcp-servers">3.2 MCP servers</a><a class="h3" href="#33-evidence-and-graph-model">3.3 Evidence and graph model</a><a class="h3" href="#34-memory">3.4 Memory</a><a class="h3" href="#35-failures">3.5 Failures</a><a class="h3" href="#36-api">3.6 API</a><a class="h3" href="#37-html-o">3.7 HTML [O]</a><a class="h3" href="#38-security">3.8 Security</a><a class="h3" href="#39-grader-access-and-cost-control">3.9 Grader access and cost control</a><a class="h2" href="#4-evaluation-t">4. Evaluation [T]</a><a class="h2" href="#5-risks">5. Risks</a><a class="h2" href="#6-diagrams-mapping-redraw-from-the-final-code">6. Diagrams (mapping; redraw from the final code)</a><a class="h2" href="#7-decision-register">7. Decision register</a><a class="h2" href="#8-gates-detailed-staging-is-the-next-step">8. Gates (detailed staging is the next step)</a><a class="h2" href="#9-unresolved-decisions-and-the-evidence-to-settle-them">9. Unresolved decisions and the evidence to settle them</a></nav>
+<main>
+<div class="banner"><span>Generated from <code>docs/architecture-plan.md</code>. Edit the .md file, then run
+<code>python scripts/render_docs.py</code>.</span><span><a href="index.html">All docs</a>
+<button type="button" onclick="toggleTheme()">Light / dark</button></span></div>
+<h1 id="changelens-architecture-and-planning-proposal-v2-design-phase-only">ChangeLens: Architecture and Planning Proposal v2 (design phase only)</h1>
+<blockquote>
+<p>Produced by the <code>research-architect</code> subagent on 2026-10-05. It supersedes <a href="architecture-plan-v1.html">v1</a>.
+This is a plan only. Nothing has been implemented, run, measured or deployed.</p>
+</blockquote>
+<p><strong>Claim tags</strong></p>
+<ul>
+<li><strong>[V: src §]</strong> means the source says it.</li>
+<li><strong>[A]</strong> is an assumption.</li>
+<li><strong>[O]</strong> is an optional enhancement.</li>
+<li><strong>[T]</strong> is a target hypothesis.</li>
+<li><strong>Missing</strong> marks evidence not yet available.</li>
+</ul>
+<p><strong>Sources</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Document</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>R</td>
+<td><code>requirements.md</code></td>
+</tr>
+<tr>
+<td>P</td>
+<td><code>Assignment_1_Description.pdf</code> (authoritative on wording)</td>
+</tr>
+<tr>
+<td>B</td>
+<td><code>CHANGELENS_ARCHITECTURE_PLANNING_BRIEF.md</code> (its FastAPI-first scope is superseded)</td>
+</tr>
+<tr>
+<td>E</td>
+<td>Local environment facts</td>
+</tr>
+<tr>
+<td>PC</td>
+<td>Professor's clarification: <strong>Missing</strong></td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="changes-from-v1">Changes from v1</h2>
+<ul>
+<li><strong>Scope widened.</strong> v1 covered public Python/FastAPI repos with caching-first features. v2 covers any public GitHub repo, in any language, for any feature type.</li>
+<li><strong>Graph provenance.</strong> <code>structural</code> edges come only from Python <code>ast</code>, as an optional depth boost. Edges in every other language are <code>inferred</code> and must cite file, line range and an exact quote that passes deterministic checks.</li>
+<li><strong>Large repos.</strong> Budgeted expansion starts from an entry point. Every answer carries a &quot;Read / Listed-not-read / Not explored&quot; disclosure.</li>
+<li><strong>New §3.9, &quot;Grader access and cost control&quot;.</strong></li>
+<li><strong>D2 (LLM) reworked.</strong> The client is config-driven against any OpenAI-compatible endpoint. The deployed model is picked by a G0 tool-calling bake-off.</li>
+<li><strong>Environment updated.</strong> Python 3.12.13 with a <code>python:3.12-slim</code> image. Pinned versions recorded. <code>LLM_*</code> environment variable names.</li>
+<li><strong>Cache dropped.</strong> v1 had a cross-session source cache; v2 removes it (D17).</li>
+<li><strong>Corpus.</strong> Now 8–10 repos covering at least 3 languages and at least 5 feature types, stratified by size tier.</li>
+</ul>
+<h2 id="1-verified-requirements-summary">1. Verified requirements (summary)</h2>
+<ul>
+<li><strong>B1, framework:</strong> exactly one framework. LangGraph + FastAPI + langchain-mcp-adapters is the tested stack. [V: R §2; P §2.1]</li>
+<li><strong>B2, MCP servers:</strong> at least 2 real MCP servers; at least 3 earns the additional-server criterion. Each needs a manifest reachable at runtime, real <code>tools/list</code> and <code>tools/call</code>, and schema-correct arguments. Simulated responses get zero. [V: R §3.1, §7; P §2.2, §3.3, §7.1, §7.5]</li>
+<li><strong>B3, README rationale:</strong> the README explains why the extra servers were included. [V: P §7.5]</li>
+<li><strong>B4, tool selection:</strong>
+<ul>
+<li>The LLM picks tools by meaning and answers directly when no tool is needed.</li>
+<li>It chains at least 2 calls when needed.</li>
+<li>No keyword routing. [V: R §3.2; P §7.2]</li>
+</ul>
+</li>
+<li><strong>B5, memory:</strong> the built-in checkpointer, scoped by <code>session_id</code>, for at least 2 turns. A custom dict loses credit. &quot;What did I ask you last?&quot; must get a real answer. [V: R §3.3; P §2.2, §7.3]</li>
+<li><strong>B6, failures:</strong> handle transport, tool-execution and malformed/invalid failures without crashing. [V: R §3.4; P §3.3, §7.1]</li>
+<li><strong>B7, endpoint:</strong> <code>POST /chat</code> takes <code>{&quot;query&quot;,&quot;session_id&quot;}</code> and returns <code>{&quot;response&quot;: str}</code>.
+<ul>
+<li>It must handle arbitrary reasonable queries.</li>
+<li>It must stay live until grades are posted.</li>
+<li>Crashing on any non-trivial query earns no credit. [V: R §3.5; P §4.2, §5, §7.4]</li>
+</ul>
+</li>
+<li><strong>B8, Cloud Run:</strong>
+<ul>
+<li>Multi-stage build, non-root user, <code>0.0.0.0</code>, read <code>PORT</code>, cloud LLM.</li>
+<li>Deploy with <code>--allow-unauthenticated</code> and <code>--max-instances 1</code>.</li>
+<li>Full and alpine images are discouraged. [V: P §4.3–4.4]</li>
+</ul>
+</li>
+<li><strong>B9, secrets:</strong> environment variables only. Commit <code>.env.example</code>; deploy with <code>--set-env-vars</code>. [V: R §4.2; P §4.5]</li>
+<li><strong>B10, README:</strong> setup, run, deploy, cost, attribution, and three diagrams that match the code. [V: R §5; P §4.6, §7.4]</li>
+<li><strong>B11, process log:</strong> four parts and a 200–300-word narrative in the student's own voice. [V: R §6; P §6.1]</li>
+<li><strong>B12, attribution:</strong> <code># Adapted from &lt;URL&gt; — &lt;rationale&gt;</code>. [V: P §6]</li>
+<li><strong>Budget facts:</strong>
+<ul>
+<li>Cloud Run is backed by a $50 education credit. [V: P §3.4]</li>
+<li>The NIM free tier allows about 40 requests per minute. [V: P §3.1]</li>
+<li>The Tavily student plan gives 4,000 credits per month. [V: P §3.2]</li>
+<li>GitHub MCP is free within API rate limits. [V: P §3.2]</li>
+</ul>
+</li>
+</ul>
+<p><strong>Conflicts and gaps</strong></p>
+<ul>
+<li><strong>C1:</strong> R defers to the PDF wording, so this plan uses the stricter reading of the two.</li>
+<li><strong>C2:</strong> P allows diagrams in <code>docs/</code>, but R requires them in README. They go in README.</li>
+<li><strong>C3:</strong> R omits <code>--allow-unauthenticated</code>, the &quot;what did I ask last&quot; check, &quot;manifest reachable at runtime&quot;, and the AI-voice warning. All are treated as binding.</li>
+<li><strong>C4 [A]:</strong> P's sample Dockerfile installs to <code>/root/.local</code> and then runs as <code>appuser</code>. Prefer <code>/opt/venv</code> owned by the app user; verify in G0.</li>
+<li><strong>C5:</strong> The deadline, the length of the grading window, and the grader's HTTP timeout are unknown.</li>
+<li><strong>C6:</strong> Context7 is not on P's &quot;confirmed accessible&quot; list. It needs its own G0 evidence.</li>
+<li><strong>C7:</strong> P §3.1 names &quot;Nemotron 3 Ultra and Nemotron 3.5 Lightning&quot; as the tested NIM models. The current default, <code>nemotron-3-super-120b-a12b</code>, is not listed and its tool calling is unverified.</li>
+<li><strong>C8:</strong> P's examples use <code>OPENAI_*</code>; the project uses <code>LLM_*</code>. The README documents the mapping.</li>
+<li><strong>C9:</strong> P's example image is <code>python:3.13-slim</code>; the project uses <code>python:3.12-slim</code>. This is compliant, because P only discourages full and alpine images.</li>
+</ul>
+<h2 id="2-project-vision">2. Project vision</h2>
+<ul>
+<li><strong>Purpose:</strong> a developer's reasoning partner for changing any unfamiliar public GitHub codebase.
+<ul>
+<li>The developer supplies a repo, optionally a ref, and the change they want to make.</li>
+<li>ChangeLens maps the relevant workflow and surfaces the assumptions the change relies on.</li>
+<li>It finds evidence for and against those assumptions and proposes test scenarios.</li>
+<li>All evidence is pinned to a commit SHA and line ranges.</li>
+</ul>
+</li>
+<li><strong>Interview story:</strong> the agent stays honest about depth.
+<ul>
+<li>It analyses Python deterministically (<code>structural</code>).</li>
+<li>In any other language, every edge is a citation-checked <code>inferred</code> claim.</li>
+<li>It discloses what it did not read.</li>
+<li>It degrades to useful partial answers under explicit, measured budgets.</li>
+</ul>
+</li>
+<li><strong>Differentiators:</strong>
+<ul>
+<li>Dependent multi-server chains: GitHub → Context7 → Tavily.</li>
+<li>An assumption ledger revised across turns.</li>
+<li>A deterministic citation verifier.</li>
+<li>A coverage disclosure.</li>
+<li>Per-language and per-provenance metrics, including false-alarm rate.</li>
+</ul>
+</li>
+<li><strong>Scope:</strong>
+<ul>
+<li>Any public GitHub repo, any language, any feature type: caching, pagination, validation, auth, rate limiting, endpoints and CLI flags, config, retries and timeouts, logging, schema changes, refactors, and others.</li>
+<li>Read-only. Repository code is never executed.</li>
+<li>Non-GitHub hosts get an explanation, and the agent still offers general help.</li>
+</ul>
+</li>
+<li><strong>General assistant:</strong>
+<ul>
+<li>Conceptual questions use no tools.</li>
+<li>Research questions go to Tavily.</li>
+<li>Library API questions go to Context7.</li>
+<li>Repository questions go to GitHub.</li>
+<li>Ambiguous requests get a targeted clarification.</li>
+</ul>
+</li>
+</ul>
+<h2 id="3-system-design-a">3. System design [A]</h2>
+<h3 id="31-flow-and-graph">3.1 Flow and graph</h3>
+<ul>
+<li>
+<p><strong>Flow:</strong> FastAPI <code>/chat</code> (validation, size caps, per-session lock, admission control, deadline) → LangGraph with <code>InMemorySaver</code> (<code>thread_id = session_id</code>) → guarded executor → <code>MultiServerMCPClient</code> → GitHub, Context7 and Tavily MCP servers.</p>
+</li>
+<li>
+<p><strong>Nodes:</strong></p>
+<ul>
+<li><code>ingest</code></li>
+<li><code>plan</code> [O, flag; ablation]</li>
+<li><code>agent</code>: the LLM with allowlisted tools plus <code>update_investigation</code></li>
+<li><code>tools</code>: guarded execution, Evidence records, a Python-only <code>ast</code> pass, and a budget ledger</li>
+<li><code>apply_update</code></li>
+<li><code>synthesize</code></li>
+<li><code>verify_citations</code>: <code>[E#]</code> must exist and quotes must match exactly; one repair pass</li>
+<li><code>render</code>: text, Mermaid, and optional HTML</li>
+</ul>
+</li>
+<li>
+<p><strong>Exits:</strong></p>
+<ul>
+<li>the LLM makes no tool calls (the no-tool path);</li>
+<li>the budget runs out;</li>
+<li>the deadline is reached;</li>
+<li>the repair limit is hit.</li>
+</ul>
+</li>
+<li>
+<p>The budget and deadline exits still run <code>synthesize</code> on the evidence gathered, and the result is labelled partial.</p>
+</li>
+<li>
+<p><strong>Stack (E):</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Package</th>
+<th>Version</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>langgraph</td>
+<td>1.2.13</td>
+</tr>
+<tr>
+<td>langchain-mcp-adapters</td>
+<td>0.3.2</td>
+</tr>
+<tr>
+<td>mcp</td>
+<td>1.30.0</td>
+</tr>
+<tr>
+<td>langchain-openai</td>
+<td>1.6.7</td>
+</tr>
+<tr>
+<td>fastapi</td>
+<td>0.142.2</td>
+</tr>
+</tbody>
+</table></div>
+<p>Python is 3.12.13. No Node runtime is needed if all servers are remote.</p>
+</li>
+</ul>
+<h3 id="32-mcp-servers">3.2 MCP servers</h3>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Server</th>
+<th>Role</th>
+<th>Config</th>
+<th>Fallback</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GitHub</td>
+<td>Repo metadata, tree, code search, file reads at a pinned SHA, issues/PRs</td>
+<td>Remote HTTP, read-only allowlist, fine-grained public-only PAT</td>
+<td>Local stdio binary</td>
+</tr>
+<tr>
+<td>Context7</td>
+<td>Version-pinned library docs for any ecosystem; a version mismatch is flagged</td>
+<td>Hosted HTTP plus API key</td>
+<td><code>mcp-server-fetch</code></td>
+</tr>
+<tr>
+<td>Tavily</td>
+<td>Upstream issues, releases, CVEs, general research</td>
+<td>Hosted HTTP plus API key</td>
+<td>Graceful degradation</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Discovery:</strong> runs at startup, tolerates failures, and retries lazily. The <code>inputSchema</code> is checked before every call.</li>
+<li><strong>Missing:</strong>
+<ul>
+<li>which GitHub tools exist for tree listing and code search;</li>
+<li>their truncation limits;</li>
+<li>Context7 coverage outside Python.</li>
+</ul>
+</li>
+</ul>
+<h3 id="33-evidence-and-graph-model">3.3 Evidence and graph model</h3>
+<ul>
+<li>
+<p><strong>Records:</strong></p>
+<ul>
+<li><strong>Investigation:</strong> repo, SHA, languages, manifests, entry points, budget, coverage. Superseded when the ref moves.</li>
+<li><strong>Evidence:</strong> immutable. Holds the URL, SHA, path, lines, exact excerpt and extraction method.</li>
+<li><strong>Assumption:</strong> lifecycle with history.</li>
+<li><strong>Concern:</strong> contradiction, missing, or speculative.</li>
+<li><strong>Scenario:</strong> with its basis. Nothing is <code>executed</code> in v1.</li>
+</ul>
+</li>
+<li>
+<p><strong>Edge provenance:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Label</th>
+<th>Produced by</th>
+<th>Acceptance check</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>structural</code></td>
+<td>Python <code>ast</code> on source fetched through MCP</td>
+<td>Node IDs resolve to parsed symbols at file:line. Dynamic dispatch, DI and middleware are recorded as limitations.</td>
+</tr>
+<tr>
+<td><code>inferred</code></td>
+<td>The LLM, in any language</td>
+<td>Cites an Evidence ID with file and lines. The quote matches the fetched text exactly, and the cited lines contain the target identifier. Otherwise the edge is rejected or downgraded to a concern.</td>
+</tr>
+<tr>
+<td><code>proposed</code></td>
+<td>The change plan</td>
+<td>Linked to an assumption</td>
+</tr>
+<tr>
+<td><code>runtime_observed</code></td>
+<td>Never produced in v1</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+</li>
+<li>
+<p><strong>Language detection:</strong> deterministic, from manifests and file extensions. It sets the provenance mode and the Context7 lookups. It does not route tools.</p>
+</li>
+<li>
+<p><strong>Budgeted expansion:</strong></p>
+<ol>
+<li>Resolve the entry point. The user may name it; otherwise use code search, then manifest or README hints. If it's ambiguous, ask.</li>
+<li>Expand outward with a frontier ranked by the LLM, limited by files, bytes, depth and tool calls.</li>
+<li>Skip vendored, generated, binary and lock files.</li>
+</ol>
+</li>
+<li>
+<p><strong>Coverage disclosure:</strong> every repo answer ends with:</p>
+<ul>
+<li><strong>Read:</strong> n files;</li>
+<li><strong>Listed, not read:</strong> m files;</li>
+<li><strong>Not explored:</strong> the remaining tree;</li>
+<li><strong>Why it stopped.</strong></li>
+</ul>
+<p>Deterministic code builds it from the budget ledger.</p>
+</li>
+</ul>
+<h3 id="34-memory">3.4 Memory</h3>
+<ul>
+<li>The checkpointed state holds:
+<ul>
+<li>messages (tool outputs truncated);</li>
+<li>the investigation and evidence (excerpts capped);</li>
+<li>assumptions, graph, concerns and scenarios;</li>
+<li>budget usage and failures.</li>
+</ul>
+</li>
+<li>Message trimming caps growth.</li>
+<li>There is no cross-session cache (D17).</li>
+<li>A <code>session_id</code> is not authentication, and this is documented.</li>
+</ul>
+<h3 id="35-failures">3.5 Failures</h3>
+<p>Every failure ends in one of three outcomes: full recovery, a useful partial result, or a safe failure.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Category</th>
+<th>Handling</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Transport</td>
+<td>One jittered retry. Then a circuit breaker and a structured &quot;unavailable&quot; message, so the LLM picks another source.</td>
+</tr>
+<tr>
+<td>Tool execution</td>
+<td>Auth errors are not retried. Not-found asks the user. A 429 is retried once if time allows. Invalid arguments get one repair attempt. (<strong>Missing:</strong> how errors surface in adapters 0.3.2.)</td>
+</tr>
+<tr>
+<td>Malformed</td>
+<td>Pydantic evidence adapters reject the result, so it can never be cited.</td>
+</tr>
+<tr>
+<td>Domain limits</td>
+<td>Explained to the user: oversized repos, no entry point, <code>ast</code> failures (fall back to <code>inferred</code>), version mismatches, conflicts, exhausted budgets.</td>
+</tr>
+<tr>
+<td>LLM provider</td>
+<td>429, 5xx or a malformed tool call gets one retry. Then an [O] fallback provider, otherwise a safe failure.</td>
+</tr>
+<tr>
+<td>Top level</td>
+<td>A final handler always returns <code>{&quot;response&quot;}</code>.</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Fault injection:</strong> a test-only stub server, never counted as an integration.</li>
+</ul>
+<h3 id="36-api">3.6 API</h3>
+<ul>
+<li>Exact pydantic request model.</li>
+<li>An invalid body gets a 4xx with a <code>{&quot;response&quot;}</code> body.</li>
+<li>An overlong query gets a 200 with an explanation.</li>
+<li><code>GET /healthz</code> and <code>GET /reports/{token}</code> are [O].</li>
+</ul>
+<h3 id="37-html-o">3.7 HTML [O]</h3>
+<ul>
+<li>Autoescaping, strict CSP, 128-bit TTL tokens, size caps.</li>
+<li>Edge styling by provenance and a coverage panel.</li>
+</ul>
+<h3 id="38-security">3.8 Security</h3>
+<ul>
+<li><strong>Credentials:</strong> environment variables only. No secrets in the LLM's context. Logs are redacted.</li>
+<li><strong>PAT:</strong> must be denied on the private <code>surendirabalaji/changelens</code>. This is a G0 negative test.</li>
+<li><strong>Untrusted content:</strong> repo and web text are treated as data. The tool allowlist is enforced outside the prompt.</li>
+</ul>
+<h3 id="39-grader-access-and-cost-control">3.9 Grader access and cost control</h3>
+<p><strong>Binding limits on any restriction</strong></p>
+<ul>
+<li>Graders send arbitrary reasonable queries. [V: R §3.5; P §4.2, §7.4]</li>
+<li>The URL stays live until grades are posted. [V: P §5]</li>
+<li>No keyword routing. [V: P §7.2]</li>
+<li>The endpoint is public. [V: P §4.2, §4.4]</li>
+</ul>
+<p><strong>ALLOWED (recommended)</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Control</th>
+<th>Why it is compliant</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>README &quot;Suggested demo repos and queries&quot;: 3–4 small repos in different languages with SHAs, labelled <strong>suggestions, not limits</strong></td>
+<td>Documentation only</td>
+</tr>
+<tr>
+<td>Per-request budgets: LLM steps, tool calls, files, bytes, Tavily calls, tokens per call, deadline. Each stops with an honest partial answer plus the disclosure.</td>
+<td>Useful response, no crash</td>
+</tr>
+<tr>
+<td>Size tiers chosen from repo metadata returned by a real tool call</td>
+<td>Not keyword routing</td>
+</tr>
+<tr>
+<td>Clarifying question for huge or ambiguous scopes</td>
+<td>Good behaviour</td>
+</tr>
+<tr>
+<td><code>--max-instances 1</code>, modest concurrency, an in-process semaphore</td>
+<td>P §4.4</td>
+</tr>
+<tr>
+<td>Global daily token budget with a reserved grading floor, then &quot;lite mode&quot; (smaller budgets, still LLM tool selection)</td>
+<td>Stays live and tool-capable</td>
+</tr>
+<tr>
+<td>Query-length cap (provisional 4,000 characters) with an explanation</td>
+<td>Reasonable-input bound</td>
+</tr>
+<tr>
+<td>Small tool allowlist and truncated tool outputs</td>
+<td>Discovery is still real</td>
+</tr>
+<tr>
+<td>Provider-side spend alerts; Tavily credit monitoring</td>
+<td>External to the app</td>
+</tr>
+<tr>
+<td>Lenient rate limit with an explanatory <code>{&quot;response&quot;}</code></td>
+<td>Acceptable if generous</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>NOT ALLOWED or risky</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Practice</th>
+<th>Problem</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Refusing repos outside the demo list, or refusing languages</td>
+<td>Violates &quot;arbitrary reasonable queries&quot; and D15</td>
+</tr>
+<tr>
+<td>API key, password or Google auth on <code>/chat</code></td>
+<td>Breaks the contract and <code>--allow-unauthenticated</code></td>
+</tr>
+<tr>
+<td>Extra required request fields</td>
+<td>Breaks the contract</td>
+</tr>
+<tr>
+<td>Choosing tools or fast paths from keywords</td>
+<td>P §7.2: no credit</td>
+</tr>
+<tr>
+<td>Hard caps that take the service down during grading</td>
+<td>P §5</td>
+</tr>
+<tr>
+<td>Tight rate limits that error on normal grader bursts</td>
+<td>Risky under P §7.4</td>
+</tr>
+<tr>
+<td>Cross-session answer caching or canned responses</td>
+<td>Looks like memorized answers; cross-session leakage</td>
+</tr>
+<tr>
+<td>Silent truncation</td>
+<td>Undermines groundedness</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Cost drivers (all [A])</strong></p>
+<ul>
+<li><strong>Formula:</strong> cost per query = Σ over LLM steps of (input tokens × p_in + output tokens × p_out) + Tavily credits + Cloud Run time. GitHub costs $0 within rate limits.</li>
+<li><strong>No-tool turn:</strong> 1 LLM call of roughly 3–8k input tokens, dominated by the system prompt and tool schemas.</li>
+<li><strong>Investigation:</strong> 4–10 LLM steps, roughly 40–150k input and 3–10k output tokens in total; 3–15 GitHub calls; 0–3 Tavily calls.</li>
+<li><strong>NIM free tier:</strong> costs $0 but is limited to about 40 requests per minute. A few overlapping investigations could hit 429, which the semaphore and step budget mitigate.</li>
+<li><strong>Missing:</strong> NIM key credit or expiry terms; paid-fallback prices; Tavily credits per call.</li>
+</ul>
+<h2 id="4-evaluation-t">4. Evaluation [T]</h2>
+<ul>
+<li><strong>Corpus:</strong> 8–10 public repos covering at least 3 languages (Python, TS/JS, Go, plus an optional fourth) and at least 5 feature types.
+<ul>
+<li>Three size tiers: small (&lt;200 files), medium, large.</li>
+<li>2 repos are held out.</li>
+<li>Each repo has historical feature requests pinned to the SHA before the change.</li>
+</ul>
+</li>
+<li><strong>Leakage controls:</strong> SHA pinning, date cutoffs, and screening Tavily results.</li>
+<li><strong>Reporting:</strong> stratified by language, provenance and size tier.</li>
+<li><strong>Baselines:</strong> each one changes only the feature under test.</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Measurement</th>
+<th>Baseline</th>
+<th>Target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tool Selection</td>
+<td>≥40 labelled turns</td>
+<td><code>plan</code> off</td>
+<td>≥85%</td>
+</tr>
+<tr>
+<td>Multi-step success</td>
+<td>≥20 dependent tasks</td>
+<td>Single parallel pass</td>
+<td>≥75%</td>
+</tr>
+<tr>
+<td>Latency</td>
+<td>≥100 warm and ≥20 cold; concurrency 1 and 3</td>
+<td>HTML off</td>
+<td>No-tool p95 ≤10 s; investigation p95 ≤ deadline (60–90 s, provisional)</td>
+</tr>
+<tr>
+<td>Error resilience</td>
+<td>Category × server × phase, 3 repeats each, plus LLM faults</td>
+<td>Recovery off</td>
+<td>0 crashes; ≥80% full or partial</td>
+</tr>
+<tr>
+<td>Memory</td>
+<td>≥20 interleaved sessions</td>
+<td>Stateless</td>
+<td>≥90% correct, 0 leaks</td>
+</tr>
+<tr>
+<td>Groundedness</td>
+<td>≥100 claims</td>
+<td><code>verify_citations</code> off</td>
+<td>≥95% supported, 0 fabricated</td>
+</tr>
+<tr>
+<td>Cost per query</td>
+<td>Tokens, credits and run time per class</td>
+<td>Fixed-context read</td>
+<td>Within ceiling; ≥20% lower median</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Product checks:</strong>
+<ul>
+<li>edge precision for <code>structural</code> vs. <code>inferred</code>;</li>
+<li><code>ast</code> ablation on Python repos;</li>
+<li>disclosure accuracy (target 100%);</li>
+<li>false-alarm rate;</li>
+<li>assumption revision;</li>
+<li>unsupported-repo handling.</li>
+</ul>
+</li>
+</ul>
+<h2 id="5-risks">5. Risks</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Shallow analysis outside Python</td>
+<td><code>inferred</code> labelling, citation checks, disclosure, per-language metrics</td>
+</tr>
+<tr>
+<td>Wrong inferred edges</td>
+<td>Lexical check, downgrade to a concern, measure precision</td>
+</tr>
+<tr>
+<td>Huge repos and tree truncation</td>
+<td>Code search first, entry-point expansion, ask for scope</td>
+</tr>
+<tr>
+<td>NIM tool calling unreliable</td>
+<td>G0 bake-off, config switch, [O] fallback</td>
+</tr>
+<tr>
+<td>NIM 429 or key expiry before grades are posted</td>
+<td>Semaphore, step budget, fallback, check key terms</td>
+</tr>
+<tr>
+<td>Budget used up during grading</td>
+<td>Reserved floor, lite mode, alerts; never go hard-down</td>
+</tr>
+<tr>
+<td>Grader timeout</td>
+<td>Internal deadline below the Cloud Run timeout; early partial results</td>
+</tr>
+<tr>
+<td>Prompt injection</td>
+<td>Data-only framing, allowlist outside the prompt, no secrets in context</td>
+</tr>
+<tr>
+<td>GitHub rate limit</td>
+<td>Per-request budgets</td>
+</tr>
+<tr>
+<td>Context7 gaps</td>
+<td>Fetch fallback; disclose the gap</td>
+</tr>
+<tr>
+<td>Third server looks like padding</td>
+<td>Evaluation cases that need it</td>
+</tr>
+<tr>
+<td>512Mi memory</td>
+<td>Byte caps; measure; 1Gi if needed</td>
+</tr>
+<tr>
+<td>Dockerfile non-root path</td>
+<td><code>/opt/venv</code>; verify in G0</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="6-diagrams-mapping-redraw-from-the-final-code">6. Diagrams (mapping; redraw from the final code)</h2>
+<ol>
+<li><strong>System architecture:</strong> client → FastAPI <code>/chat</code> → LangGraph nodes ↔ <code>InMemorySaver</code>; the deployed LLM labelled; <code>MultiServerMCPClient</code> → GitHub, Context7 and Tavily; the optional HTML store.</li>
+<li><strong>Tool loop:</strong> query → <code>ingest</code> → reasoning → selection → <code>tools/call</code> → validation → loop back. Includes the no-tool, budget/deadline/partial and failure branches, and <code>verify_citations</code> → final response.</li>
+<li><strong>Deployment:</strong> <code>.env</code> → local Docker → <code>gcloud builds submit</code> → Artifact Registry → Cloud Run in us-west1 (<code>--max-instances 1</code>, <code>--set-env-vars</code>) → URL, with outbound HTTPS to the LLM and the 3 servers.</li>
+</ol>
+<h2 id="7-decision-register">7. Decision register</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Decision</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D1</td>
+<td>LangGraph + FastAPI, pinned</td>
+<td>Provisional</td>
+</tr>
+<tr>
+<td>D2</td>
+<td>Config-driven OpenAI-compatible LLM. Development: NIM <code>nemotron-3-super-120b-a12b</code>. Deployed: G0 bake-off (PDF-tested Nemotron 3 Ultra and 3.5 Lightning first, then <code>gpt-oss-20b</code>, <code>mistral-large</code>, <code>kimi-k3</code>).</td>
+<td><strong>Blocked on G0</strong></td>
+</tr>
+<tr>
+<td>D3</td>
+<td>GitHub remote MCP, read-only allowlist</td>
+<td>Provisional</td>
+</tr>
+<tr>
+<td>D4</td>
+<td>Context7</td>
+<td>Highest risk; fetch fallback</td>
+</tr>
+<tr>
+<td>D5</td>
+<td>Tavily remote</td>
+<td>Provisional</td>
+</tr>
+<tr>
+<td>D6</td>
+<td><code>InMemorySaver</code>, <code>thread_id = session_id</code></td>
+<td>Provisional</td>
+</tr>
+<tr>
+<td>D7</td>
+<td>Planner flag</td>
+<td>Decided by ablation</td>
+</tr>
+<tr>
+<td>D8</td>
+<td><code>ast</code>-only structural edges; others inferred with citations; budgeted expansion with disclosure</td>
+<td><strong>Decided</strong></td>
+</tr>
+<tr>
+<td>D9</td>
+<td>4xx with <code>{&quot;response&quot;}</code> for invalid bodies</td>
+<td>Provisional</td>
+</tr>
+<tr>
+<td>D10</td>
+<td>60–90 s deadline</td>
+<td>Placeholder</td>
+</tr>
+<tr>
+<td>D11</td>
+<td>HTML</td>
+<td>Optional, after G2</td>
+</tr>
+<tr>
+<td>D12</td>
+<td><code>--set-env-vars</code></td>
+<td>Per P</td>
+</tr>
+<tr>
+<td>D13</td>
+<td>512Mi</td>
+<td>Measure</td>
+</tr>
+<tr>
+<td>D14</td>
+<td>Deploy a skeleton early (G1)</td>
+<td>Kept</td>
+</tr>
+<tr>
+<td>D15</td>
+<td>Any public GitHub repo, any language, any feature</td>
+<td><strong>Decided (student)</strong></td>
+</tr>
+<tr>
+<td>D16</td>
+<td>Grader cost controls per §3.9</td>
+<td>Proposed</td>
+</tr>
+<tr>
+<td>D17</td>
+<td>No cross-session cache</td>
+<td>Proposed</td>
+</tr>
+<tr>
+<td>D18</td>
+<td><code>LLM_*</code> names documented against <code>OPENAI_*</code></td>
+<td>Proposed</td>
+</tr>
+<tr>
+<td>D19</td>
+<td>Suggested demo repos, non-exclusive</td>
+<td>Proposed</td>
+</tr>
+<tr>
+<td>D20</td>
+<td>Status code when overloaded (429 vs. 200 + explanation)</td>
+<td>Open</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="8-gates-detailed-staging-is-the-next-step">8. Gates (detailed staging is the next step)</h2>
+<ul>
+<li><strong>G0, access validation:</strong>
+<ul>
+<li>one <code>tools/list</code> and one <code>tools/call</code> dump per server;</li>
+<li>the PAT is denied on the private repo;</li>
+<li>at least 5 corpus repos across 3 or more languages;</li>
+<li>the LLM bake-off;</li>
+<li>the Dockerfile non-root check;</li>
+<li>NIM key terms recorded.</li>
+</ul>
+</li>
+<li><strong>G1, grounded workflow deployed:</strong>
+<ul>
+<li>cited analysis on 2 repos in different languages;</li>
+<li>a no-tool query makes 0 calls;</li>
+<li>2-turn recall on the live URL;</li>
+<li>3 failure categories injected without a crash;</li>
+<li>a budget-exhaustion disclosure.</li>
+<li>Fallback: ReAct + citation check + disclosure.</li>
+</ul>
+</li>
+<li><strong>G2, corrections and scenarios:</strong> assumption history; no leaks; lite mode verified.</li>
+<li><strong>G3, HTML [O].</strong></li>
+<li><strong>G4, evaluation:</strong> full metrics with strata and raw traces.</li>
+<li><strong>G5, readiness:</strong>
+<ul>
+<li>fresh-clone build;</li>
+<li>ZIP secret scan;</li>
+<li>10 unseen queries, including at least 2 repos not on the suggested list;</li>
+<li>diagrams match the code;</li>
+<li>spend floor confirmed.</li>
+</ul>
+</li>
+<li><strong>Test scenarios:</strong>
+<ul>
+<li>contract, no-tool, clarification, out-of-domain;</li>
+<li>private repo, non-GitHub URL, empty repo;</li>
+<li>non-Python repo, monorepo, no entry point, binary-heavy repo;</li>
+<li>oversized query, moved ref, prompt injection;</li>
+<li>budget exhaustion and lite mode, NIM 429;</li>
+<li>each failure on each server;</li>
+<li>concurrent requests on one session, two sessions on one repo, restart loss.</li>
+</ul>
+</li>
+</ul>
+<h2 id="9-unresolved-decisions-and-the-evidence-to-settle-them">9. Unresolved decisions and the evidence to settle them</h2>
+<ol>
+<li><strong>Professor's clarification:</strong> the original text.</li>
+<li><strong>NIM:</strong> the tested model IDs, key credit or expiry terms, and the bake-off results.</li>
+<li><strong>GitHub MCP:</strong> whether it works with a public-only PAT; which tree and search tools exist and how they truncate; the rate limit.</li>
+<li><strong>Context7:</strong> auth and cross-ecosystem coverage.</li>
+<li><strong>Adapters 0.3.2:</strong> how errors surface and the session lifecycle.</li>
+<li><strong>Timing:</strong> the grader's HTTP timeout, the Cloud Run timeout, and the length of the grading window.</li>
+<li><strong>GCP budget:</strong> whether it can hard-cap or only alert; fallback prices; Tavily credits per call.</li>
+<li><strong>Memory APIs:</strong> thread deletion and trimming in langgraph 1.2.13.</li>
+<li><strong>Corpus:</strong> the repo list, pre-change SHAs, and the demo repos.</li>
+<li><strong>Schedule:</strong> the deadline and weekly hours.</li>
+<li><strong>D20:</strong> the status code for overload.</li>
+</ol>
+
+</main>
+</div>
+</body>
+</html>

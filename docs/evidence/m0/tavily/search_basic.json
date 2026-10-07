@@ -1,0 +1,27 @@
+{
+  "server": "tavily",
+  "url": "https://mcp.tavily.com/mcp/",
+  "probed_at": "2026-10-07T03:06:29.360091+00:00",
+  "server_info": {
+    "name": "tavily-mcp",
+    "title": null,
+    "version": "4.0.4",
+    "websiteUrl": null,
+    "icons": null
+  },
+  "tool": "tavily_search",
+  "arguments": {
+    "query": "fastapi-cache2 cache key per user known issues",
+    "max_results": 3,
+    "search_depth": "basic"
+  },
+  "isError": false,
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"query\":\"fastapi-cache2 cache key per user known issues\",\"follow_up_questions\":null,\"answer\":null,\"images\":[],\"results\":[{\"url\":\"https://github.com/long2ice/fastapi-cache/issues\",\"title\":\"Issues \u00b7 long2ice/fastapi-cache \u00b7 GitHub\",\"content\":\"long2ice/fastapi-cache#562 \u00b7 opened on Jul 14, 2025\\n\\n  3\\n ### @cache decorator is not behaving properly in swagger. Giving same etag and same respones for different header with same query param\\n\\n  long2ice/fastapi-cache#558 \u00b7 opened on May 26, 2025\\n ### Dependency Injection Conflict: `fastapi-cache2` >= 0.2.2 breaks integration with `fastapi-pagination`\\n\\n  long2ice/fastapi-cache#557 \u00b7 opened on May 14, 2025\\n ### Add the cache\\\\_key parameter to the cache decorator [...] long2ice/fastapi-cache#456 \u00b7 opened on Nov 4, 2024\\n ### How to correctly annotated the key builder in Pycharm\\n\\n  long2ice/fastapi-cache#454 \u00b7 opened on Oct 30, 2024\\n\\n  2\\n ### Remove pendulum dependency\\n\\n  long2ice/fastapi-cache#453 \u00b7 opened on Oct 28, 2024 \u00b7  Version 0.3.0\\n ### Can't clear Redis by key if a prefix has been set\\n\\n  long2ice/fastapi-cache#451 \u00b7 opened on Oct 25, 2024\\n\\n  1\\n ### Implement Graceful Cache Failure Handling and Logging in Initialization [...] long2ice/fastapi-cache#498 \u00b7 opened on Dec 26, 2024\\n\\n  3\\n ### Caching is not working on routes that are generated from a factory function\\n\\n  long2ice/fastapi-cache#491 \u00b7 opened on Dec 11, 2024\\n\\n  3\\n ### ImportError: cannot import name 'FastAPICache' from 'fastapi\\\\_cache'\\n\\n  long2ice/fastapi-cache#489 \u00b7 opened on Dec 8, 2024\\n\\n  2\\n ### Cache doesnt doesnt \\\"discriminate\\\" between args\\n\\n  long2ice/fastapi-cache#475 \u00b7 opened on Nov 11, 2024\\n\\n  1\\n ### Deprecate Pydantic v1 Support\",\"score\":0.71758664,\"raw_content\":null,\"id\":\"40a580-00\"},{\"url\":\"https://oneuptime.com/blog/post/2026-02-02-fastapi-cache-invalidation/view\",\"title\":\"How to Implement Cache Invalidation in FastAPI\",\"content\":\"\\\"\\\"\\\"Generate a consistent cache key from arguments\\\"\\\"\\\"\\nkey_data = json.dumps({\\\"args\\\": args, \\\"kwargs\\\": kwargs}, sort_keys=True)\\nkey_hash = hashlib.md5(key_data.encode()).hexdigest()[:12]\\nreturn f\\\"{prefix}:{key_hash}\\\"` [...] cached_value = r.get(cache_key)\\nif cached_value:\\nreturn json.loads(cached_value)\\n# Execute function and cache result\\nresult = await func(args, kwargs)\\nr.setex(cache_key, ttl_seconds, json.dumps(result))\\nreturn result\\nreturn wrapper\\nreturn decorator\\n# Usage in FastAPI\\nfrom fastapi import FastAPI\\napp = FastAPI()\\n@app.get(\\\"/users/{user_id}\\\")\\n@cached(prefix=\\\"user\\\", ttl_seconds=60)\\nasync def get_user(user_id: int):\\n# Simulating database call [...] # Parse key to determine type and ID\\nparts = key.split(\\\":\\\")\\nif len(parts) < 2:\\nreturn\\nkey_type, key_id = parts, parts\\n# Fetch and cache based on type\\nif key_type == \\\"user\\\":\\nuser = await fetch_user_from_db(int(key_id))\\nself.redis.setex(key, 3600, json.dumps(user))\\nelif key_type == \\\"product\\\":\\nproduct = await fetch_product_from_db(int(key_id))\\nself.redis.setex(key, 600, json.dumps(product))\\nwarmer = CacheWarmer()\\n@warmer.register_warmer\\nasync def warm_popular_products():\",\"score\":0.41392776,\"raw_content\":null,\"id\":\"70a12a-01\"},{\"url\":\"https://dev.to/sivakumarmanoharan/caching-in-fastapi-unlocking-high-performance-development-20ej\",\"title\":\"Caching in FastAPI: Unlocking High-Performance Development: - DEV Community\",\"content\":\"import json from functools import wraps from aiocache import Cache from fastapi import HTTPException def cache_response(ttl: int = 60, namespace: str = \\\" main \\\"): \\\"\\\"\\\" Caching decorator for FastAPI endpoints. ttl: Time to live for the cache in seconds. namespace: Namespace for cache keys in Redis. \\\"\\\"\\\" def decorator(func): @wraps(func) async def wrapper( args, kwargs): user_id = kwargs. get(' user_id ') or args # Assuming the user ID is the first argument cache_key = f \\\"{namespace}:user:{user_id}\",\"score\":0.3783448,\"raw_content\":null,\"id\":\"f453ea-02\"}],\"response_time\":0.97,\"request_id\":\"9adbdfd4-ab78-429e-b302-ed4835723371\",\"auth_mode\":\"keyed\"}",
+      "annotations": null,
+      "meta": null
+    }
+  ]
+}

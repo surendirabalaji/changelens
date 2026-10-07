@@ -1,0 +1,41 @@
+{
+  "server": "github",
+  "url": "https://api.githubcopilot.com/mcp/",
+  "probed_at": "2026-10-07T03:04:13.219716+00:00",
+  "server_info": {
+    "name": "github-mcp-server",
+    "title": "GitHub MCP Server",
+    "version": "github-mcp-server/remote-18476532e82031cceaefe1e32476866d1cd668ed",
+    "websiteUrl": null,
+    "icons": [
+      {
+        "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAADK0lEQVRIibWVQWhcVRSGv3Pfy0zGdBIMRWk7iziMTpORptpqiNSNG1dNizaFFlxIoYuCC7NwJdiVlhYprtwpighCF9GtuhCRtuCoaWdqGF7HkE4aWm1CpklmJpl3j4vMS99M2k4G9N+8d8659/8u9553H/zPkscVM5lMf03do6iOKbJXIAGgUBJ0GpHvolKfzOfzCx0BEonRWDRemRD0PaC3zSKXED1fLfdcLJUuV9oC0ukXdluxkyq81Ma4VX9Y4x4p5rOzjwSkUvsSdMkVYE+H5oHmjM9IoTA1FyRM8JJIjMbokm83zUW/Vvi5raXwC8rnjWiPdXRyYGCgOyi7wUs0XpkAXmyEa/XV8qmZmZnqc0P7XrXKW2BuKDovgorqLoWMFb4p3rj2I4w7qcHCMSAOctDt7n0X+GiDT6NbrPsXDw50xftzKg7odvcmtXf4DsJTjXBpzbXPzF6/vmgAauoepblbnGTyQLvu2VQmk4kgxEKpvui6cwSCM1Ada5qheq5YzC5tF5DP59dQzjYlZcOzccgyGK65mC+2ax7IWPfLcGxhKARgV7i4vBy70ymgUMj+A9SDWGB3GOCEB/f0VJ/sFJBKjfQS6srAOwD8HR7su/7BTgE2Umn98u9uAgR+ayqpnOkUIK1zZMPTACjyQzOA11ND+z+E8aate4TMs4PD7wu80ezP940nJJMH+ky0XgKeAHkH1TcRXgNywFeoueJN//5T2CCZGT7kWBlV9CSwvwV6n/XuhOddLRuAYjG7hMjHgEH1tEb0BEgWeB44J8aebF2243Nc0fMPMUfgguddLUOoe/r7dlwWJzqGMCxq6q5Wz/jSVQZ+Nb795N69u4thk/6dT7uInNiyYcoU9ZW3FxYWfAjdpp7n1XzjHAbmUJ3wTXQ8gvOZb+oXV1d3zLf6WEcWW3MoJXX9w57n1YKUCdeL+eysOv4oyrQqn65Tv+1adz4WrxzaskXWNs0V5Jq6/is3c7lb4byhRTdzuVvUV0ZQPgDuA6jqlj+fqhvkllE9q+vLL7eab4Afo1RqpJdI9Rhr3ZeCQwuUTqfjvoket7WuS51cjP+5/gWC8y5uIkrtDQAAAABJRU5ErkJggg==",
+        "mimeType": "image/png",
+        "sizes": null,
+        "theme": "light"
+      },
+      {
+        "src": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAABgAAAAYCAYAAADgdz34AAAABmJLR0QA/wD/AP+gvaeTAAAB8ElEQVRIibWVu09UQRSHv9k1IgW7AY0RBWKsTGx9ND4qS5F/wEYLDb0xAY0UxkdrZ2NHYWfsaYyVT4iJwZpNjJooLBQEYz6LvZsdxmH3LtFfN3PO+X5zzzwu/GeFbkF1BJgCJoHjwFgRagDLwAvgeQjhR1+u6qA6q67ZW6vqjDpYFn5YfV0CnOqDOtELPqY2dgFvq6Ee6daWd1HyvPqyBPSV+jQav1H3tbkhMpgF7hXDLaAeQthUzwFXgE/AF0BgFDgBPAshLKhV4CcwVNTPhBAexKsfcfuGbqhdT1imA1+j+lV1GKBSxKeAWpRfTca94HuB+BTVgcuxwWRS8zCEsFbWIISwBcwl0x2m+jnZuKNl4RHjQMJYjoPNJFju0vxt8itiNKHTomqSO7wLeA3YE01VYoPvSf7Jfg2AU8n4W2zwPglO78Igrekw1enMDb1fXKCuUivq7Uz99Tiprq6rvwuzhSLpo3pLvZABn1Vv2nrkUjWLPdlWMFcEF9WD6tuo4EnG4HEG3Nad3KcOqEtRe/bb+ic8Uo9l8i/tAF9UB3bq54StJ3dTvaGOqofM3IuiRalW1PH8bnUKx4tVxLqYyTuf5Czl4JV0IoSwApwB7gLr7enMWtpzG7TeodNFbXmpNfWq6YloxYbUa2q9L+i/1h8/EAGdUrF9ZQAAAABJRU5ErkJggg==",
+        "mimeType": "image/png",
+        "sizes": null,
+        "theme": "dark"
+      }
+    ]
+  },
+  "tool": "pull_request_read",
+  "arguments": {
+    "method": "get",
+    "owner": "fastapi",
+    "repo": "full-stack-fastapi-template",
+    "pullNumber": 2478
+  },
+  "isError": false,
+  "content": [
+    {
+      "type": "text",
+      "text": "{\"number\":2478,\"title\":\"feat(rag): add multi-tenant hybrid search, LLM streaming, token metering, conversation memory \\u0026 full-stack UI\",\"body\":\" ### Summary of Changes\\r\\n\\r\\nThis PR introduces a comprehensive, production-grade **Retrieval-Augmented Generation (RAG) \\u0026 Conversational AI** capability to the full-stack template, maintaining multi-tenant isolation, enterprise token governance, and modern UI integration.\\r\\n\\r\\n---\\r\\n\\r\\n### Key Capabilities Added\\r\\n\\r\\n1. **Multi-Tenant Hybrid Search (`pgvector` + Full-Text Search)**\\r\\n   - Swapped PostgreSQL image to `pgvector/pgvector:pg17` in `compose.yml`.\\r\\n   - Added `Document` and `DocumentChunk` models with `Vector(1536)` embeddings and `owner_id` indexing for strict tenant isolation.\\r\\n   - Combined dense semantic similarity (HNSW cosine index) and sparse keyword retrieval (PostgreSQL full-text search with `tsvector`) using **Reciprocal Rank Fusion (RRF)**.\\r\\n   - Zero-external-dependency fallback for deterministic offline vector generation during testing and local development.\\r\\n\\r\\n2. **Two-Stage Hybrid Retrieval \\u0026 Cross-Encoder Re-Ranking**\\r\\n   - Stage 1: High-recall hybrid candidate retrieval.\\r\\n   - Stage 2: Cross-attention relevance scoring with term coverage, phrase proximity bonus, and optional Cohere Rerank API integration (`rerank-v3.5`).\\r\\n\\r\\n3. **Abort-Aware LLM Token Streaming (SSE)**\\r\\n   - Implemented real-time token-by-token streaming over Server-Sent Events (SSE) following W3C standards (`sources`, `token`, `done`).\\r\\n   - **Proactive Disconnect Detection**: Periodically polls `await request.is_disconnected()`. If a user closes their tab or cancels generation, upstream LLM connections and compute are aborted immediately to prevent token leakage.\\r\\n\\r\\n4. **AI Token Metering \\u0026 Budget Quota Guardrails**\\r\\n   - Real-time tracking of prompt and completion tokens per request with cost estimation in USD.\\r\\n   - Enforces per-user monthly token quotas with `HTTP 429 Too Many Requests` when limits are exceeded (Superusers are exempt).\\r\\n   - Dedicated API endpoints for monthly usage inspection and administrative quota management.\\r\\n\\r\\n5. **Multi-Turn Conversation Memory \\u0026 Chat Sessions**\\r\\n   - Persistent `ChatSession` and `ChatMessage` models with JSON source chunk metadata.\\r\\n   - Sliding-window conversational context formatting and contextual query expansion for multi-turn RAG.\\r\\n\\r\\n6. **Async Document Ingestion via Background Tasks**\\r\\n   - `POST /api/v1/rag/documents?background=true` returns `202 Accepted` and offloads chunking/embedding to FastAPI `BackgroundTasks`.\\r\\n   - Added `status` (`processing` | `ready` | `failed`) and status polling endpoint `GET /api/v1/rag/documents/{id}/status`.\\r\\n\\r\\n7. **Full-Stack Frontend UI (React 19 + TanStack Router \\u0026 Query + Tailwind CSS)**\\r\\n   - **Knowledge Base Page (`/documents`)**:\\r\\n     - Live document table with auto-polling for processing items.\\r\\n     - Real-time monthly AI token progress bar, spend tracker, and quota limit badge.\\r\\n     - Ingestion modal with background task toggle and 1-click sample document templates.\\r\\n   - **AI Chat \\u0026 Streaming Page (`/chat`)**:\\r\\n     - Multi-session sidebar (create, switch, delete conversations).\\r\\n     - Live token-by-token streaming with typing animation.\\r\\n     - Grounded citations accordion showing chunk indices, similarity match percentage, and retrieval strategy.\\r\\n     - \\\"Stop Generating\\\" abort button linked to frontend `AbortController`.\\r\\n\\r\\n---\\r\\n\\r\\n### Verification \\u0026 Testing\\r\\n\\r\\n- **Backend**: **90/90 tests passing** (`uv run pytest tests`) covering hybrid search, reranking, SSE streaming, multi-turn memory, token metering quotas, and async ingestion.\\r\\n- **Frontend**: `bun run build` and `bun run lint` pass with 0 errors (TypeScript compilation succeeded in 864ms).\\r\\n- **Backward Compatibility**: Fully non-breaking change. Existing User and Items endpoints function identically without modification.\",\"state\":\"closed\",\"draft\":false,\"merged\":false,\"mergeable_state\":\"blocked\",\"html_url\":\"https://github.com/fastapi/full-stack-fastapi-template/pull/2478\",\"user\":{\"login\":\"VimalN2005\",\"id\":222097573,\"profile_url\":\"https://github.com/VimalN2005\",\"avatar_url\":\"https://avatars.githubusercontent.com/u/222097573?v=4\"},\"head\":{\"ref\":\"master\",\"sha\":\"db6872fd418de7c01dedb0e3fd139f46aed86c96\",\"repo\":{\"full_name\":\"VimalN2005/full-stack-fastapi-template\",\"description\":\"Full-stack web application template with FastAPI, React, SQLModel, PostgreSQL, Vite, Tailwind CSS, shadcn/ui, FastAPI Cloud, and Docker Compose.\"}},\"base\":{\"ref\":\"master\",\"sha\":\"cb740b656d7a0a6c5e12c7bf8e50343ec94ee9c7\",\"repo\":{\"full_name\":\"fastapi/full-stack-fastapi-template\",\"description\":\"Full-stack web application template with FastAPI, React, SQLModel, PostgreSQL, Vite, Tailwind CSS, shadcn/ui, FastAPI Cloud, and Docker Compose.\"}},\"additions\":5388,\"deletions\":52,\"changed_files\":41,\"commits\":7,\"comments\":1,\"created_at\":\"2026-09-10T02:44:08Z\",\"updated_at\":\"2026-09-10T02:44:18Z\",\"closed_at\":\"2026-09-10T02:44:18Z\"}",
+      "annotations": null,
+      "meta": null
+    }
+  ]
+}

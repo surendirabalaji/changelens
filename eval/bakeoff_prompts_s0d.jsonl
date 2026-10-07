@@ -1,0 +1,7 @@
+{"id": "rc1", "kind": "recheck", "accept": ["github"], "accept_tools": ["pull_request_read"], "prompt": "Recheck our database-readiness decision against PR #2460 in fastapi/full-stack-fastapi-template. Start by looking at what the PR changed."}
+{"id": "rc2", "kind": "recheck", "accept": ["github"], "accept_tools": ["pull_request_read"], "prompt": "Which files did pull request #6198 in Netflix/dispatch change?"}
+{"id": "rc3", "kind": "recheck", "accept": ["github"], "accept_tools": ["get_commit"], "prompt": "Show me the full patch of commit dd2837e82a0b in Netflix/dispatch."}
+{"id": "rc4", "kind": "recheck", "accept": ["github"], "accept_tools": ["list_commits", "get_commit"], "prompt": "What is the SHA of the latest commit on the default branch of brocoders/nestjs-boilerplate? I need it to pin a review."}
+{"id": "rc5", "kind": "recheck", "accept": ["github"], "accept_tools": ["pull_request_read"], "prompt": "Did PR #2209 in brocoders/nestjs-boilerplate touch the auth module? Check its changed files."}
+{"id": "rc6", "kind": "recheck", "accept": ["github"], "accept_tools": ["search_pull_requests", "list_pull_requests"], "prompt": "Find recently merged pull requests in polarsource/polar that are about OAuth2."}
+{"id": "rc7", "kind": "clarify", "accept": ["clarify"], "prompt": "Recheck our decision against the latest PR."}

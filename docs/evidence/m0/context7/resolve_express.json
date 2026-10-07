@@ -1,0 +1,33 @@
+{
+  "server": "context7",
+  "url": "https://mcp.context7.com/mcp",
+  "probed_at": "2026-10-07T03:05:29.284004+00:00",
+  "server_info": {
+    "name": "Context7",
+    "title": null,
+    "version": "4.1.1",
+    "websiteUrl": "https://context7.com",
+    "icons": [
+      {
+        "src": "https://context7.com/context7-icon-green.png",
+        "mimeType": "image/png",
+        "sizes": null
+      }
+    ],
+    "description": "Context7 provides up-to-date documentation and code examples for libraries and frameworks."
+  },
+  "tool": "resolve-library-id",
+  "arguments": {
+    "libraryName": "express",
+    "query": "middleware order and error handling"
+  },
+  "isError": false,
+  "content": [
+    {
+      "type": "text",
+      "text": "Available Libraries:\n\n- Title: Express\n- Context7-compatible library ID: /expressjs/express\n- Description: Fast, unopinionated, minimalist web framework for node.\n- Code Snippets: 208\n- Source Reputation: High\n- Benchmark Score: 77.76\n- Versions: v5.1.0, 4_21_2, v5.2.0\n----------\n- Title: Express\n- Context7-compatible library ID: /websites/expressjs\n- Description: Express is a fast, unopinionated, minimalist web framework for Node.js that provides a robust set of features for building web applications and APIs.\n- Code Snippets: 1648\n- Source Reputation: High\n- Benchmark Score: 80.64\n----------\n- Title: Express\n- Context7-compatible library ID: /websites/expressjs_es\n- Description: Express es un marco web r\u00e1pido, sin opini\u00f3n y minimalista para Node.js que provee un conjunto robusto de caracter\u00edsticas para aplicaciones web y m\u00f3viles.\n- Code Snippets: 1724\n- Source Reputation: High\n- Benchmark Score: 74.54\n----------\n- Title: Express Validator\n- Context7-compatible library ID: /express-validator/express-validator\n- Description: An express.js middleware for validator.js.\n- Code Snippets: 4\n- Source Reputation: High\n- Benchmark Score: 72.63\n----------\n- Title: Express Session\n- Context7-compatible library ID: /expressjs/session\n- Description: Simple session middleware for Express\n- Code Snippets: 319\n- Source Reputation: High\n- Benchmark Score: 87.2\n- Versions: v1.18.0, v1.18.1, v1.18.2, v1.19.0",
+      "annotations": null,
+      "meta": null
+    }
+  ]
+}

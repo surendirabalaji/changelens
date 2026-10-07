@@ -1,0 +1,78 @@
+{
+  "assumptions": {
+    "evidence_per_turn": 5,
+    "excerpt_chars": 1500,
+    "nodes_per_turn": 4,
+    "note": "synthetic sizes; offline; one session"
+  },
+  "untrimmed_tool_output_20k_chars": [
+    {
+      "turn": 1,
+      "checkpoints": 6,
+      "saver_kb": 92.2
+    },
+    {
+      "turn": 5,
+      "checkpoints": 30,
+      "saver_kb": 1233.0
+    },
+    {
+      "turn": 10,
+      "checkpoints": 60,
+      "saver_kb": 4375.4
+    },
+    {
+      "turn": 20,
+      "checkpoints": 120,
+      "saver_kb": 16377.6
+    },
+    {
+      "turn": 30,
+      "checkpoints": 180,
+      "saver_kb": 36003.2
+    },
+    {
+      "turn": 50,
+      "checkpoints": 300,
+      "saver_kb": 98124.9
+    },
+    {
+      "after_delete_thread_kb": 0.0
+    }
+  ],
+  "trimmed_tool_output_1k_chars": [
+    {
+      "turn": 1,
+      "checkpoints": 6,
+      "saver_kb": 36.5
+    },
+    {
+      "turn": 5,
+      "checkpoints": 30,
+      "saver_kb": 398.4
+    },
+    {
+      "turn": 10,
+      "checkpoints": 60,
+      "saver_kb": 1314.4
+    },
+    {
+      "turn": 20,
+      "checkpoints": 120,
+      "saver_kb": 4688.7
+    },
+    {
+      "turn": 30,
+      "checkpoints": 180,
+      "saver_kb": 10120.1
+    },
+    {
+      "turn": 50,
+      "checkpoints": 300,
+      "saver_kb": 27153.8
+    },
+    {
+      "after_delete_thread_kb": 0.0
+    }
+  ]
+}

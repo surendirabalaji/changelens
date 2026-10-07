@@ -1,0 +1,14 @@
+{
+  "source_rows": "docs/evidence/m0/jev/rows.jsonl",
+  "labels": "eval/triage_prompts.jsonl",
+  "relabelled": [
+    "q2: clarify -> recheck (student, after run 2)"
+  ],
+  "jev_intent_accuracy": "30/30",
+  "jev_group_crossings": 0,
+  "nemotron_intent_accuracy": "30/30",
+  "nemotron_group_crossings": 0,
+  "policy_v3_intent_accuracy": "30/30",
+  "policy_v3_fallbacks": "0/30",
+  "note": "The label change was made after seeing both models answer 'recheck', so these numbers are not an independent test. Held-out validation is still required (M3)."
+}

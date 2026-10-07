@@ -1,0 +1,33 @@
+{
+  "server": "context7",
+  "url": "https://mcp.context7.com/mcp",
+  "probed_at": "2026-10-07T03:06:25.904715+00:00",
+  "server_info": {
+    "name": "Context7",
+    "title": null,
+    "version": "4.1.1",
+    "websiteUrl": "https://context7.com",
+    "icons": [
+      {
+        "src": "https://context7.com/context7-icon-green.png",
+        "mimeType": "image/png",
+        "sizes": null
+      }
+    ],
+    "description": "Context7 provides up-to-date documentation and code examples for libraries and frameworks."
+  },
+  "tool": "query-docs",
+  "arguments": {
+    "libraryId": "/fastapi/fastapi/0.115.13",
+    "query": "dependencies with yield and use_cache"
+  },
+  "isError": false,
+  "content": [
+    {
+      "type": "text",
+      "text": "### FastAPI Sub-Dependencies with Yield\n\nSource: https://github.com/fastapi/fastapi/blob/0.115.13/docs/en/docs/tutorial/dependencies/dependencies-with-yield.md\n\nShows how to chain multiple dependencies, where each can use `yield`. FastAPI ensures that the 'exit code' of each dependency is run in the correct order, even when subsequent dependencies rely on values yielded by their predecessors for their own cleanup.\n\n```Python\nfrom typing import Generator\nfrom fastapi import Depends, FastAPI\n\napp = FastAPI()\n\nasync def dependency_a() -> Generator:\n    print(\"Dependency A: Entering\")\n    try:\n        yield \"value_a\"\n    finally:\n        print(\"Dependency A: Exiting\")\n\nasync def dependency_b(dep_a: str = Depends(dependency_a)) -> Generator:\n    print(f\"Dependency B: Entering with {dep_a}\")\n    try:\n        yield \"value_b\"\n    finally:\n        print(f\"Dependency B: Exiting, dep_a was {dep_a}\")\n\nasync def dependency_c(dep_b: str = Depends(dependency_b)) -> Generator:\n    print(f\"Dependency C: Entering with {dep_b}\")\n    try:\n        yield \"value_c\"\n    finally:\n        print(f\"Dependency C: Exiting, dep_b was {dep_b}\")\n```\n\n```Python\n# From dependency_b's finally block:\nprint(f\"Dependency B: Exiting, dep_a was {dep_a}\")\n\n# From dependency_c's finally block:\nprint(f\"Dependency C: Exiting, dep_b was {dep_b}\")\n```\n\n--------------------------------\n\n### Disabling Dependency Caching in FastAPI\n\nSource: https://github.com/fastapi/fastapi/blob/0.115.13/docs/em/docs/tutorial/dependencies/sub-dependencies.md\n\nThis Python code demonstrates how to explicitly disable caching for a specific dependency by setting `use_cache=False` when declaring it with `Depends`. This forces the dependency to be re-evaluated on every call within the same request.\n\n```Python\nasync def needy_dependency(fresh_value: str = Depends(get_value, use_cache=False)):\n    return {\"fresh_value\": fresh_value}\n```\n\n--------------------------------\n\n### Force re-execution of FastAPI dependency (Annotated)\n\nSource: https://github.com/fastapi/fastapi/blob/0.115.13/docs/en/docs/tutorial/dependencies/sub-dependencies.md\n\nDemonstrates how to use `use_cache=False` with `Annotated` to ensure a dependency is re-executed on every call within the same request, bypassing FastAPI's default caching mechanism.\n\n```Python\nasync def needy_dependency(fresh_value: Annotated[str, Depends(get_value, use_cache=False)]):\n    return {\"fresh_value\": fresh_value}\n```\n\n--------------------------------\n\n### Async Generator Dependency Pattern\n\nSource: https://github.com/fastapi/fastapi/blob/master/docs_src/dependencies/tutorial008_an_py310.py\n\nDemonstrates async dependency functions with yield for resource management and cleanup. Shows how to structure dependencies that need setup/teardown in async context.\n\n```python\nfrom typing import Annotated\nfrom fastapi import Depends\n\nasync def dependency_a():\n    dep_a = generate_dep_a()\n    try:\n        yield dep_a\n    finally:\n        dep_a.close()\n\nasync def dependency_b(dep_a: Annotated[DepA, Depends(dependency_a)]):\n    dep_b = generate_dep_b()\n    try:\n        yield dep_b\n    finally:\n        dep_b.close(dep_a)\n```\n\n--------------------------------\n\n### Per-Request Async Session Dependency\n\nSource: https://github.com/fastapi/fastapi/blob/master/docs_src/sql_databases/tutorial001_an_py310.py\n\nDemonstrates async session dependency injection using yield, which creates a new session per request and cleans it up after the request completes. This can be extended to filter by tenant_id extracted from JWT.\n\n```python\ndef get_session():\n    with Session(engine) as session:\n        yield session\n\nSessionDep = Annotated[Session, Depends(get_session)]\n\n@app.get(\"/heroes/{hero_id}\", response_model=HeroPublic)\ndef read_hero(hero_id: int, session: SessionDep):\n    hero = session.get(Hero, hero_id)\n    if not hero:\n        raise HTTPException(status_code=404, detail=\"Hero not found\")\n    return hero\n```",
+      "annotations": null,
+      "meta": null
+    }
+  ]
+}

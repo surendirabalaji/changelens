@@ -1,0 +1,602 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>M0 evidence top-up (2026-10-06)</title>
+<style>
+:root {
+  --bg: #fbfbfa; --surface: #ffffff; --text: #1f2328; --muted: #59636e; --border: #d8dee4;
+  --accent: #0b6bcb; --code-bg: #f2f4f6; --row-alt: #f6f8fa; --mark: #fff3c4;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1115; --surface: #161a20; --text: #e6e8eb; --muted: #9aa4af; --border: #2c333c;
+    --accent: #6cb6ff; --code-bg: #1d232b; --row-alt: #1a1f26; --mark: #4a3f12;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1115; --surface: #161a20; --text: #e6e8eb; --muted: #9aa4af; --border: #2c333c;
+  --accent: #6cb6ff; --code-bg: #1d232b; --row-alt: #1a1f26; --mark: #4a3f12;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+.layout { display: grid; grid-template-columns: 1fr; max-width: 1280px; margin: 0 auto; padding: 0 16px; }
+@media (min-width: 1100px) { .layout { grid-template-columns: 260px minmax(0, 1fr); gap: 40px; } }
+nav.toc { display: none; }
+@media (min-width: 1100px) {
+  nav.toc { display: block; position: sticky; top: 0; align-self: start; max-height: 100vh; overflow-y: auto;
+    padding: 24px 0; font-size: 14px; }
+}
+nav.toc a { color: var(--muted); text-decoration: none; display: block; padding: 3px 0; }
+nav.toc a:hover { color: var(--accent); }
+nav.toc .h3 { padding-left: 14px; font-size: 13px; }
+nav.toc .home { font-weight: 600; color: var(--text); margin-bottom: 10px; }
+main { min-width: 0; padding: 24px 0 80px; }
+.banner { font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 10px;
+  margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between; }
+.banner button { font: inherit; color: var(--muted); background: none; border: 1px solid var(--border);
+  border-radius: 6px; padding: 2px 10px; cursor: pointer; }
+h1 { font-size: 2em; line-height: 1.25; margin: 0.2em 0 0.6em; }
+h2 { font-size: 1.5em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; margin-top: 2em; }
+h3 { font-size: 1.2em; margin-top: 1.6em; }
+h1, h2, h3, h4 { scroll-margin-top: 16px; }
+a { color: var(--accent); }
+p, li { overflow-wrap: anywhere; }
+code { background: var(--code-bg); border-radius: 4px; padding: 0.1em 0.35em; font-size: 0.88em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+pre { background: var(--code-bg); border-radius: 8px; padding: 14px 16px; overflow-x: auto; font-size: 13.5px;
+  line-height: 1.5; }
+pre code { background: none; padding: 0; font-size: inherit; }
+pre.mermaid { background: var(--surface); border: 1px solid var(--border); text-align: center; }
+blockquote { margin: 1em 0; padding: 0.4em 1em; border-left: 4px solid var(--accent); color: var(--muted);
+  background: var(--surface); border-radius: 0 6px 6px 0; }
+.table-wrap { overflow-x: auto; margin: 1em 0; border: 1px solid var(--border); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; background: var(--surface); }
+th, td { border-bottom: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+th { background: var(--row-alt); font-weight: 600; }
+tr:nth-child(even) td { background: var(--row-alt); }
+tr:last-child td { border-bottom: none; }
+del { color: var(--muted); }
+hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+.index-list { list-style: none; padding: 0; }
+.index-list li { padding: 12px 0; border-bottom: 1px solid var(--border); }
+.index-list .path { color: var(--muted); font-size: 13px; }
+</style>
+
+<script>
+(function () {
+  var key = "changelens-docs-theme";
+  try { var saved = localStorage.getItem(key); if (saved) document.documentElement.dataset.theme = saved; } catch (e) {}
+  window.toggleTheme = function () {
+    var dark = document.documentElement.dataset.theme
+      ? document.documentElement.dataset.theme === "dark"
+      : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var next = dark ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem(key, next); } catch (e) {}
+  };
+})();
+</script>
+
+</head>
+<body>
+<div class="layout">
+<nav class="toc"><a class="home" href="../../index.html">ChangeLens docs</a><a class="h2" href="#design-changes-required-by-this-evidence">Design changes required by this evidence</a><a class="h2" href="#1-github-pr-and-commit-tools-github">1. GitHub PR and commit tools (github/)</a><a class="h2" href="#2-context7-coverage-context7">2. Context7 coverage (context7/)</a><a class="h2" href="#3-tavily-tavily">3. Tavily (tavily/)</a><a class="h2" href="#4-benchmark-repo-candidates-corpusbenchmark_candidatesjson">4. Benchmark repo candidates (corpus/benchmark_candidates.json)</a><a class="h2" href="#5-s0d-bake-off-re-run-bakeoff">5. S0d bake-off re-run (bakeoff/)</a><a class="h2" href="#6-structured-decisionrecord-output-structured">6. Structured DecisionRecord output (structured/)</a><a class="h2" href="#7-jev-vs-nemotron-triage-jev">7. Jev vs Nemotron triage (jev/)</a><a class="h2" href="#8-library-checks-library">8. Library checks (library/)</a><a class="h2" href="#still-open-after-m0">Still open after M0</a></nav>
+<main>
+<div class="banner"><span>Generated from <code>docs/evidence/m0/README.md</code>. Edit the .md file, then run
+<code>python scripts/render_docs.py</code>.</span><span><a href="../../index.html">All docs</a>
+<button type="button" onclick="toggleTheme()">Light / dark</button></span></div>
+<h1 id="m0-evidence-top-up-2026-10-06">M0 evidence top-up (2026-10-06)</h1>
+<p><strong>Scope:</strong> check the missing evidence listed in <code>docs/architecture-plan-v3.md</code> before any app code is written. Every MCP result here comes from a real <code>tools/call</code> against the live remote servers. Secrets were loaded from <code>.env</code> at runtime and scrubbed from saved files (<code>scripts/probe_mcp.py::redact</code>). LLM and Jev calls were real API calls.</p>
+<p><strong>Measured from:</strong> the developer laptop, not Cloud Run. Latencies are indicative; M1 re-measures them on the live URL.</p>
+<p><strong>Status of decisions:</strong></p>
+<ul>
+<li><strong>D2 (Nemotron super): GO.</strong></li>
+<li><strong>D18 (Jev for triage): GO, with a revised policy.</strong></li>
+</ul>
+<p>The next section lists the design changes that follow.</p>
+<h2 id="design-changes-required-by-this-evidence">Design changes required by this evidence</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Finding</th>
+<th>Change to the design</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>E1</td>
+<td>A PR from a fork can return <strong>empty <code>get_files</code> and <code>get_diff</code> with <code>isError=False</code></strong> even though it has commits (#2484).</td>
+<td>Treat &quot;commits &gt; 0 but 0 files&quot; as <strong>missing evidence</strong>, never as &quot;unaffected&quot;. Fall back to <code>pull_request_read get_commits</code> → <code>get_commit</code> for each commit, which worked on the fork commit.</td>
+</tr>
+<tr>
+<td>E2</td>
+<td><code>get_files</code> defaults to 30 files per page (the large PR has 41). <code>get_diff</code> returned <strong>212 KB untruncated</strong>.</td>
+<td>Page through <code>get_files</code> and read patches only for affected files. Never pass a full <code>get_diff</code> to the LLM; cap each file's patch and disclose what was skipped.</td>
+</tr>
+<tr>
+<td>E3</td>
+<td>Context7 returns a missing version as <strong>plain text with <code>isError=False</code></strong> (&quot;Version … not found. Available versions: …&quot;).</td>
+<td>The executor detects this text and classifies it as a tool error. It retries once with the nearest listed version <strong>at or below</strong> the detected one and records the version mismatch in the evidence.</td>
+</tr>
+<tr>
+<td>E4</td>
+<td>A version-pinned Context7 query can return snippets from <strong><code>blob/master</code></strong> (NestJS v11.1.16). Express v5.1.0 and FastAPI 0.115.13 cited pinned tags.</td>
+<td><code>Evidence.revision_or_version</code> comes from <strong>the snippet's source URL</strong>, not from the requested ID. If they differ, label the snippet &quot;version-unpinned&quot;.</td>
+</tr>
+<tr>
+<td>E5</td>
+<td>The FastAPI ID with versions is <code>/fastapi/fastapi</code> (0.115.13, 0_116_1, 0.118.2, 0.122.0, 0.128.0). It was not in the top resolve result (<code>/websites/fastapi_tiangolo</code>, which has no versions). Starlette and the website IDs list no versions.</td>
+<td>The stack detector maps known frameworks to their versioned Context7 IDs. Otherwise it uses the resolved ID and labels the evidence &quot;unversioned docs&quot;.</td>
+</tr>
+<tr>
+<td>E6</td>
+<td>Tavily <code>tavily_extract</code> returned 28.7 KB for one page. No Tavily response reports credits used.</td>
+<td>Cap extracted text when building evidence. Credit cost comes from Tavily's published pricing, labelled as such and not measured.</td>
+</tr>
+<tr>
+<td>E7</td>
+<td>Code search results carry <strong>file blob SHAs, not commit SHAs</strong>.</td>
+<td>Never treat a search hit as evidence. Re-read the file with <code>get_file_contents</code> at the pinned commit SHA first.</td>
+</tr>
+<tr>
+<td>E8</td>
+<td>Nemotron super writes a valid <code>DecisionRecord</code> 6/6 times, but takes <strong>9–28 s</strong> (944–1,888 output tokens).</td>
+<td>Synthesis output is compact: at most about 900 tokens, at most 4 assumptions and 4 tests, short strings, <code>json_schema</code> mode. The synthesis reserve grows from 10 s to <strong>15 s</strong>, and the tool loop stops at about T+30 s. Revisit after measuring on Cloud Run.</td>
+</tr>
+<tr>
+<td>E9</td>
+<td>The OpenAI client's <code>timeout=60</code> did <strong>not</strong> bound the call: Lightning calls ran 100–181 s, and the last ended with <code>APITimeoutError</code> after 181 s. The timeout applies <strong>to each attempt</strong>, and the client retries twice by default (<code>max_retries=2</code>), so a call can last about 3 × 60 s.</td>
+<td>LLM clients use <code>max_retries=0</code>; the graph controls retries. The 50 s turn deadline and per-node budgets are enforced with <code>asyncio.wait_for</code>.</td>
+</tr>
+<tr>
+<td>E10</td>
+<td>Nemotron 3.5 Lightning <strong>cannot</strong> produce a <code>DecisionRecord</code>: 0/6, cut off at the token limit after 69–179 s.</td>
+<td>Lightning is not a fallback for synthesis.</td>
+</tr>
+<tr>
+<td>E11</td>
+<td>The adapter (0.3.2) has <code>ToolCallInterceptor</code>, which receives the <strong>raw <code>CallToolResult</code></strong> (<code>isError</code> and the resource URI) and can retry, short-circuit or return a LangGraph <code>Command</code>.</td>
+<td>The guarded executor is built <strong>as an interceptor</strong> instead of bypassing the adapter. This replaces the raw <code>ClientSession</code> workaround from S0b.</td>
+</tr>
+<tr>
+<td>E12</td>
+<td>Without an explicit session the adapter opens <strong>a new MCP session for every tool call</strong>: a 0.23–0.30 s handshake, and the first call is slower (GitHub median 1.31 s fresh vs 0.61 s reused).</td>
+<td>Open <strong>one session per server per <code>/chat</code> turn</strong>, lazily, and pass it to <code>load_mcp_tools(session=...)</code>.</td>
+</tr>
+<tr>
+<td>E13</td>
+<td><code>InMemorySaver</code> stores the full message list in every checkpoint, so it grows faster than linearly. In a synthetic test one session reached 98 MB after 50 turns without trimming and 27 MB with tool output trimmed. There is no pruning API; <code>delete_thread</code> frees everything.</td>
+<td>Keep tool output out of <code>messages</code> (it lives in <code>evidence</code>). Keep only the last N messages. Cap evidence at 150 entries. Evict idle sessions with <code>delete_thread</code> (LRU by idle time). Measure under M7 load before choosing 512Mi or 1Gi.</td>
+</tr>
+<tr>
+<td>E14</td>
+<td>Jev's <code>needs_clarification</code> yes/no question is <strong>poorly calibrated</strong> for this task: 0.39–0.58 on clear-cut cases. It caused 6 of 7 fallbacks in run 1.</td>
+<td>Drop the question from the fallback rule. <s>Decide &quot;clarify&quot; in code when a recheck or revision has target <code>none</code>.</s> That code rule was <strong>removed</strong> after the student relabelled <code>q2</code> as <code>recheck</code> (<strong>policy v3</strong>, §7). The agent asks a clarifying question only when it can't resolve the PR's repository.</td>
+</tr>
+<tr>
+<td>E15</td>
+<td>The TypeSafe SDK's default <code>RetryPolicy</code> allows <strong>up to 30 s</strong> of retries per call. An invalid request returned <strong>400 <code>TypeSafeBadRequestError</code></strong>, not the documented 422. <code>jev-latest</code> resolved to <strong><code>jev-1.13.0</code></strong>.</td>
+<td>Triage uses <code>RetryPolicy(max_retries=1, timeout≈2 s)</code> and records the concrete model string in traces. The failure map adds 400 next to 422.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="1-github-pr-and-commit-tools-github">1. GitHub PR and commit tools (<code>github/</code>)</h2>
+<p>All calls returned <code>isError=False</code>.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>File</th>
+<th>Call</th>
+<th>Result</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>list_prs_closed.json</code></td>
+<td><code>list_pull_requests</code> state=closed, 30 per page, filtered fields</td>
+<td>30 PRs. The <code>additions</code> and <code>changed_files</code> fields are not returned by the list endpoint.</td>
+</tr>
+<tr>
+<td><code>pr_small_get.json</code></td>
+<td><code>pull_request_read get</code> #2484</td>
+<td>Fork head <code>H-XX-D/...@af56548f47</code>, 2 commits, closed and not merged</td>
+</tr>
+<tr>
+<td><code>pr_small_files.json</code>, <code>pr_small_diff.json</code></td>
+<td><code>get_files</code> and <code>get_diff</code> #2484</td>
+<td><strong>Empty</strong> (<code>[]</code> and an empty string), with no error flag (E1)</td>
+</tr>
+<tr>
+<td><code>commit_fork_head_full.json</code></td>
+<td><code>get_commit</code> with <code>detail=full_patch</code> on the fork's head SHA, through the base repo</td>
+<td>Works: <code>backend/app/api/deps.py</code> +1/−1</td>
+</tr>
+<tr>
+<td><code>pr_large_get.json</code></td>
+<td><code>get</code> #2478</td>
+<td>41 files changed, +5,388/−52, 7 commits</td>
+</tr>
+<tr>
+<td><code>pr_large_files.json</code>, <code>pr_large_files_page2.json</code></td>
+<td><code>get_files</code> page 1 and page 2</td>
+<td>30 + 11 files, all with patches; 147 KB + 76 KB (E2)</td>
+</tr>
+<tr>
+<td><code>pr_large_diff.json</code></td>
+<td><code>get_diff</code> #2478</td>
+<td>212 KB, untruncated (E2)</td>
+</tr>
+<tr>
+<td><code>list_commits_head.json</code></td>
+<td><code>list_commits</code> with perPage=1 and fields=[sha]</td>
+<td>Latest commit pinned: <code>e99fbaeb…</code></td>
+</tr>
+<tr>
+<td><code>list_branches.json</code></td>
+<td><code>list_branches</code> with perPage=5</td>
+<td>4 branches. <code>master</code> is protected and its SHA matches the latest commit.</td>
+</tr>
+<tr>
+<td><code>search_code_scoped.json</code></td>
+<td><code>search_code</code> for &quot;get_current_user repo:fastapi/full-stack-fastapi-template&quot;</td>
+<td>1 hit, <code>backend/app/api/deps.py</code>, blob SHA only (E7)</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Rate limits:</strong> the MCP responses don't expose GitHub's rate-limit headers. GitHub publishes 5,000 REST requests an hour for an authenticated token and a separate, lower limit for code search; these figures are <strong>published, not measured</strong>. The budget allows ≤10 calls per turn, so the main risk is code search; M2 handles 429s.</p>
+<h2 id="2-context7-coverage-context7">2. Context7 coverage (<code>context7/</code>)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Framework</th>
+<th>Resolved ID</th>
+<th>Versions</th>
+<th>Docs query</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>FastAPI</td>
+<td><code>/websites/fastapi_tiangolo</code> (top result); <code>/fastapi/fastapi</code> has versions</td>
+<td>0.115.13, 0_116_1, 0.118.2, 0.122.0, 0.128.0</td>
+<td>OK at 0.115.13; snippet cites <code>blob/0.115.13</code></td>
+</tr>
+<tr>
+<td>FastAPI, version not listed</td>
+<td><code>/fastapi/fastapi/0.115.0</code></td>
+<td>—</td>
+<td>&quot;Version not found&quot; text with <code>isError=False</code> (E3)</td>
+</tr>
+<tr>
+<td>Starlette</td>
+<td><code>/kludex/starlette</code></td>
+<td>none listed</td>
+<td>OK, unversioned (cites <code>blob/main</code>)</td>
+</tr>
+<tr>
+<td>Express</td>
+<td><code>/expressjs/express</code></td>
+<td>v5.1.0, 4_21_2, v5.2.0</td>
+<td>OK at v5.1.0; cites <code>blob/v5.1.0</code></td>
+</tr>
+<tr>
+<td>NestJS</td>
+<td><code>/nestjs/nest</code></td>
+<td>v11_1_6, v10_4_15, v10_4_6, v11.1.16, v12.0.1</td>
+<td>v11.1.16 queried, but the snippet cites <code>blob/master</code> (E4)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Response sizes were 1.9–6.5 KB. Quota is not shown in responses and is still unknown.</p>
+<h2 id="3-tavily-tavily">3. Tavily (<code>tavily/</code>)</h2>
+<ul>
+<li><code>tavily_search</code> (basic, 3 results): 4 KB, server <code>response_time</code> 0.97 s. It returned real fastapi-cache issues, including one where the cache ignored a header.</li>
+<li><code>tavily_extract</code> (1 URL): 28.7 KB of raw content (E6).</li>
+<li>Neither response has a usage or credit field.</li>
+</ul>
+<h2 id="4-benchmark-repo-candidates-corpusbenchmark_candidatesjson">4. Benchmark repo candidates (<code>corpus/benchmark_candidates.json</code>)</h2>
+<p>Script: <code>scripts/probe_benchmark.py</code>. Every candidate could be read at a pinned SHA, and every manifest declares the expected framework.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Batch</th>
+<th>Repo</th>
+<th>Status</th>
+<th>Merged non-bot PRs (last 50 closed)</th>
+<th>Proposed role</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>B1</td>
+<td>fastapi/full-stack-fastapi-template</td>
+<td>active</td>
+<td>7</td>
+<td>small or medium (already verified)</td>
+</tr>
+<tr>
+<td>B1</td>
+<td>polarsource/polar (<code>server/</code>)</td>
+<td>active</td>
+<td>41</td>
+<td>large, oversized-repo case</td>
+</tr>
+<tr>
+<td>B1</td>
+<td>Netflix/dispatch</td>
+<td><strong>archived</strong> (2025)</td>
+<td>24</td>
+<td>frozen history; auth and permission changes</td>
+</tr>
+<tr>
+<td>B1</td>
+<td>nsidnev/fastapi-realworld-example-app</td>
+<td>archived</td>
+<td>2 (README and CI only)</td>
+<td><strong>dropped</strong></td>
+</tr>
+<tr>
+<td>B2</td>
+<td>brocoders/nestjs-boilerplate</td>
+<td>active</td>
+<td>8</td>
+<td>medium NestJS</td>
+</tr>
+<tr>
+<td>B2</td>
+<td>immich-app/immich (<code>server/</code>)</td>
+<td>active</td>
+<td>42</td>
+<td>large NestJS</td>
+</tr>
+<tr>
+<td>B2</td>
+<td>Unleash/unleash</td>
+<td>active</td>
+<td>3 in the window (mostly CI)</td>
+<td>Express; use older PRs</td>
+</tr>
+<tr>
+<td>B2</td>
+<td>lujakob/nestjs-realworld-example-app</td>
+<td>active, old</td>
+<td>4</td>
+<td>small backup</td>
+</tr>
+<tr>
+<td>B2</td>
+<td>gothinkster/node-express-realworld-example-app</td>
+<td>active</td>
+<td>1</td>
+<td>backup</td>
+</tr>
+</tbody>
+</table></div>
+<p>The student may replace these with their own list. The final (decision, PR) pairs are chosen in M9.</p>
+<h2 id="5-s0d-bake-off-re-run-bakeoff">5. S0d bake-off re-run (<code>bakeoff/</code>)</h2>
+<p>Setup:</p>
+<ul>
+<li><strong>Prompts:</strong> the original 18 plus 7 Workflow C prompts (<code>eval/bakeoff_prompts_s0d.jsonl</code>), which require the right <strong>GitHub tool</strong>, not just the right server.</li>
+<li><strong>Tools bound:</strong> 12, adding <code>pull_request_read</code>, <code>get_commit</code>, <code>list_pull_requests</code> and <code>search_pull_requests</code>.</li>
+<li><strong>Scoring:</strong> first decision only, no execution; one run per model.</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Selection correct</th>
+<th>No-tool correct</th>
+<th>Schema-valid calls</th>
+<th>Errors / 429s</th>
+<th>Median latency</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>nemotron-3-super-120b-a12b</td>
+<td><strong>25/25</strong></td>
+<td>4/4</td>
+<td>18/18</td>
+<td>0 / 0</td>
+<td>1.35 s</td>
+</tr>
+<tr>
+<td>nemotron-3.5-lightning-30b-a3b</td>
+<td>24/25 (<code>c73</code> went to Tavily)</td>
+<td>4/4</td>
+<td>18/18</td>
+<td>0 / 0</td>
+<td>0.92 s</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>D2 is confirmed:</strong> super gets every Workflow C tool choice right. Per-row files: <code>rows_2026-10-06.jsonl</code>, <code>bakeoff_2026-10-06.csv</code>, <code>summary_2026-10-06.json</code>.</p>
+<h2 id="6-structured-decisionrecord-output-structured">6. Structured <code>DecisionRecord</code> output (<code>structured/</code>)</h2>
+<p>Script: <code>scripts/probe_structured.py</code>.</p>
+<ul>
+<li><strong>Cases:</strong> 3, built from real M0 evidence.</li>
+<li><strong>Modes:</strong> <code>json_schema</code> and <code>json_object</code>.</li>
+<li><strong>Settings:</strong> <code>max_tokens=2500</code>.</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Model</th>
+<th>Valid / citations OK</th>
+<th>Latency</th>
+<th>Output tokens</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>super</td>
+<td><strong>6/6 and 6/6</strong></td>
+<td>9.0–27.6 s (<code>json_schema</code>: 9.5–14.7 s)</td>
+<td>944–1,888</td>
+</tr>
+<tr>
+<td>lightning</td>
+<td>0/6</td>
+<td>69–179 s, mostly cut off at the token limit</td>
+<td>401–2,500</td>
+</tr>
+</tbody>
+</table></div>
+<p>In <code>json_schema</code> mode, super produced richer records (2–4 assumptions, against 1–2 in <code>json_object</code>) with similar or lower latency. See E8–E10.</p>
+<h2 id="7-jev-vs-nemotron-triage-jev">7. Jev vs Nemotron triage (<code>jev/</code>)</h2>
+<p><strong>Setup:</strong></p>
+<ul>
+<li><strong>Script:</strong> <code>scripts/probe_jev.py</code>.</li>
+<li><strong>Cases:</strong> 30 labelled cases in <code>eval/triage_prompts.jsonl</code>, covering all 7 request types, with ledgers of 0, 1 or 2 stored decisions. <strong>The labels were written by Claude and still need the student's review.</strong></li>
+<li><strong>SDK:</strong> <code>typesafe-sdk</code> 0.7.2 with <code>AsyncTypeSafeClient</code>, <code>RetryPolicy(max_retries=1, timeout=5)</code>, <code>timeout=5</code>.</li>
+<li><strong>Jev:</strong> one <code>system_one</code> call per case with three questions: <code>intent</code> (a Choice with structured criteria), <code>target_decision</code> (a Choice built from the ledger on each request) and <code>needs_clarification</code> (a Noul). Each case ran twice.</li>
+<li><strong>Nemotron super:</strong> <code>json_object</code> mode with the same definitions.</li>
+</ul>
+<p><strong>Run 1</strong> (<code>rows_run1_max200.jsonl</code>, <code>summary_run1_max200.json</code>) is <strong>not a fair comparison</strong>. Nemotron's <code>max_tokens=200</code> starved its reasoning tokens, causing 11 of 30 failures with empty or cut-off content. That was a probe bug, kept here for the record. Jev's results in run 1 matched run 2.</p>
+<p><strong>Run 2</strong> (<code>rows.jsonl</code>, <code>summary.json</code>), with Nemotron at <code>max_tokens=1024</code>, <code>finish_reason=length</code> 0 times and a median of 179 output tokens:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Jev (<code>jev-1.13.0</code>)</th>
+<th>Nemotron super</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Request type correct</td>
+<td>29/30</td>
+<td>29/30</td>
+</tr>
+<tr>
+<td>Crossings between the tool and no-tool groups</td>
+<td>1</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Target decision correct (27 scored)</td>
+<td>27/27</td>
+<td>27/27</td>
+</tr>
+<tr>
+<td>Latency p50 / p95 (from the laptop)</td>
+<td><strong>0.117 s / 0.197 s</strong></td>
+<td>1.503 s / 4.544 s</td>
+</tr>
+<tr>
+<td>Errors</td>
+<td>0</td>
+<td>0</td>
+</tr>
+<tr>
+<td>Same answer across 2 runs</td>
+<td>29/30</td>
+<td>(1 run)</td>
+</tr>
+<tr>
+<td>Mean confidence when correct / wrong</td>
+<td>0.963 / 0.86</td>
+<td>—</td>
+</tr>
+<tr>
+<td>Input tokens</td>
+<td>32,074 for 30 cases (about 1.07k per call, about $0.000045 at $0.042/MTok)</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>The one miss</strong> is <code>q2</code>, &quot;Recheck our decision against the latest PR.&quot; with two stored decisions. Both models chose <code>recheck</code> and picked target <code>none</code>. The request is a recheck whose target can't be identified. My <code>clarify</code> label is arguably a policy decision rather than the classifier's job.</p>
+<p><strong>Fallback policies:</strong></p>
+<ul>
+<li><strong>v1 (as designed):</strong> fall back on a near-tie that crosses the tool/no-tool split, a near-tie between two real decisions, or a <code>needs_clarification</code> value between 0.35 and 0.65. <strong>9/30 fallbacks</strong>, nearly all triggered by the Noul, whose values sat between 0.39 and 0.58 even on clear-cut cases (E14).</li>
+<li><strong>v2:</strong> drop the Noul from the rule, and add a code rule: a recheck or revision with more than 1 stored decision and target <code>none</code> becomes <code>clarify</code>. <strong>0/30 fallbacks, 30/30 correct.</strong> v2 was tuned on these same 30 cases after run 1, so <strong>it must be confirmed on held-out cases in M3</strong> before the number counts.</li>
+</ul>
+<p><strong>Errors:</strong> an empty <code>Choice</code> returned <strong>HTTP 400 <code>TypeSafeBadRequestError</code></strong> (&quot;Choice question must have at least one choice&quot;), not 422 (E15).</p>
+<p><strong>Models for this account:</strong> <code>jev-latest</code> and <code>jev-preview</code>, both released 2026-09-10. <code>jev-latest</code> served as <code>jev-1.13.0</code>.</p>
+<p><strong>Relabel by the student (2026-10-06, after run 2):</strong> the student judged <code>q2</code> to be a <code>recheck</code> (&quot;what is there to clarify&quot;). That agrees with both models.</p>
+<ul>
+<li><strong>Code rule removed:</strong> v2's code-side clarify rule would now turn a correct answer into a wrong one, so it is dropped. This is <strong>policy v3</strong>: v2's fallback triggers with no clarify rule. Clarification moves into the agent, which asks only when the PR's repository can't be resolved, for example &quot;latest PR&quot; with decisions on two repos.</li>
+<li><strong>Rescore</strong> (<code>rescore_after_relabel.json</code>, saved rows only, no new calls): Jev 30/30, Nemotron 30/30, policy v3 30/30 with 0/30 fallbacks and 0 tool/no-tool crossings.</li>
+<li><strong>Caveat:</strong> the label changed after seeing the answers, so this is not an independent test. Held-out validation in M3 still decides.</li>
+</ul>
+<p><strong>D18 decision rule (set in the plan before the test):</strong> keep Jev if it is at least as accurate as Nemotron and has lower p95. <strong>Met: equal accuracy, about 23× lower p95. D18 is GO</strong>, with Nemotron as the fallback and the v2 policy.</p>
+<h2 id="8-library-checks-library">8. Library checks (<code>library/</code>)</h2>
+<ul>
+<li><strong>Adapter interceptor (E11):</strong> <code>langchain_mcp_adapters/interceptors.py</code> defines <code>ToolCallInterceptor</code> and <code>MCPToolCallRequest</code>. Interceptors run before <code>_convert_call_tool_result</code>, so they see raw <code>CallToolResult.isError</code> and the resource content.</li>
+<li><strong>Session per call (E12):</strong> <code>session_overhead.json</code>.</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Server</th>
+<th>Handshake (median)</th>
+<th>Call on a fresh session</th>
+<th>Call on a reused session</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GitHub</td>
+<td>0.25 s</td>
+<td>1.31 s</td>
+<td>0.61 s</td>
+</tr>
+<tr>
+<td>Context7</td>
+<td>0.23 s</td>
+<td>1.93 s</td>
+<td>1.89 s</td>
+</tr>
+<tr>
+<td>Tavily</td>
+<td>0.24 s</td>
+<td>0.70 s</td>
+<td>0.31 s</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Checkpoint growth (E13):</strong> <code>checkpoint_growth.json</code> (offline, synthetic sizes). <code>langgraph</code> 1.2.13 with <code>langgraph-checkpoint</code> 4.2.0 has no checkpoint pruning API, only <code>delete_thread</code> and <code>adelete_thread</code>.</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Turns in one session</th>
+<th>10</th>
+<th>20</th>
+<th>50</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tool output left in messages (20k chars)</td>
+<td>4.4 MB</td>
+<td>16.4 MB</td>
+<td>98 MB</td>
+</tr>
+<tr>
+<td>Tool output trimmed (1k chars)</td>
+<td>1.3 MB</td>
+<td>4.7 MB</td>
+<td>27 MB</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="still-open-after-m0">Still open after M0</h2>
+<ul>
+<li>Rate-limit numbers for GitHub code search, Context7, Tavily and Jev (published figures only, or unknown).</li>
+<li>Context7 quota.</li>
+<li>Jev data retention, pricing and how long the key stays valid through grading.</li>
+<li>Cloud Run cold-start time and in-region latency (M1).</li>
+<li>Whether policy v2 holds on held-out cases (M3).</li>
+<li><strong>Student review of the 30 triage labels in <code>eval/triage_prompts.jsonl</code>.</strong></li>
+</ul>
+
+</main>
+</div>
+</body>
+</html>

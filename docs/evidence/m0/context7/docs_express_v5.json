@@ -1,0 +1,33 @@
+{
+  "server": "context7",
+  "url": "https://mcp.context7.com/mcp",
+  "probed_at": "2026-10-07T03:06:05.573662+00:00",
+  "server_info": {
+    "name": "Context7",
+    "title": null,
+    "version": "4.1.1",
+    "websiteUrl": "https://context7.com",
+    "icons": [
+      {
+        "src": "https://context7.com/context7-icon-green.png",
+        "mimeType": "image/png",
+        "sizes": null
+      }
+    ],
+    "description": "Context7 provides up-to-date documentation and code examples for libraries and frameworks."
+  },
+  "tool": "query-docs",
+  "arguments": {
+    "libraryId": "/expressjs/express/v5.1.0",
+    "query": "error handling middleware and async errors"
+  },
+  "isError": false,
+  "content": [
+    {
+      "type": "text",
+      "text": "### Express Error Handling and Middleware\n\nSource: https://github.com/expressjs/express/blob/v5.1.0/History.md\n\nCovers improvements and fixes related to error handling, middleware precedence, and the definition of error handlers within Express.js applications.\n\n```APIDOC\nError handler definition:\n  - Fixed issue preventing error handlers from being defined anywhere.\n\nMiddleware precedence:\n  - Fixed middleware/router precedence issues.\n\nError propagation:\n  - Fixed `res.sendfile()` error handling, deferring via `next()`.\n  - Fixed `res.render()` exceptions, now passed to `next()` when no callback is given.\n```\n\n--------------------------------\n\n### Wrapping of rejected promise in handleError (error middleware layer)\n\nSource: https://github.com/expressjs/express/blob/master/node_modules/router/lib/layer.js\n\nSame wrapping behavior applies to error middleware: if an error handler's returned promise rejects with no value, it becomes `new Error('Rejected promise')` forwarded to the next error handler.\n\n```javascript\nLayer.prototype.handleError = function handleError (error, req, res, next) {\n  const fn = this.handle\n\n  if (fn.length !== 4) {\n    // not a standard error handler\n    return next(error)\n  }\n\n  try {\n    // invoke function\n    const ret = fn(error, req, res, next)\n\n    // wait for returned promise\n    if (isPromise(ret)) {\n      if (!(ret instanceof Promise)) {\n        deprecate('handlers that are Promise-like are deprecated, use a native Promise instead')\n      }\n\n      ret.then(null, function (error) {\n        next(error || new Error('Rejected promise'))\n      })\n    }\n  } catch (err) {\n    next(err)\n  }\n}\n```\n\n--------------------------------\n\n### Custom JSON 404 middleware\n\nSource: https://github.com/expressjs/express/blob/master/examples/web-service/index.js\n\nPlaced last, this 404 handler returns a JSON error response when no other middleware matched the route. This is the simplest and most direct pattern for a custom 404 in Express.\n\n```javascript\n// our custom JSON 404 middleware. Since it's placed last\n// it will be the last middleware called, if all others\n// invoke next() and do not respond.\napp.use(function(req, res){\n  res.status(404);\n  res.send({ error: \"Sorry, can't find that\" })\n});\n```\n\n--------------------------------\n\n### Express.js: Handling Client Aborts in sendfile/sendFile\n\nSource: https://github.com/expressjs/express/blob/v5.1.0/History.md\n\nEnsures that the callback function for `res.sendFile`, `res.sendfile`, and `res.download` is invoked when the client aborts the request. The `err` object will be populated with the request aborted error.\n\n```JavaScript\nres.sendFile('/path/to/large/file', (err) => {\n  if (err) {\n    console.error('File transfer aborted by client:', err);\n  }\n});\n```\n\n--------------------------------\n\n### Use http-errors for res.format errors\n\nSource: https://github.com/expressjs/express/blob/v5.1.0/History.md\n\nIntegrates the `http-errors` library for generating errors within `res.format`. This provides standardized and informative error objects for better error handling.\n\n```javascript\nres.format({\n  'text/plain': function() { /* ... */ },\n  'application/json': function() { /* ... */ },\n  'default': function() {\n    // Use http-errors for consistent error responses\n    const err = createError(406, 'Not Acceptable');\n    throw err;\n  }\n});\n```",
+      "annotations": null,
+      "meta": null
+    }
+  ]
+}

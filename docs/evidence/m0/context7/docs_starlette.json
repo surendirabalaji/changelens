@@ -1,0 +1,33 @@
+{
+  "server": "context7",
+  "url": "https://mcp.context7.com/mcp",
+  "probed_at": "2026-10-07T03:06:02.396467+00:00",
+  "server_info": {
+    "name": "Context7",
+    "title": null,
+    "version": "4.1.1",
+    "websiteUrl": "https://context7.com",
+    "icons": [
+      {
+        "src": "https://context7.com/context7-icon-green.png",
+        "mimeType": "image/png",
+        "sizes": null
+      }
+    ],
+    "description": "Context7 provides up-to-date documentation and code examples for libraries and frameworks."
+  },
+  "tool": "query-docs",
+  "arguments": {
+    "libraryId": "/kludex/starlette",
+    "query": "middleware execution order"
+  },
+  "isError": false,
+  "content": [
+    {
+      "type": "text",
+      "text": "### build_middleware_stack \u2014 middleware list assembly and reversal\n\nSource: https://github.com/kludex/starlette/blob/main/starlette/applications.py\n\nShows how middleware is assembled (inner-to-outer conceptually) and then reversed when wrapping: ServerErrorMiddleware \u2192 RequestBodyLimitMiddleware \u2192 user_middleware \u2192 ExceptionMiddleware. The reversed() call means ExceptionMiddleware wraps the router first (innermost), and ServerErrorMiddleware wraps last (outermost).\n\n```python\nmiddleware = [Middleware(ServerErrorMiddleware, handler=error_handler, debug=debug)]\nif self.max_body_size is not None:\n    middleware.append(Middleware(RequestBodyLimitMiddleware, max_body_size=self.max_body_size))\nmiddleware += self.user_middleware\nmiddleware.append(Middleware(ExceptionMiddleware, handlers=exception_handlers, debug=debug))\n\napp = self.router\nfor cls, args, kwargs in reversed(middleware):\n    app = cls(app, *args, **kwargs)\nreturn app\n```\n\n--------------------------------\n\n### add_middleware \u2014 prepends to user_middleware\n\nSource: https://github.com/kludex/starlette/blob/main/starlette/applications.py\n\nWhen adding middleware after init via add_middleware, it uses insert(0, ...), so later-added middlewares appear earlier in the list and become outer-most after reversal.\n\n```python\ndef add_middleware(self, middleware_class: _MiddlewareFactory[P], *args: P.args, **kwargs: P.kwargs) -> None:\n    if self.middleware_stack is not None:  # pragma: no cover\n        raise RuntimeError(\"Cannot add middleware after an application has started\")\n    self.user_middleware.insert(0, Middleware(middleware_class, *args, **kwargs))\n```\n\n### Middleware > Using middleware\n\nSource: https://github.com/kludex/starlette/blob/main/docs/middleware.md\n\nMiddleware is evaluated from top-to-bottom, so the flow of execution in our example\napplication would look like this:\n\n* Middleware\n    * `ServerErrorMiddleware`\n    * `TrustedHostMiddleware`\n    * `HTTPSRedirectMiddleware`\n    * `ExceptionMiddleware`\n* Routing\n* Endpoint\n\n--------------------------------\n\n### Background Tasks > BackgroundTasks\n\nSource: https://github.com/kludex/starlette/blob/main/docs/background.md\n\n!!! important\n    The tasks are executed in order. In case one of the tasks raises\n    an exception, the following tasks will not get the opportunity to be executed.\n\n--------------------------------\n\n### Errors and handled exceptions\n\nSource: https://github.com/kludex/starlette/blob/main/docs/exceptions.md\n\n## Errors and handled exceptions\n\nIt is important to differentiate between handled exceptions and errors.\n\nHandled exceptions do not represent error cases. They are coerced into appropriate\nHTTP responses, which are then sent through the standard middleware stack. By default\nthe `HTTPException` class is used to manage any handled exceptions.\n\nErrors are any other exception that occurs within the application. These cases\nshould bubble through the entire middleware stack as exceptions. Any error\nlogging middleware should ensure that it re-raises the exception all the\nway up to the server.\n\nIn practical terms, the error handled used is `exception_handler[500]` or `exception_handler[Exception]`.\nBoth keys `500` and `Exception` can be used. See below:\n\n```python\nasync def handle_error(request: Request, exc: HTTPException):\n    # Perform some logic\n    return JSONResponse({\"detail\": exc.detail}, status_code=exc.status_code)\n\nexception_handlers = {\n    Exception: handle_error  # or \"500: handle_error\"\n}\n```\n\nIt's important to notice that in case a [`BackgroundTask`](background.md) raises an exception,\nit will be handled by the `handle_error` function, but at that point, the response was already sent. In other words,\nthe response created by `handle_error` will be discarded. In case the error happens before the response was sent, then\nit will use the response object - in the above example, the returned `JSONResponse`.\n\nIn order to deal with this behaviour correctly, the middleware stack of a\n`Starlette` application is configured like this:\n\n* `ServerErrorMiddleware` - Returns 500 responses when server errors occur.\n* Installed middleware\n* `ExceptionMiddleware` - Deals with handled exceptions, and returns responses.\n* Router\n* Endpoints",
+      "annotations": null,
+      "meta": null
+    }
+  ]
+}

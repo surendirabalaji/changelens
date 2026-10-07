@@ -1,0 +1,483 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ChangeLens: Architecture and Planning Proposal (design phase only)</title>
+<style>
+:root {
+  --bg: #fbfbfa; --surface: #ffffff; --text: #1f2328; --muted: #59636e; --border: #d8dee4;
+  --accent: #0b6bcb; --code-bg: #f2f4f6; --row-alt: #f6f8fa; --mark: #fff3c4;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1115; --surface: #161a20; --text: #e6e8eb; --muted: #9aa4af; --border: #2c333c;
+    --accent: #6cb6ff; --code-bg: #1d232b; --row-alt: #1a1f26; --mark: #4a3f12;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1115; --surface: #161a20; --text: #e6e8eb; --muted: #9aa4af; --border: #2c333c;
+  --accent: #6cb6ff; --code-bg: #1d232b; --row-alt: #1a1f26; --mark: #4a3f12;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+.layout { display: grid; grid-template-columns: 1fr; max-width: 1280px; margin: 0 auto; padding: 0 16px; }
+@media (min-width: 1100px) { .layout { grid-template-columns: 260px minmax(0, 1fr); gap: 40px; } }
+nav.toc { display: none; }
+@media (min-width: 1100px) {
+  nav.toc { display: block; position: sticky; top: 0; align-self: start; max-height: 100vh; overflow-y: auto;
+    padding: 24px 0; font-size: 14px; }
+}
+nav.toc a { color: var(--muted); text-decoration: none; display: block; padding: 3px 0; }
+nav.toc a:hover { color: var(--accent); }
+nav.toc .h3 { padding-left: 14px; font-size: 13px; }
+nav.toc .home { font-weight: 600; color: var(--text); margin-bottom: 10px; }
+main { min-width: 0; padding: 24px 0 80px; }
+.banner { font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 10px;
+  margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between; }
+.banner button { font: inherit; color: var(--muted); background: none; border: 1px solid var(--border);
+  border-radius: 6px; padding: 2px 10px; cursor: pointer; }
+h1 { font-size: 2em; line-height: 1.25; margin: 0.2em 0 0.6em; }
+h2 { font-size: 1.5em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; margin-top: 2em; }
+h3 { font-size: 1.2em; margin-top: 1.6em; }
+h1, h2, h3, h4 { scroll-margin-top: 16px; }
+a { color: var(--accent); }
+p, li { overflow-wrap: anywhere; }
+code { background: var(--code-bg); border-radius: 4px; padding: 0.1em 0.35em; font-size: 0.88em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+pre { background: var(--code-bg); border-radius: 8px; padding: 14px 16px; overflow-x: auto; font-size: 13.5px;
+  line-height: 1.5; }
+pre code { background: none; padding: 0; font-size: inherit; }
+pre.mermaid { background: var(--surface); border: 1px solid var(--border); text-align: center; }
+blockquote { margin: 1em 0; padding: 0.4em 1em; border-left: 4px solid var(--accent); color: var(--muted);
+  background: var(--surface); border-radius: 0 6px 6px 0; }
+.table-wrap { overflow-x: auto; margin: 1em 0; border: 1px solid var(--border); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; background: var(--surface); }
+th, td { border-bottom: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+th { background: var(--row-alt); font-weight: 600; }
+tr:nth-child(even) td { background: var(--row-alt); }
+tr:last-child td { border-bottom: none; }
+del { color: var(--muted); }
+hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+.index-list { list-style: none; padding: 0; }
+.index-list li { padding: 12px 0; border-bottom: 1px solid var(--border); }
+.index-list .path { color: var(--muted); font-size: 13px; }
+</style>
+
+<script>
+(function () {
+  var key = "changelens-docs-theme";
+  try { var saved = localStorage.getItem(key); if (saved) document.documentElement.dataset.theme = saved; } catch (e) {}
+  window.toggleTheme = function () {
+    var dark = document.documentElement.dataset.theme
+      ? document.documentElement.dataset.theme === "dark"
+      : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var next = dark ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem(key, next); } catch (e) {}
+  };
+})();
+</script>
+
+</head>
+<body>
+<div class="layout">
+<nav class="toc"><a class="home" href="index.html">ChangeLens docs</a><a class="h2" href="#context">Context</a><a class="h2" href="#1-verified-requirements-summary">1. Verified requirements (summary)</a><a class="h2" href="#2-project-vision">2. Project vision</a><a class="h2" href="#3-system-design-a">3. System design [A]</a><a class="h2" href="#4-evaluation-t">4. Evaluation [T]</a><a class="h2" href="#5-risks">5. Risks</a><a class="h2" href="#6-diagrams-redraw-from-the-final-code">6. Diagrams (redraw from the final code)</a><a class="h2" href="#7-decision-register">7. Decision register</a><a class="h2" href="#8-gates-and-backlog-not-started">8. Gates and backlog (not started)</a><a class="h2" href="#9-unresolved-decisions-and-the-evidence-to-settle-them">9. Unresolved decisions and the evidence to settle them</a><a class="h2" href="#verification-of-this-plan">Verification of this plan</a></nav>
+<main>
+<div class="banner"><span>Generated from <code>docs/architecture-plan-v1.md</code>. Edit the .md file, then run
+<code>python scripts/render_docs.py</code>.</span><span><a href="index.html">All docs</a>
+<button type="button" onclick="toggleTheme()">Light / dark</button></span></div>
+<h1 id="changelens-architecture-and-planning-proposal-design-phase-only">ChangeLens: Architecture and Planning Proposal (design phase only)</h1>
+<h2 id="context">Context</h2>
+<p>The user asked research-architect to design ChangeLens from <code>CHANGELENS_ARCHITECTURE_PLANNING_BRIEF.md</code> for CSCI 599 Assignment 1: an agent with three real MCP servers, LangGraph checkpointer memory scoped by <code>session_id</code>, the exact <code>/chat</code> contract, and a Cloud Run deployment.</p>
+<p>This is a plan only. Nothing has been implemented, run, measured or deployed. The plan does not authorize implementation; that is a later, separate phase.</p>
+<p><strong>Claim tags</strong></p>
+<ul>
+<li><strong>[V: src §]</strong> means the source says it.</li>
+<li><strong>[A]</strong> is an assumption.</li>
+<li><strong>[O]</strong> is an optional enhancement.</li>
+<li><strong>[T]</strong> is a target hypothesis.</li>
+<li><strong>Missing</strong> marks evidence that couldn't be checked from the files.</li>
+</ul>
+<p><strong>Sources</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Key</th>
+<th>Document</th>
+<th>Status</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>R</td>
+<td><code>assignemnt1/requirements.md</code></td>
+<td>Read</td>
+</tr>
+<tr>
+<td>P</td>
+<td><code>assignemnt1/Assignment_1_Description.pdf</code></td>
+<td>Read, all 12 pages</td>
+</tr>
+<tr>
+<td>B</td>
+<td><code>assignemnt1/CHANGELENS_ARCHITECTURE_PLANNING_BRIEF.md</code></td>
+<td>Read</td>
+</tr>
+<tr>
+<td>PC</td>
+<td>Professor's clarification</td>
+<td><strong>Missing.</strong> Only the summary in B §7 exists.</td>
+</tr>
+<tr>
+<td>—</td>
+<td><code>changelens-concept.html</code></td>
+<td><strong>Missing</strong></td>
+</tr>
+<tr>
+<td>—</td>
+<td>Prior stack</td>
+<td><code>Phase 1/requirements.txt</code>: fastapi, uvicorn, openai, pydantic. No LangGraph or MCP packages.</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="1-verified-requirements-summary">1. Verified requirements (summary)</h2>
+<ul>
+<li><strong>B1, framework:</strong> exactly one framework. LangGraph + FastAPI + langchain-mcp-adapters is the tested stack. [V: R §2; P §2.1]</li>
+<li><strong>B2, MCP servers:</strong> at least 2 real MCP servers; at least 3 earns the additional-server criterion. Each needs a manifest reachable at runtime, real <code>tools/list</code> and <code>tools/call</code>, and arguments that match the schema. Simulated responses get zero. [V: R §3.1, §7; P §2.2, §3.3, §7.1, §7.5]</li>
+<li><strong>B3, README rationale:</strong> the README explains why the extra servers were included. [V: P §7.5]</li>
+<li><strong>B4, tool selection:</strong> the LLM picks tools by meaning, answers directly when no tool is needed, and chains at least 2 calls when needed. No keyword routing. [V: R §3.2; P §7.2]</li>
+<li><strong>B5, memory:</strong> the built-in checkpointer, scoped by <code>session_id</code>, for at least 2 turns. A custom dict loses credit. &quot;What did I ask you last?&quot; must be answered. [V: R §3.3; P §7.3]</li>
+<li><strong>B6, failures:</strong> handle transport, tool-execution and malformed/invalid failures without crashing. [V: R §3.4; P §3.3]</li>
+<li><strong>B7, endpoint:</strong> <code>POST /chat</code> takes <code>{&quot;query&quot;,&quot;session_id&quot;}</code> and returns <code>{&quot;response&quot;: str}</code>. It stays live until grades are posted. [V: R §3.5; P §4.2, §5]</li>
+<li><strong>B8, Cloud Run:</strong> multi-stage Docker build, non-root user, bind 0.0.0.0, read <code>PORT</code>, cloud LLM. Deploy with <code>--allow-unauthenticated</code> and <code>--max-instances 1</code>. [V: P §3.1, §4.3–4.4]</li>
+<li><strong>B9, secrets:</strong> environment variables only. Commit <code>.env.example</code>; deploy with <code>--set-env-vars</code>. [V: R §4.2; P §4.5]</li>
+<li><strong>B10, README:</strong> setup, run, deploy, cost, attribution, and three diagrams that match the code. [V: R §5; P §4.6, §7.4]</li>
+<li><strong>B11, process log:</strong> four parts and a 200–300-word narrative in your own voice. AI-sounding logs are graded skeptically. [V: R §6; P §6.1]</li>
+<li><strong>B12, attribution:</strong> use <code># Adapted from &lt;URL&gt; — &lt;rationale&gt;</code>. [V: P §6]</li>
+</ul>
+<p><strong>Conflicts and gaps</strong></p>
+<ul>
+<li><strong>C1:</strong> R says to defer to the PDF wording, so this plan uses the stricter reading of the two.</li>
+<li><strong>C2:</strong> P allows diagrams in docs/, but R requires them in README. They go in README.</li>
+<li><strong>C3:</strong> R omits <code>--allow-unauthenticated</code>, the &quot;what did I ask last&quot; check, &quot;manifest reachable at runtime&quot;, and the AI-voice warning. All are treated as binding.</li>
+<li><strong>C4 [A]:</strong> P's sample Dockerfile installs to <code>/root/.local</code> and then runs as <code>appuser</code>, who probably can't read it. Verify in G0.</li>
+<li><strong>C5:</strong> The deadline, the grader's timeout and the available credentials are unknown.</li>
+<li><strong>C6:</strong> Context7 is not on P's &quot;confirmed accessible&quot; list, so it needs its own G0 evidence.</li>
+</ul>
+<h2 id="2-project-vision">2. Project vision</h2>
+<ul>
+<li><strong>Purpose:</strong> help a developer change an unfamiliar FastAPI codebase safely, using evidence pinned to commit SHAs and line ranges.</li>
+<li><strong>Differentiators:</strong> dependent multi-server chains (GitHub → Context7 → Tavily), an assumption ledger revised across turns, citation verification, and measured false-alarm rates.</li>
+<li><strong>v1 scope:</strong> public Python/FastAPI repos, one route or feature area per investigation, caching first. Read-only; repository code is never executed.</li>
+<li><strong>General queries:</strong> stays a general assistant. Conceptual questions use no tools, research goes to Tavily, repo questions go to GitHub, and anything out of scope gets a clear explanation.</li>
+</ul>
+<h2 id="3-system-design-a">3. System design [A]</h2>
+<p><strong>Flow:</strong> FastAPI <code>/chat</code> (validation, per-session lock, deadline) → LangGraph graph with <code>InMemorySaver</code> (<code>thread_id = session_id</code>) → guarded executor → <code>MultiServerMCPClient</code> → GitHub, Context7 and Tavily MCP servers.</p>
+<p><strong>Nodes:</strong></p>
+<ul>
+<li><code>ingest</code></li>
+<li><code>plan</code> <strong>[O, flag; used for ablation]</strong></li>
+<li><code>agent</code>: LLM with about 12 allowlisted tools plus <code>update_investigation</code></li>
+<li><code>tools</code>: guarded execution, Evidence records, Python <code>ast</code> structural pass</li>
+<li><code>apply_update</code>: deterministic validation</li>
+<li><code>synthesize</code></li>
+<li><code>verify_citations</code>: <code>[E#]</code> must exist and quotes must match exactly; one repair pass</li>
+<li><code>render</code>: text, Mermaid and optional HTML</li>
+</ul>
+<p><strong>Exits:</strong></p>
+<ul>
+<li>the LLM makes no tool calls (the no-tool path);</li>
+<li>the budget runs out (provisional: 8 calls per turn);</li>
+<li>the deadline is reached (provisional: 60 s);</li>
+<li>the repair limit is hit.</li>
+</ul>
+<p><strong>MCP servers:</strong></p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Server</th>
+<th>Configuration</th>
+<th>Fallback</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GitHub</td>
+<td>Remote HTTP, read-only, fine-grained PAT limited to public repos</td>
+<td>Local stdio binary</td>
+</tr>
+<tr>
+<td>Context7</td>
+<td>Version-pinned docs; a version mismatch is flagged</td>
+<td><code>mcp-server-fetch</code></td>
+</tr>
+<tr>
+<td>Tavily</td>
+<td>Issues, releases, general research</td>
+<td>—</td>
+</tr>
+</tbody>
+</table></div>
+<ul>
+<li><strong>Discovery:</strong> runs at startup, tolerates failures, and retries lazily.</li>
+</ul>
+<p><strong>Memory:</strong></p>
+<ul>
+<li>The checkpointed state holds messages (tool outputs truncated), investigation, evidence, assumptions, graph, concerns, scenarios, budget and failures.</li>
+<li>The HTML artifact store and the immutable source cache sit outside it; neither is conversational memory.</li>
+<li>Message trimming caps growth.</li>
+<li>A <code>session_id</code> is not authentication, and this is documented.</li>
+</ul>
+<p><strong>Failures:</strong> each ends as full recovery, partial result, or safe failure.</p>
+<ul>
+<li><strong>Transport:</strong> one jittered retry, then a circuit breaker and a structured &quot;unavailable&quot; message so the LLM can choose another source.</li>
+<li><strong>Tool execution:</strong> auth errors are not retried; not-found asks the user; 429 is retried once if time allows; invalid arguments get one repair attempt. Arguments are checked against the <code>inputSchema</code> before every call.</li>
+<li><strong>Malformed:</strong> pydantic evidence adapters reject the result, so it can never be cited.</li>
+<li><strong>Domain limits:</strong> explained to the user.</li>
+<li><strong>Top level:</strong> a final handler always returns <code>{&quot;response&quot;}</code>.</li>
+<li><strong>Fault injection:</strong> a test-only stub server, never counted as an integration.</li>
+</ul>
+<p><strong>Evidence model:</strong></p>
+<ul>
+<li>Records: Investigation (pinned SHA, superseded when the ref moves), Evidence (immutable), Assumption (lifecycle with history), Graph (<code>structural</code> comes from <code>ast</code> only; no <code>runtime_observed</code> in v1), Concern (contradiction / missing / speculative), Scenario (with its basis; nothing is <code>executed</code> in v1).</li>
+<li>Deterministic code validates structure. The LLM interprets.</li>
+</ul>
+<p><strong>API:</strong> exact pydantic request model. An invalid body gets a 4xx with a <code>{&quot;response&quot;}</code> body. <code>GET /reports/{token}</code> is <strong>[O]</strong>.</p>
+<p><strong>HTML [O]:</strong> graph, ledger and scenarios; autoescaping; strict CSP; 128-bit tokens with a TTL; size caps.</p>
+<p><strong>Security:</strong></p>
+<ul>
+<li><strong>Credentials:</strong> environment variables only. No secrets in the LLM's context. Logs are redacted.</li>
+<li><strong>Untrusted content:</strong> repository and web text are treated as data, never as instructions.</li>
+<li><strong>Spend:</strong> per-turn budgets and a rate limit.</li>
+</ul>
+<h2 id="4-evaluation-t">4. Evaluation [T]</h2>
+<ul>
+<li><strong>Corpus:</strong> 6–8 public FastAPI repos (2 held out), with historical feature requests pinned to the commit before each change.</li>
+<li><strong>Leakage controls:</strong> SHA pinning and date cutoffs.</li>
+<li><strong>Baselines:</strong> each one changes only the feature under test.</li>
+</ul>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Baseline</th>
+<th>Target</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tool Selection (≥40 turns)</td>
+<td><code>plan</code> off</td>
+<td>≥85%</td>
+</tr>
+<tr>
+<td>Multi-step success (≥20 dependent tasks)</td>
+<td>Single parallel pass</td>
+<td>≥75%</td>
+</tr>
+<tr>
+<td>Latency (≥100 warm, ≥20 cold; concurrency 1 and 3)</td>
+<td>HTML off</td>
+<td>Investigation p95 ≤ 60 s; no-tool p95 ≤ 10 s (provisional)</td>
+</tr>
+<tr>
+<td>Error resilience (category × server × phase, 3 repeats each)</td>
+<td>Recovery off</td>
+<td>0 crashes; ≥80% full or partial</td>
+</tr>
+<tr>
+<td>Memory (≥20 interleaved sessions)</td>
+<td>Stateless</td>
+<td>≥90% correct, 0 leaks</td>
+</tr>
+<tr>
+<td>Groundedness (≥100 claims)</td>
+<td><code>verify_citations</code> off</td>
+<td>≥95% supported, 0 fabricated</td>
+</tr>
+<tr>
+<td>Cost per query</td>
+<td>Fixed-context baseline</td>
+<td>≥20% lower median (<strong>Missing:</strong> prices)</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="5-risks">5. Risks</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Risk</th>
+<th>Mitigation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Remote GitHub MCP access with the PAT</td>
+<td>Local stdio server</td>
+</tr>
+<tr>
+<td>Context7 unknowns</td>
+<td><code>mcp-server-fetch</code></td>
+</tr>
+<tr>
+<td>Grader timeout</td>
+<td>Internal deadline and early partial results</td>
+</tr>
+<tr>
+<td>Generic grader questions</td>
+<td>General-assistant behaviour</td>
+</tr>
+<tr>
+<td>Limits of static analysis</td>
+<td>Narrow scope; list limitations</td>
+</tr>
+<tr>
+<td>False alarms</td>
+<td>Separate concern kinds and measure them</td>
+</tr>
+<tr>
+<td>Third server looks like padding</td>
+<td>Evaluation cases that need it</td>
+</tr>
+<tr>
+<td>Public endpoint spend</td>
+<td>Budgets, rate limit, spend caps</td>
+</tr>
+<tr>
+<td>512Mi memory</td>
+<td>Measure in G1; consider 1Gi</td>
+</tr>
+<tr>
+<td>Python 3.14 locally vs. 3.13 in the image</td>
+<td>Pin 3.13 locally</td>
+</tr>
+<tr>
+<td>AI-voice process log</td>
+<td>You write it yourself</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="6-diagrams-redraw-from-the-final-code">6. Diagrams (redraw from the final code)</h2>
+<ol>
+<li><strong>Architecture:</strong> client → FastAPI → LangGraph ↔ checkpointer / LLM / MCP client → the three servers.</li>
+<li><strong>Tool loop:</strong> includes the no-tool exit, the budget exit and the failure branches.</li>
+<li><strong>Deployment:</strong> <code>.env</code> → local Docker → <code>gcloud builds submit</code> → registry → Cloud Run in us-west1 with <code>--set-env-vars</code>, plus outbound HTTPS to the LLM and the MCP servers.</li>
+</ol>
+<h2 id="7-decision-register">7. Decision register</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>ID</th>
+<th>Decision</th>
+<th>Status and evidence needed</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>D1</td>
+<td>LangGraph + FastAPI</td>
+<td>Provisional</td>
+</tr>
+<tr>
+<td>D2</td>
+<td>LLM (GPT-5 vs. NIM)</td>
+<td><strong>Blocked</strong> on which credential you hold</td>
+</tr>
+<tr>
+<td>D3</td>
+<td>GitHub remote</td>
+<td>Provisional</td>
+</tr>
+<tr>
+<td>D4</td>
+<td>Context7</td>
+<td>Highest risk</td>
+</tr>
+<tr>
+<td>D5</td>
+<td>Tavily remote</td>
+<td>Provisional</td>
+</tr>
+<tr>
+<td>D6</td>
+<td><code>InMemorySaver</code></td>
+<td>Provisional</td>
+</tr>
+<tr>
+<td>D7</td>
+<td>Planner flag</td>
+<td>Decided by ablation</td>
+</tr>
+<tr>
+<td>D8</td>
+<td><code>ast</code>-only structure</td>
+<td>Provisional</td>
+</tr>
+<tr>
+<td>D9</td>
+<td>4xx <code>{&quot;response&quot;}</code> for invalid bodies</td>
+<td>Provisional</td>
+</tr>
+<tr>
+<td>D10</td>
+<td>60 s deadline</td>
+<td>Placeholder</td>
+</tr>
+<tr>
+<td>D11</td>
+<td>HTML</td>
+<td>Optional, after G2</td>
+</tr>
+<tr>
+<td>D12</td>
+<td><code>--set-env-vars</code></td>
+<td>Per P</td>
+</tr>
+<tr>
+<td>D13</td>
+<td>512Mi</td>
+<td>Measure</td>
+</tr>
+<tr>
+<td>D14</td>
+<td>Deploy a skeleton early (G1)</td>
+<td>Deviates from the brief's &quot;deploy last&quot; order</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="8-gates-and-backlog-not-started">8. Gates and backlog (not started)</h2>
+<ul>
+<li><strong>G0, access validation:</strong> <code>tools/list</code> and one <code>tools/call</code> dump per server; the PAT is denied on a private repo; at least 5 repos accessible; versions pinned; the Dockerfile non-root path checked.</li>
+<li><strong>G1, grounded workflow deployed:</strong> cited caching analysis on 2 repos; a no-tool query makes 0 tool calls; the 2-turn recall test passes on the live URL; all 3 failure categories are injected without a crash.
+<ul>
+<li>Fallback: plain ReAct + citation check, which is still compliant.</li>
+</ul>
+</li>
+<li><strong>G2, corrections and scenarios:</strong> assumptions superseded with history; no cross-session leak.</li>
+<li><strong>G3, HTML [O]:</strong> escaping tests pass; tokens expire.</li>
+<li><strong>G4, evaluation:</strong> every metric reports its denominator, baseline and raw traces; met or missed is stated honestly.</li>
+<li><strong>G5, readiness:</strong> fresh-clone build; secret scan of the ZIP; 10 rephrased unseen queries on the live URL; diagrams match the code.</li>
+<li><strong>Test scenarios:</strong> contract shape, no-tool, clarification, out-of-domain, private-repo refusal, oversized input, moved ref, README prompt injection, budget exhaustion, each failure on each server, concurrent requests on one session, two sessions on the same repo, restart loss.</li>
+</ul>
+<h2 id="9-unresolved-decisions-and-the-evidence-to-settle-them">9. Unresolved decisions and the evidence to settle them</h2>
+<ol>
+<li><strong>Professor's clarification:</strong> the original text, to decide whether hosted third-party servers count.</li>
+<li><strong>GitHub remote MCP:</strong> whether it works with a public-only fine-grained PAT. Needs a <code>tools/list</code> dump, one pinned-SHA read and one denied private-repo read.</li>
+<li><strong>Latency:</strong> the grader's HTTP timeout and the Cloud Run request timeout.</li>
+<li><strong>Context7:</strong> auth, version coverage and failure behaviour.</li>
+<li><strong>langchain-mcp-adapters:</strong> how failures surface (<code>isError</code> vs. exceptions) and the session lifecycle in the pinned version.</li>
+<li><strong>LLM:</strong> which credential you hold, dated pricing, spend caps, and a tool-calling smoke test.</li>
+<li><strong>Memory APIs:</strong> thread deletion and message trimming in the pinned LangGraph version.</li>
+<li><strong>Schedule:</strong> the deadline and your weekly hours.</li>
+<li><strong>Corpus:</strong> whether the shortlisted repos and pre-change SHAs are viable.</li>
+</ol>
+<h2 id="verification-of-this-plan">Verification of this plan</h2>
+<p>Nothing can be verified until the evidence for G0 is collected. G0 is the first gate in the implementation phase.</p>
+<p>Once you accept the architecture decisions, run <code>process-log-coach</code> and record a checkpoint in <code>docs/process-log-checkpoints.md</code>. You write <code>PROCESS_LOG.md</code> yourself.</p>
+
+</main>
+</div>
+</body>
+</html>

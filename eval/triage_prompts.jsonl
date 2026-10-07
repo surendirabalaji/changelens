@@ -1,0 +1,30 @@
+{"id": "c1", "intent": "conceptual", "target": "none", "ledger": "none", "query": "What makes a cache key safe for multi-tenant APIs?"}
+{"id": "c2", "intent": "conceptual", "target": "none", "ledger": "none", "query": "Explain the difference between optimistic and pessimistic locking."}
+{"id": "c3", "intent": "conceptual", "target": "none", "ledger": "none", "query": "In general, when should rate limiting live at the API gateway instead of inside the app?"}
+{"id": "c4", "intent": "conceptual", "target": "none", "ledger": "L1", "query": "What's the difference between FastAPI's per-request dependency caching and an HTTP response cache?"}
+{"id": "c5", "intent": "conceptual", "target": "none", "ledger": "L2", "query": "Why do people say ETags help with caching?"}
+{"id": "r1", "intent": "repo_review", "target": "none", "ledger": "none", "query": "Analyze https://github.com/fastapi/full-stack-fastapi-template. I want to cache product search results for five minutes. Build the current workflow graph, identify assumptions, find evidence, and suggest tests."}
+{"id": "r2", "intent": "repo_review", "target": "none", "ledger": "none", "query": "In brocoders/nestjs-boilerplate, is it safe to add a global CacheInterceptor? Check the auth endpoints."}
+{"id": "r3", "intent": "repo_review", "target": "none", "ledger": "L1", "query": "Different question: look at polarsource/polar's OAuth2 grant code and tell me whether adding a unique index on (client_id, sub) is safe."}
+{"id": "r4", "intent": "repo_review", "target": "none", "ledger": "none", "query": "Review Netflix/dispatch: what would break if task operations required the incident commander role?"}
+{"id": "r5", "intent": "repo_review", "target": "none", "ledger": "none", "query": "for the immich server can we paginate the memories endpoint with a cursor instead of offset? check the code"}
+{"id": "v1", "intent": "revise_decision", "target": "D1", "ledger": "L1", "query": "Prices are customer-specific, but the raw catalog is shared. Revise the decision and tests."}
+{"id": "v2", "intent": "revise_decision", "target": "D1", "ledger": "L1", "query": "Actually up to 10 minutes of staleness is fine for us; update the caching recommendation."}
+{"id": "v3", "intent": "revise_decision", "target": "D2", "ledger": "L2", "query": "For the NestJS one, /auth/me must never be cached. Revise that decision."}
+{"id": "v4", "intent": "revise_decision", "target": "D1", "ledger": "L2", "query": "We don't have Redis, only in-process memory. Update the FastAPI items caching decision and its tests."}
+{"id": "k1", "intent": "recheck", "target": "D1", "ledger": "L1", "query": "Recheck our caching decision against PR #2460."}
+{"id": "k2", "intent": "recheck", "target": "D2", "ledger": "L2", "query": "Does PR #2209 in brocoders/nestjs-boilerplate invalidate what we decided about the cache interceptor?"}
+{"id": "k3", "intent": "recheck", "target": "D1", "ledger": "L2", "query": "A new commit e99fbaeba3b5 landed on master of the FastAPI template. Is the items caching decision still valid?"}
+{"id": "k4", "intent": "recheck", "target": "D2", "ledger": "L2", "query": "Re-validate the NestJS decision's assumptions against the latest main branch."}
+{"id": "k5", "intent": "recheck", "target": "D1", "ledger": "L1", "query": "Check whether PR 2453 breaks anything we assumed for the cache."}
+{"id": "m1", "intent": "memory_recall", "target": "any", "ledger": "L1", "query": "What did I ask you last?"}
+{"id": "m2", "intent": "memory_recall", "target": "D1", "ledger": "L2", "query": "Remind me what we decided about caching in the FastAPI template."}
+{"id": "m3", "intent": "memory_recall", "target": "D2", "ledger": "L2", "query": "Which assumptions were still unresolved in our NestJS decision?"}
+{"id": "m4", "intent": "memory_recall", "target": "any", "ledger": "L2", "query": "Summarize the decisions we've made in this session."}
+{"id": "q1", "intent": "clarify", "target": "none", "ledger": "none", "query": "Add caching to my repo."}
+{"id": "q2", "intent": "recheck", "target": "none", "ledger": "L2", "query": "Recheck our decision against the latest PR.", "relabel": "clarify -> recheck by the student on 2026-10-06, after run 2; any clarifying happens in the agent when the PR's repo cannot be resolved"}
+{"id": "q3", "intent": "clarify", "target": "none", "ledger": "none", "query": "Is it safe?"}
+{"id": "q4", "intent": "clarify", "target": "any", "ledger": "L1", "query": "Can you review the PR?"}
+{"id": "o1", "intent": "out_of_scope", "target": "none", "ledger": "none", "query": "Write me a poem about autumn."}
+{"id": "o2", "intent": "out_of_scope", "target": "none", "ledger": "L1", "query": "Book me a flight to Seattle for Friday."}
+{"id": "o3", "intent": "out_of_scope", "target": "none", "ledger": "none", "query": "What's a good recipe for banana bread?"}
