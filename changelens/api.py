@@ -23,7 +23,11 @@ class ChatResponse(BaseModel):
 
 # One saver per process. Memory is lost on restart. It explains check 4. Cloud Run can also run several instances, so a later request might reach one with no memory of the session.
 graph = build_graph(InMemorySaver())
+
 logger = logging.getLogger(__name__)
+logging.basicConfig(level=logging.INFO)
+
+
 app = FastAPI()
 
 

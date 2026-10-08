@@ -35,6 +35,7 @@ class Settings(BaseSettings):
     synthesis_reserve_s: float = 15.0
     triage_timeout_s: float = 2.0
     llm_max_retries: int = 0
+    llm_timeout_s: float = 30.0
 
 @lru_cache
 def get_settings() -> Settings:
