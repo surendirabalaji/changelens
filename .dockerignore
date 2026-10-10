@@ -1,0 +1,12 @@
+*
+
+!requirements.txt
+!main.py
+!changelens/
+
+**/__pycache__
+**/*.pyc
+**/.env
+**/.env.*
+
+

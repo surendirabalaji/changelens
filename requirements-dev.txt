@@ -1,6 +1,2 @@
-# Development-only tools (probe scripts and doc rendering); not installed in the app image.
--r requirements.txt
-openai==3.24.0            # scripts/bakeoff_llm.py, probe_structured.py, probe_jev.py
-jsonschema==4.26.0        # tool-argument and DecisionRecord validation in probes
-markdown-it-py==4.2.0     # scripts/render_docs.py
-mdit-py-plugins==0.6.1    # scripts/render_docs.py (heading anchors)
+pytest===9.1.1
+pytest-asyncio===1.4.0
