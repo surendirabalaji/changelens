@@ -12,7 +12,7 @@ def get_llm()->ChatOpenAI:
     return ChatOpenAI(
         model = settings.llm_model,
         temperature= 0.2,
-        max_tokens = 1024,
+        max_tokens = 2048,
         timeout=settings.llm_timeout_s,
         max_retries=settings.llm_max_retries,
         api_key = settings.llm_api_key.get_secret_value(),

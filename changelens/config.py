@@ -36,6 +36,8 @@ class Settings(BaseSettings):
     triage_timeout_s: float = 2.0
     llm_max_retries: int = 0
     llm_timeout_s: float = 30.0
+    max_tool_rounds: int = 3
+    mcp_connection_timeout: float = 10.0
 
 @lru_cache
 def get_settings() -> Settings:

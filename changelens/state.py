@@ -8,4 +8,4 @@ class ChangeLensState(TypedDict):
     messages : Annotated[list[AnyMessage], add_messages]
     query: str
     response: str
-
+    tool_rounds: int
