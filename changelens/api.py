@@ -60,7 +60,7 @@ async def validation_exception_handler(
     )
 
 
-@app.get("/healthz")
+@app.get("/health")
 async def get_health() -> dict[str, str]:
     return {"status": "ok"}
 
