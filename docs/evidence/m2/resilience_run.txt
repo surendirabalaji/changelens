@@ -1,0 +1,45 @@
+============================= test session starts ==============================
+platform darwin -- Python 3.12.13, pytest-9.1.1, pluggy-1.6.0 -- /Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/bin/python3.12
+cachedir: .pytest_cache
+rootdir: /Users/surensfolder/Desktop/Agentic AI/assignemnt1
+configfile: pytest.ini
+plugins: asyncio-1.4.0, langsmith-0.14.4, anyio-4.15.1
+asyncio: mode=Mode.AUTO, debug=False, asyncio_default_fixture_loop_scope=None, asyncio_default_test_loop_scope=function
+collecting ... collected 26 items / 15 deselected / 11 selected
+
+tests/resilience/test_faults.py::test_stub_starts_and_restarts PASSED
+RESILIENCE test_stub_starts_and_restarts kind=none attempts=0 elapsed=0.932s breaker=unused scope=connect connect_attempts=0
+
+tests/resilience/test_faults.py::test_success PASSED
+RESILIENCE test_success kind=none attempts=1 elapsed=0.499s breaker=closed scope=tool connect_attempts=1
+
+tests/resilience/test_faults.py::test_refused_connection_opens_breaker PASSED
+RESILIENCE test_refused_connection_opens_breaker kind=transport attempts=2 elapsed=0.013s breaker=open scope=connect connect_attempts=2
+
+tests/resilience/test_faults.py::test_http_fault[401-auth-1] PASSED
+RESILIENCE test_http_fault[401-auth-1] kind=auth attempts=1 elapsed=0.465s breaker=closed scope=connect connect_attempts=1
+
+tests/resilience/test_faults.py::test_http_fault[503-transport-2] PASSED
+RESILIENCE test_http_fault[503-transport-2] kind=transport attempts=2 elapsed=0.477s breaker=open scope=connect connect_attempts=2
+
+tests/resilience/test_faults.py::test_slow_tool_retries_and_opens_breaker PASSED
+RESILIENCE test_slow_tool_retries_and_opens_breaker kind=timeout attempts=2 elapsed=1.496s breaker=open scope=tool connect_attempts=1
+
+tests/resilience/test_faults.py::test_tool_error_is_not_retried PASSED
+RESILIENCE test_tool_error_is_not_retried kind=tool_error attempts=1 elapsed=0.472s breaker=closed scope=tool connect_attempts=1
+
+tests/resilience/test_faults.py::test_malformed_image_response Raw malformed stub response: {'meta': None, 'content': [{'type': 'image', 'data': 'iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8/x8AAwMCAO+jRZkAAAAASUVORK5CYII=', 'mimeType': 'image/png', 'annotations': None, 'meta': None}], 'structuredContent': None, 'isError': False}
+PASSED
+RESILIENCE test_malformed_image_response kind=malformed attempts=1 elapsed=0.491s breaker=closed scope=tool connect_attempts=1
+
+tests/resilience/test_faults.py::test_recovery_after_cooldown PASSED
+RESILIENCE test_recovery_after_cooldown kind=transport attempts=1 elapsed=0.501s breaker=closed scope=tool connect_attempts=3
+
+tests/resilience/test_faults.py::test_graph_answers_from_tool_failure PASSED
+RESILIENCE test_graph_answers_from_tool_failure kind=timeout attempts=2 elapsed=1.496s breaker=open scope=tool connect_attempts=1
+
+tests/resilience/test_faults.py::test_http_answers_from_real_tool_failure PASSED
+RESILIENCE test_http_answers_from_real_tool_failure kind=timeout attempts=2 elapsed=1.500s breaker=open scope=tool connect_attempts=1
+
+
+====================== 11 passed, 15 deselected in 8.43s =======================

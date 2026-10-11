@@ -1,0 +1,2 @@
+{"response":"The latest Uvicorn release documented in the available sources is **version 0.52.0**, released on **July 29, 2026**. This release adds an experimental zttp‑based HTTP/1.1 implementation (enabled with `--http zttp`) and fixes non‑ASCII WebSocket headers when using websockets 17.0.  \n\n*Source: Uvicorn release notes (from the kludex/uvicorn documentation).*\n\nNote: I could not reach web search for this request, so it is not used in this answer."}
+HTTP 200 time=11.057870s

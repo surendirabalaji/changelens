@@ -1,0 +1,2 @@
+{"response":"I’m unable to perform web searches, as that tool is currently unavailable. To get today’s top news about Python 3.14, you’ll need to check a news site, search engine, or Python community channels directly."}
+HTTP 200 time=3.568974s
