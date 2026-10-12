@@ -1,0 +1,2 @@
+{"response":"A Python decorator is a callable that takes a function (or class) as input and returns a modified version of it, allowing you to add or alter behavior without changing the original code."}
+HTTP 200 time=3.209608s

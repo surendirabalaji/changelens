@@ -76,7 +76,7 @@ async def chat(request: ChatRequest) -> ChatResponse:
             {"query": request.query},
             config={"configurable": {"thread_id": request.session_id},
                     "recursion_limit": 2 * settings.max_tool_rounds + 10},
-            context=TurnContext(tools=opened.tools, started_at=started,sources=opened.available, unavailable=opened.unavailable),
+            context=TurnContext(tools=opened.tools,tool_servers=opened.tool_servers, started_at=started,sources=opened.available, unavailable=opened.unavailable),
         )
     except Exception:
         logger.exception("Graph failed")
