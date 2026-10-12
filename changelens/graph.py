@@ -61,10 +61,15 @@ TOOLS_NOTE = (
     "Web search results are short snippets of pages, not complete files. "
     "Quote only text that appears in the results. "
     "Never complete or reconstruct parts you did not see.\n"
-    "When you name a source, use plain words: 'web search', 'library "
-    "documentation' or 'public GitHub repositories'. "
+    "How to name a source: say only 'web search', 'library documentation' "
+    "or 'public GitHub repositories'.\n"
+    "Wrong: 'I called <tool name> and it returned...'.\n"
+    "Right: 'According to library documentation...'.\n"
     "Never write tool names, function names, call ids, citation markers "
-    "such as 【0†L1-L30】, or vendor and product names such as Tavily or Context7."
+    "such as 【0†L1-L30】, or vendor and product names.\n"
+    "Library documentation can be older than the newest release. "
+    "Do not call documentation up to date, current or latest unless a "
+    "source in this turn says so.\n"
 )
 
 UNAVAILABLE_NOTE = (
@@ -73,7 +78,12 @@ UNAVAILABLE_NOTE = (
     "the web page is on their website. If the question needs an unavailable "
     "source, say so first. "
     "If you found the information through web search instead, say it was "
-    "found through web search. Do not say it came from the unavailable source."
+    "found through web search. Do not say it came from the unavailable source.\n"
+    "If the question asks for the latest or newest version, release or "
+    "news, and web search is unavailable, say you could not check for "
+    "the latest information. Say any documentation you used may be older. "
+    "Mention an unavailable source only if the question needed it. "
+    "Otherwise do not mention it."
 )
 
 NO_TOOLS_NOTE = (
@@ -580,8 +590,9 @@ async def render(
             for name in unavailable
         )
         text += (
-            f"\n\nNote: I could not reach {labels} for this request, "
-            "so it is not used in this answer."
+            f"\n\nNote: {labels} was unavailable for this request, so "
+            "anything about the newest releases or news was not checked, "
+            "and documentation used here may be older."
         )
 
     return {"response": text}

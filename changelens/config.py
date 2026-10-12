@@ -36,7 +36,7 @@ class Settings(BaseSettings):
     triage_timeout_s: float = 2.0
     llm_max_retries: int = 0
     llm_timeout_s: float = 30.0
-    max_tool_rounds: int = 3
+    max_tool_rounds: int = 5
     mcp_connect_deadline_s: float = 5
     mcp_retry_jitter_s: float = 0.3
     mcp_connection_timeout: float = 10.0
