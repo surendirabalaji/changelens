@@ -1,0 +1,113 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Process Log — CSCI 599 Assignment 1 (ChangeLens)</title>
+<style>
+:root {
+  --bg: #fbfbfa; --surface: #ffffff; --text: #1f2328; --muted: #59636e; --border: #d8dee4;
+  --accent: #0b6bcb; --code-bg: #f2f4f6; --row-alt: #f6f8fa; --mark: #fff3c4;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1115; --surface: #161a20; --text: #e6e8eb; --muted: #9aa4af; --border: #2c333c;
+    --accent: #6cb6ff; --code-bg: #1d232b; --row-alt: #1a1f26; --mark: #4a3f12;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1115; --surface: #161a20; --text: #e6e8eb; --muted: #9aa4af; --border: #2c333c;
+  --accent: #6cb6ff; --code-bg: #1d232b; --row-alt: #1a1f26; --mark: #4a3f12;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+.layout { display: grid; grid-template-columns: 1fr; max-width: 1280px; margin: 0 auto; padding: 0 16px; }
+@media (min-width: 1100px) { .layout { grid-template-columns: 260px minmax(0, 1fr); gap: 40px; } }
+nav.toc { display: none; }
+@media (min-width: 1100px) {
+  nav.toc { display: block; position: sticky; top: 0; align-self: start; max-height: 100vh; overflow-y: auto;
+    padding: 24px 0; font-size: 14px; }
+}
+nav.toc a { color: var(--muted); text-decoration: none; display: block; padding: 3px 0; }
+nav.toc a:hover { color: var(--accent); }
+nav.toc .h3 { padding-left: 14px; font-size: 13px; }
+nav.toc .home { font-weight: 600; color: var(--text); margin-bottom: 10px; }
+main { min-width: 0; padding: 24px 0 80px; }
+.banner { font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 10px;
+  margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between; }
+.banner button { font: inherit; color: var(--muted); background: none; border: 1px solid var(--border);
+  border-radius: 6px; padding: 2px 10px; cursor: pointer; }
+h1 { font-size: 2em; line-height: 1.25; margin: 0.2em 0 0.6em; }
+h2 { font-size: 1.5em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; margin-top: 2em; }
+h3 { font-size: 1.2em; margin-top: 1.6em; }
+h1, h2, h3, h4 { scroll-margin-top: 16px; }
+a { color: var(--accent); }
+p, li { overflow-wrap: anywhere; }
+code { background: var(--code-bg); border-radius: 4px; padding: 0.1em 0.35em; font-size: 0.88em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+pre { background: var(--code-bg); border-radius: 8px; padding: 14px 16px; overflow-x: auto; font-size: 13.5px;
+  line-height: 1.5; }
+pre code { background: none; padding: 0; font-size: inherit; }
+pre.mermaid { background: var(--surface); border: 1px solid var(--border); text-align: center; }
+blockquote { margin: 1em 0; padding: 0.4em 1em; border-left: 4px solid var(--accent); color: var(--muted);
+  background: var(--surface); border-radius: 0 6px 6px 0; }
+.table-wrap { overflow-x: auto; margin: 1em 0; border: 1px solid var(--border); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; background: var(--surface); }
+th, td { border-bottom: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+th { background: var(--row-alt); font-weight: 600; }
+tr:nth-child(even) td { background: var(--row-alt); }
+tr:last-child td { border-bottom: none; }
+del { color: var(--muted); }
+hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+.index-list { list-style: none; padding: 0; }
+.index-list li { padding: 12px 0; border-bottom: 1px solid var(--border); }
+.index-list .path { color: var(--muted); font-size: 13px; }
+</style>
+
+<script>
+(function () {
+  var key = "changelens-docs-theme";
+  try { var saved = localStorage.getItem(key); if (saved) document.documentElement.dataset.theme = saved; } catch (e) {}
+  window.toggleTheme = function () {
+    var dark = document.documentElement.dataset.theme
+      ? document.documentElement.dataset.theme === "dark"
+      : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var next = dark ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem(key, next); } catch (e) {}
+  };
+})();
+</script>
+
+</head>
+<body>
+<div class="layout">
+<nav class="toc"><a class="home" href="index.html">ChangeLens docs</a><a class="h2" href="#1-ai-tools-used">1. AI tools used</a><a class="h2" href="#2-development-narrative">2. Development narrative</a><a class="h2" href="#3-verification-approach">3. Verification approach</a><a class="h2" href="#4-what-i-learned">4. What I learned</a></nav>
+<main>
+<div class="banner"><span>Generated from <code>docs/PROCESS_LOG.md</code>. Edit the .md file, then run
+<code>python scripts/render_docs.py</code>.</span><span><a href="index.html">All docs</a>
+<button type="button" onclick="toggleTheme()">Light / dark</button></span></div>
+<h1 id="process-log--csci-599-assignment-1-changelens">Process Log — CSCI 599 Assignment 1 (ChangeLens)</h1>
+<h2 id="1-ai-tools-used">1. AI tools used</h2>
+<ul>
+<li><strong>Claude Code</strong> (Anthropic CLI). Main session model: Claude Opus 5.5 (<code>claude-opus-5-5</code>).</li>
+<li><strong>research-architect</strong> (a custom Claude Code subagent, <code>.claude/agents/research-architect.md</code>). Runs on Opus 5.5. It is set up as a senior architect for ideation and system design checked against <code>requirements.md</code>. It can only read files (Read/Grep/Glob).</li>
+<li><strong>process-log-coach</strong> (a custom Claude Code subagent, <code>.claude/agents/process-log-coach.md</code>). Runs on Sonnet. It reminds me to log progress at milestones and collects evidence into <code>docs/process-log-checkpoints.md</code>.</li>
+</ul>
+<h2 id="2-development-narrative">2. Development narrative</h2>
+<p><strong>Design phase (Oct 4–5, 2026).</strong> Before writing any code, I set up <code>requirements.md</code> (my summary of the assignment PDF), <code>CLAUDE.md</code>, and a <code>research-architect</code> subagent to act as a senior architect during ideation. It suggested several AI SaaS ideas. I rejected some because they couldn't use real MCP data without mocking. For example, an AI deployment-monitoring tool needed actual running services to feed it data. After several rounds of ideas I chose a developer &quot;second brain&quot;, narrowed it into ChangeLens, and wrote a planning brief for it. Then I asked the architect for a design-only plan:</p>
+<blockquote>
+<p>&quot;Design and plan ChangeLens using <code>CHANGELENS_ARCHITECTURE_PLANNING_BRIEF.md</code>. First read project-root <code>requirements.md</code>, the supplied assignment PDF, and the professor's clarification. … Stay in design/planning mode: do not implement application code … Distinguish verified facts, assumptions, optional features, and target metrics. … End with the most important unresolved design decisions and the precise evidence needed to settle them.&quot;</p>
+</blockquote>
+<p>The plan it produced, which I approved, uses LangGraph + FastAPI with three MCP servers: GitHub, Context7 and Tavily. Memory is the LangGraph checkpointer keyed by <code>session_id</code>. Every decision in it is still provisional until it passes the access checks (gate G0).</p>
+<!-- Implementation entries go here. Keep the whole narrative to 200–300 words. -->
+<h2 id="3-verification-approach">3. Verification approach</h2>
+<p>Nothing has been verified yet; the project is still in design. The first step is gate G0: list each MCP server's tools and make one real tool call, confirm the GitHub token can't read a private repo, and check that the Dockerfile works as a non-root user.</p>
+<h2 id="4-what-i-learned">4. What I learned</h2>
+<!-- 2–3 sentences in your own words: what the AI tools could not do that you had to work out yourself. -->
+
+</main>
+</div>
+</body>
+</html>

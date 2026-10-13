@@ -1,0 +1,93 @@
+no_tool True 6.8 []
+no_tool True 5.0 []
+no_tool True 5.1 []
+no_tool True 4.5 []
+no_tool True 4.9 []
+no_tool True 5.6 []
+no_tool True 3.8 []
+no_tool True 3.7 []
+no_tool True 3.8 []
+tool True 6.4 ['github'] want ['github']
+tool True 6.6 ['github'] want ['github']
+tool True 9.4 ['github'] want ['github']
+tool True 6.0 ['github'] want ['github']
+tool True 9.6 ['context7'] want ['context7']
+tool True 9.5 ['context7'] want ['context7']
+tool True 9.9 ['context7'] want ['context7']
+tool True 9.8 ['context7'] want ['context7']
+tool True 7.4 ['tavily'] want ['github', 'tavily']
+tool True 5.8 ['tavily'] want ['tavily']
+tool True 7.9 ['tavily'] want ['tavily']
+tool True 7.5 ['tavily'] want ['tavily']
+chain True 10.7 ['context7', 'github'] want ['context7', 'github']
+chain True 10.5 ['context7', 'github'] want ['context7', 'github']
+chain True 8.1 ['github', 'tavily'] want ['github', 'tavily']
+chain True 12.4 ['context7', 'github'] want ['context7', 'github']
+chain True 11.6 ['context7', 'github'] want ['context7', 'github']
+memory 0 True
+memory 1 True
+memory 2 True
+memory 3 True
+isolation own= True leak= False
+review fastapi-template 10.6 {'assumptions': 4, 'grounded': 3, 'tests': 3} evidence 2
+review polar 15.9 {'assumptions': 4, 'grounded': 4, 'tests': 3} evidence 4
+Tool get_file_contents on server github attempt 1 returned error kind=not_found
+review express-realworld 19.4 {'assumptions': 0, 'grounded': 0, 'tests': 0} evidence 2
+Tool get_file_contents on server github attempt 1 returned error kind=not_found
+review nestjs-boilerplate 14.3 {'assumptions': 0, 'grounded': 0, 'tests': 0} evidence 2
+baseline no tools 2.6 None
+Tool get_file_contents on server github attempt 1 returned error kind=not_found
+scenario no_entry_point 41.2
+Tool get_file_contents on server github attempt 1 returned error kind=not_found
+Tool get_file_contents on server github attempt 1 returned error kind=not_found
+Tool get_file_contents on server github attempt 1 returned error kind=not_found
+scenario express_router 22.0
+Tool list_branches on server github attempt 1 returned error kind=not_found
+scenario fake_repo 5.2
+scenario followup_1_review 12.1
+Deserializing unregistered type changelens.schemas.Evidence from checkpoint. This will be blocked in a future version. Set LANGGRAPH_STRICT_MSGPACK=true to block now, or add to allowed_msgpack_modules to allow explicitly: [('changelens.schemas', 'Evidence')]
+Deserializing unregistered type changelens.schemas.DecisionRecord from checkpoint. This will be blocked in a future version. Set LANGGRAPH_STRICT_MSGPACK=true to block now, or add to allowed_msgpack_modules to allow explicitly: [('changelens.schemas', 'DecisionRecord')]
+scenario followup_2_quote 5.3
+scenario followup_3_unverified 3.6
+scenario followup_4_unknown_id 4.1
+scenario invalid_ask_new_session 3.7
+# Evaluation summary
+
+## Tool selection
+- No-tool queries: 9/9 made 0 tool calls
+- Tool-needed queries: 12/12 called an accepted server
+- Overall: 21/21
+- Misses:
+
+## Multi-step chaining
+- 5/5 made 2+ calls across every required server
+- Misses:
+
+## Memory and isolation
+- 5/5 checks passed (recall sessions plus one isolation check)
+
+## Groundedness (check_decision)
+- Reviews that produced a decision record: 4/4
+- Assumptions whose quote matched the saved file text: 7/8
+- Assumptions flagged NOT VERIFIED: 1
+  - fastapi-template: {'assumptions': 4, 'grounded': 3, 'tests': 3} evidence=2 stack=evaluated batch 10.6s 
+  - polar: {'assumptions': 4, 'grounded': 4, 'tests': 3} evidence=4 stack=None 15.9s 
+  - express-realworld: {'assumptions': 0, 'grounded': 0, 'tests': 0} evidence=2 stack=evaluated batch 19.4s 
+  - nestjs-boilerplate: {'assumptions': 0, 'grounded': 0, 'tests': 0} evidence=2 stack=None 14.3s 
+- Baseline, no tools (same request): decision=None, evidence=0
+
+## Latency (seconds, laptop to real services, one run each)
+- chain: n=5 p50=10.7 p95=12.4 max=12.4
+- iso_turn: n=3 p50=3.8 p95=3.8 max=3.8
+- memory_turn: n=9 p50=3.4 p95=4.1 max=4.1
+- no_tool: n=9 p50=4.9 p95=6.8 max=6.8
+- review: n=4 p50=15.1 p95=19.4 max=19.4
+- scenario: n=8 p50=5.2 p95=41.2 max=41.2
+- tool_needed: n=12 p50=7.7 p95=9.8 max=9.9
+- Turns over 60 s: 0/50
+- Turns that errored: 0
+- Agent-call tokens over 50 turns: input 557062, output 9068 (excludes the separate synthesis call)
+
+## Scenario outputs
+See scenarios.jsonl (read the responses; these are judged by hand)
+

@@ -1,0 +1,314 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CSCI 599 Assignment 1 — Tool-Using Agent with MCP Integration</title>
+<style>
+:root {
+  --bg: #fbfbfa; --surface: #ffffff; --text: #1f2328; --muted: #59636e; --border: #d8dee4;
+  --accent: #0b6bcb; --code-bg: #f2f4f6; --row-alt: #f6f8fa; --mark: #fff3c4;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1115; --surface: #161a20; --text: #e6e8eb; --muted: #9aa4af; --border: #2c333c;
+    --accent: #6cb6ff; --code-bg: #1d232b; --row-alt: #1a1f26; --mark: #4a3f12;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1115; --surface: #161a20; --text: #e6e8eb; --muted: #9aa4af; --border: #2c333c;
+  --accent: #6cb6ff; --code-bg: #1d232b; --row-alt: #1a1f26; --mark: #4a3f12;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+.layout { display: grid; grid-template-columns: 1fr; max-width: 1280px; margin: 0 auto; padding: 0 16px; }
+@media (min-width: 1100px) { .layout { grid-template-columns: 260px minmax(0, 1fr); gap: 40px; } }
+nav.toc { display: none; }
+@media (min-width: 1100px) {
+  nav.toc { display: block; position: sticky; top: 0; align-self: start; max-height: 100vh; overflow-y: auto;
+    padding: 24px 0; font-size: 14px; }
+}
+nav.toc a { color: var(--muted); text-decoration: none; display: block; padding: 3px 0; }
+nav.toc a:hover { color: var(--accent); }
+nav.toc .h3 { padding-left: 14px; font-size: 13px; }
+nav.toc .home { font-weight: 600; color: var(--text); margin-bottom: 10px; }
+main { min-width: 0; padding: 24px 0 80px; }
+.banner { font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 10px;
+  margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between; }
+.banner button { font: inherit; color: var(--muted); background: none; border: 1px solid var(--border);
+  border-radius: 6px; padding: 2px 10px; cursor: pointer; }
+h1 { font-size: 2em; line-height: 1.25; margin: 0.2em 0 0.6em; }
+h2 { font-size: 1.5em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; margin-top: 2em; }
+h3 { font-size: 1.2em; margin-top: 1.6em; }
+h1, h2, h3, h4 { scroll-margin-top: 16px; }
+a { color: var(--accent); }
+p, li { overflow-wrap: anywhere; }
+code { background: var(--code-bg); border-radius: 4px; padding: 0.1em 0.35em; font-size: 0.88em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+pre { background: var(--code-bg); border-radius: 8px; padding: 14px 16px; overflow-x: auto; font-size: 13.5px;
+  line-height: 1.5; }
+pre code { background: none; padding: 0; font-size: inherit; }
+pre.mermaid { background: var(--surface); border: 1px solid var(--border); text-align: center; }
+blockquote { margin: 1em 0; padding: 0.4em 1em; border-left: 4px solid var(--accent); color: var(--muted);
+  background: var(--surface); border-radius: 0 6px 6px 0; }
+.table-wrap { overflow-x: auto; margin: 1em 0; border: 1px solid var(--border); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; background: var(--surface); }
+th, td { border-bottom: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+th { background: var(--row-alt); font-weight: 600; }
+tr:nth-child(even) td { background: var(--row-alt); }
+tr:last-child td { border-bottom: none; }
+del { color: var(--muted); }
+hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+.index-list { list-style: none; padding: 0; }
+.index-list li { padding: 12px 0; border-bottom: 1px solid var(--border); }
+.index-list .path { color: var(--muted); font-size: 13px; }
+</style>
+
+<script>
+(function () {
+  var key = "changelens-docs-theme";
+  try { var saved = localStorage.getItem(key); if (saved) document.documentElement.dataset.theme = saved; } catch (e) {}
+  window.toggleTheme = function () {
+    var dark = document.documentElement.dataset.theme
+      ? document.documentElement.dataset.theme === "dark"
+      : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var next = dark ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem(key, next); } catch (e) {}
+  };
+})();
+</script>
+
+</head>
+<body>
+<div class="layout">
+<nav class="toc"><a class="home" href="index.html">ChangeLens docs</a><a class="h2" href="#1-objective">1. Objective</a><a class="h2" href="#2-framework-choice-pick-exactly-one">2. Framework Choice (Pick Exactly One)</a><a class="h2" href="#3-mandatory-functional-requirements">3. Mandatory Functional Requirements</a><a class="h3" href="#31-mcp-integration-minimum-2-servers-3-for-full-credit">3.1 MCP Integration (Minimum 2 servers, 3 for full credit)</a><a class="h3" href="#32-agent-reasoning--tool-selection">3.2 Agent Reasoning &amp; Tool Selection</a><a class="h3" href="#33-conversational-memory">3.3 Conversational Memory</a><a class="h3" href="#34-failure-handling-all-three-categories-required">3.4 Failure Handling (All Three Categories Required)</a><a class="h3" href="#35-api-contract-cloud-run">3.5 API Contract (Cloud Run)</a><a class="h2" href="#4-deployment-requirements-google-cloud-run">4. Deployment Requirements (Google Cloud Run)</a><a class="h3" href="#41-infrastructure">4.1 Infrastructure</a><a class="h3" href="#42-secrets--configuration">4.2 Secrets &amp; Configuration</a><a class="h3" href="#43-llm-backend-options-in-recommended-order">4.3 LLM Backend Options (in recommended order)</a><a class="h2" href="#5-submission-deliverables">5. Submission Deliverables</a><a class="h2" href="#6-process-log-requirements-process_logmd">6. Process Log Requirements (PROCESS_LOG.md)</a><a class="h2" href="#7-rubric-100-base-no-separate-bonus">7. Rubric (100% base, no separate bonus)</a><a class="h2" href="#8-academic-integrity-highlights">8. Academic Integrity Highlights</a></nav>
+<main>
+<div class="banner"><span>Generated from <code>docs/requirements.md</code>. Edit the .md file, then run
+<code>python scripts/render_docs.py</code>.</span><span><a href="index.html">All docs</a>
+<button type="button" onclick="toggleTheme()">Light / dark</button></span></div>
+<h1 id="csci-599-assignment-1--tool-using-agent-with-mcp-integration">CSCI 599 Assignment 1 — Tool-Using Agent with MCP Integration</h1>
+<p><strong>Requirements Specification</strong><br />
+Fall 2026 · Individual Assignment · 15% of course grade</p>
+<hr />
+<h2 id="1-objective">1. Objective</h2>
+<p>Build and deploy an LLM-powered agent that:</p>
+<ul>
+<li>Reasons over user queries</li>
+<li>Selects and invokes tools exposed via <strong>at least two MCP servers</strong></li>
+<li>Uses the real Model Context Protocol (tools/list + tools/call)</li>
+<li>Maintains conversational memory across turns (session-scoped)</li>
+<li>Runs as a live web service on <strong>Google Cloud Run</strong></li>
+</ul>
+<p>This assignment demonstrates learning objectives related to agentic architectures, production framework implementation with MCP, and cloud deployment.</p>
+<hr />
+<h2 id="2-framework-choice-pick-exactly-one">2. Framework Choice (Pick Exactly One)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Framework</th>
+<th>Recommendation</th>
+<th>Primary Docs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>LangGraph</strong></td>
+<td><strong>Strongly recommended</strong> (course tested stack with FastAPI + langchain-mcp-adapters)</td>
+<td>https://docs.langchain.com/oss/python/langgraph/overview</td>
+</tr>
+<tr>
+<td>OpenAI Agents SDK</td>
+<td>Viable</td>
+<td>https://openai.github.io/openai-agents-python/</td>
+</tr>
+<tr>
+<td>Google ADK</td>
+<td>Viable</td>
+<td>https://google.github.io/adk-docs/</td>
+</tr>
+</tbody>
+</table></div>
+<p>Same rubric applies regardless of choice.</p>
+<hr />
+<h2 id="3-mandatory-functional-requirements">3. Mandatory Functional Requirements</h2>
+<h3 id="31-mcp-integration-minimum-2-servers-3-for-full-credit">3.1 MCP Integration (Minimum 2 servers, 3 for full credit)</h3>
+<ul>
+<li>Integrate <strong>≥ 2 MCP servers</strong>. Canonical recommended pair:
+<ul>
+<li><strong>Filesystem MCP</strong> — <code>@modelcontextprotocol/server-filesystem</code> (Node)</li>
+<li><strong>Tavily Search MCP</strong></li>
+</ul>
+</li>
+<li>Additional servers (for the 10% criterion) examples:
+<ul>
+<li><code>@modelcontextprotocol/server-sqlite</code></li>
+<li><code>mcp-server-fetch</code> (or Node equivalent)</li>
+<li>Open-Meteo weather MCP (no key)</li>
+<li>GitHub MCP server</li>
+<li>Student-authored MCP server (must expose ≥1 tool with valid JSON Schema)</li>
+</ul>
+</li>
+</ul>
+<p><strong>Hard requirements</strong>:</p>
+<ul>
+<li>Real MCP protocol usage: <code>tools/list</code> (discovery + input schemas) and <code>tools/call</code></li>
+<li>Framework adapters (e.g. <code>langchain-mcp-adapters</code>) are allowed and recommended</li>
+<li><strong>Papa’s rule</strong>: Hard-coded / simulated tool responses that never touch the wire = <strong>zero credit</strong> on MCP integration</li>
+</ul>
+<h3 id="32-agent-reasoning--tool-selection">3.2 Agent Reasoning &amp; Tool Selection</h3>
+<ul>
+<li>Correctly select the right tool (or no tool) based on query semantics</li>
+<li>Answer from LLM knowledge alone when no tool is needed</li>
+<li>Chain <strong>≥ 2 tool calls</strong> when the task requires multi-step reasoning</li>
+<li>No hard-coded keyword routing</li>
+</ul>
+<h3 id="33-conversational-memory">3.3 Conversational Memory</h3>
+<ul>
+<li>Use the <strong>framework’s built-in memory primitives</strong> only:
+<ul>
+<li>LangGraph → checkpointer (MemorySaver / SQLite / etc.)</li>
+<li>OpenAI Agents SDK → sessions</li>
+<li>Google ADK → equivalent</li>
+</ul>
+</li>
+<li>Memory must be <strong>session-scoped</strong> via a <code>session_id</code> (or thread_id) passed in the request</li>
+<li>Must remember conversation across <strong>≥ 2 turns</strong> while the Cloud Run instance is alive</li>
+<li>Durable persistence across instance replacement / scale-to-zero is <strong>not required</strong></li>
+<li>Custom dictionary-based memory = <strong>loses credit</strong></li>
+</ul>
+<h3 id="34-failure-handling-all-three-categories-required">3.4 Failure Handling (All Three Categories Required)</h3>
+<p>Agent must handle gracefully (no crash, useful response):</p>
+<ol>
+<li><strong>Connection / transport failures</strong> (server unavailable or transport closes)</li>
+<li><strong>Tool execution errors</strong> (valid call reaches server but tool fails)</li>
+<li><strong>Malformed / invalid responses</strong> (unparseable or schema-violating response)</li>
+</ol>
+<h3 id="35-api-contract-cloud-run">3.5 API Contract (Cloud Run)</h3>
+<pre><code>POST /chat
+Content-Type: application/json
+
+Request:
+{
+  &quot;query&quot;: &quot;string&quot;,
+  &quot;session_id&quot;: &quot;string&quot;
+}
+
+Response:
+{
+  &quot;response&quot;: &quot;string&quot;
+}
+</code></pre>
+<ul>
+<li>Must handle arbitrary reasonable queries (not just memorized test cases)</li>
+<li>Service must remain available until grades are posted</li>
+</ul>
+<hr />
+<h2 id="4-deployment-requirements-google-cloud-run">4. Deployment Requirements (Google Cloud Run)</h2>
+<h3 id="41-infrastructure">4.1 Infrastructure</h3>
+<ul>
+<li>Live Cloud Run URL required (localhost-only = zero)</li>
+<li>Multi-stage Docker build</li>
+<li>Non-root runtime user</li>
+<li>Bind to <code>0.0.0.0</code> and read the <code>PORT</code> environment variable (Cloud Run injects it)</li>
+<li>Cloud-accessible LLM backend only (Ollama allowed for local testing only)</li>
+<li>Region recommendation: <code>us-west1</code></li>
+<li><code>--max-instances 1</code> recommended to keep in-memory session state on one instance</li>
+</ul>
+<h3 id="42-secrets--configuration">4.2 Secrets &amp; Configuration</h3>
+<ul>
+<li>No API keys or secrets in source code or git</li>
+<li>Provide <code>.env.example</code> with placeholders</li>
+<li>Use environment variables for all credentials</li>
+<li>Load local <code>.env</code> for development; pass via <code>--set-env-vars</code> for deployment</li>
+</ul>
+<h3 id="43-llm-backend-options-in-recommended-order">4.3 LLM Backend Options (in recommended order)</h3>
+<ol>
+<li>OpenAI GPT-5 (or current equivalent) via <code>OPENAI_API_KEY</code></li>
+<li>NVIDIA NIM free Developer keys (OpenAI-compatible endpoint)</li>
+<li>Gemma via Ollama — <strong>local testing only</strong>, never deploy</li>
+</ol>
+<hr />
+<h2 id="5-submission-deliverables">5. Submission Deliverables</h2>
+<ol>
+<li><strong>Live Cloud Run URL</strong></li>
+<li><strong>Source ZIP</strong> (exclude <code>.env</code>, <code>node_modules</code>, virtualenvs, secrets). Canonical filenames: <code>main.py</code>, <code>deploy.sh</code>, <code>README.md</code>, etc.</li>
+<li><strong>PROCESS_LOG.md</strong> (root of submission)</li>
+<li><strong>README.md</strong> (inside the ZIP) containing:
+<ul>
+<li>Setup, run, and deploy instructions</li>
+<li>Cost disclosure</li>
+<li>Attribution for external MCP servers</li>
+<li><strong>Three required diagrams</strong> that match the actual implementation:
+<ol>
+<li><strong>System Architecture</strong> — endpoint, agent state graph, MCP client, each named MCP server, LLM, memory/checkpointer, request/response arrows</li>
+<li><strong>Tool Invocation Flow</strong> — full loop: query → reasoning → tool selection → MCP tools/call → result → synthesis (with loop-back for additional calls)</li>
+<li><strong>Deployment Topology</strong> — local env → Docker image → Artifact Registry → Cloud Run → live URL + environment-variable flow</li>
+</ol>
+</li>
+</ul>
+</li>
+</ol>
+<hr />
+<h2 id="6-process-log-requirements-process_logmd">6. Process Log Requirements (PROCESS_LOG.md)</h2>
+<p>Must contain (in your own voice):</p>
+<ol>
+<li><strong>AI tools used</strong> — every LLM / tool (Claude, GPT, Gemini, Grok, Copilot, Cursor, Ollama, etc.) + versions if known</li>
+<li><strong>Development narrative</strong> — chronological, 200–300 words, specific productive prompts, what worked / didn’t / how you unblocked</li>
+<li><strong>Verification approach</strong> — how you tested beyond “it ran once” (error injection, multi-turn memory checks, tool inspection, etc.)</li>
+<li><strong>What you learned</strong> — 2–3 sentences on what the AI tools could not do that you had to figure out yourself</li>
+</ol>
+<hr />
+<h2 id="7-rubric-100-base-no-separate-bonus">7. Rubric (100% base, no separate bonus)</h2>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Criterion</th>
+<th>Weight</th>
+<th>Full Credit Expectation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>MCP integration correctness</td>
+<td>25%</td>
+<td>≥2 real MCP servers, real discovery + invocation, correct argument schemas, all 3 failure modes handled</td>
+</tr>
+<tr>
+<td>Agent reasoning &amp; tool selection</td>
+<td>25%</td>
+<td>Correct tool (or no-tool) selection, multi-step chaining when needed</td>
+</tr>
+<tr>
+<td>Memory implementation</td>
+<td>20%</td>
+<td>Framework-native, session-scoped, works across ≥2 turns</td>
+</tr>
+<tr>
+<td>Code quality &amp; documentation</td>
+<td>20%</td>
+<td>Readable code, working deployment, complete README + 3 accurate diagrams, substantive PROCESS_LOG.md</td>
+</tr>
+<tr>
+<td>Additional MCP servers</td>
+<td>10%</td>
+<td>≥3 total servers, actually invoked, rationale documented in README</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="8-academic-integrity-highlights">8. Academic Integrity Highlights</h2>
+<ul>
+<li>Individual work only</li>
+<li>AI-assisted development is <strong>expected and allowed</strong></li>
+<li>Attribute any substantially adapted external code in both comments <strong>and</strong> PROCESS_LOG.md</li>
+<li>MCP server implementations and frameworks do not require special attribution beyond normal imports + README citation of servers used</li>
+</ul>
+<hr />
+<p><em>This document is a clean, structured extraction of the official Assignment 1 description (CSCI 599, Fall 2026). Always refer to the original PDF for authoritative wording.</em></p>
+
+</main>
+</div>
+</body>
+</html>

@@ -1,0 +1,8 @@
+[
+  {
+    "session": "m4-s7",
+    "query": "Review https://github.com/this-owner/does-not-exist-12345 and list its assumptions.",
+    "seconds": 8.2,
+    "response": "The repository https://github.com/this-owner/does-not-exist-12345 could not be found, so no assumptions can be verified or listed."
+  }
+]

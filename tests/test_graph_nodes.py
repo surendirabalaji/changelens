@@ -37,8 +37,9 @@ SETTINGS = Settings(
 )
 
 FOOTER = (
-    "Note: I could not reach public GitHub repositories for this request, "
-    "so it is not used in this answer."
+    "Note: public GitHub repositories was unavailable for this request, so "
+    "anything about the newest releases or news was not checked, and "
+    "documentation used here may be older."
 )
 
 

@@ -1,0 +1,14 @@
+[
+  {
+    "session": "m4-s6",
+    "query": "What is the capital of Australia?",
+    "seconds": 4.0,
+    "response": "The capital of Australia is Canberra."
+  },
+  {
+    "session": "m4-s6",
+    "query": "What did I just ask you?",
+    "seconds": 4.0,
+    "response": "You just asked what the capital of Australia is."
+  }
+]

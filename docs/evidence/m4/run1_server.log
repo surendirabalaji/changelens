@@ -1,0 +1,118 @@
+INFO:     Started server process [78256]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8099 (Press CTRL+C to quit)
+INFO:     127.0.0.1:64898 - "GET /healthz HTTP/1.1" 404 Not Found
+INFO:httpx:HTTP Request: POST https://mcp.context7.com/mcp "HTTP/1.1 200 OK"
+INFO:mcp.client.streamable_http:Negotiated protocol version: 2025-11-25
+INFO:httpx:HTTP Request: POST https://mcp.context7.com/mcp "HTTP/1.1 202 Accepted"
+INFO:httpx:HTTP Request: POST https://mcp.context7.com/mcp "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.session:MCP server context7 loaded 2 tools in 0.89s
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 200 OK"
+INFO:mcp.client.streamable_http:Received session ID: 9689d520-c877-4c8e-87a0-91dd4df182d5
+INFO:mcp.client.streamable_http:Negotiated protocol version: 2025-11-25
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 202 Accepted"
+INFO:httpx:HTTP Request: GET https://api.githubcopilot.com/mcp/ "HTTP/1.1 405 Method Not Allowed"
+INFO:mcp.client.streamable_http:GET stream disconnected, reconnecting in 1000ms...
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.session:MCP server github loaded 6 tools in 1.04s
+INFO:httpx:HTTP Request: POST https://mcp.tavily.com/mcp/ "HTTP/1.1 200 OK"
+INFO:mcp.client.streamable_http:Negotiated protocol version: 2025-11-25
+INFO:httpx:HTTP Request: POST https://mcp.tavily.com/mcp/ "HTTP/1.1 202 Accepted"
+INFO:httpx:HTTP Request: POST https://mcp.tavily.com/mcp/ "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.session:MCP server tavily loaded 1 tools in 0.78s
+INFO:changelens.mcp_tools.session:MCP tools initialized in 2.71s: 9 tools, available=['context7', 'github', 'tavily'], unavailable=[]
+INFO:httpx:HTTP Request: GET https://api.githubcopilot.com/mcp/ "HTTP/1.1 405 Method Not Allowed"
+INFO:httpx2:HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:changelens.graph:Agent LLM call took 5.25s, tool calls requested: ['get_file_contents']
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.guard:mcp_guard server=github tool=get_file_contents is_error=False category=- chars=1978 truncated=False seconds=0.91
+INFO:changelens.graph:Tools round 1: ['get_file_contents'] took 0.92s, statuses=['success']
+INFO:httpx2:HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:changelens.graph:Agent LLM call took 1.73s, tool calls requested: ['get_file_contents']
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.guard:mcp_guard server=github tool=get_file_contents is_error=False category=- chars=6267 truncated=False seconds=0.75
+INFO:changelens.graph:Tools round 2: ['get_file_contents'] took 0.75s, statuses=['success']
+INFO:httpx2:HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:changelens.graph:Agent LLM call took 2.05s, tool calls requested: ['get_file_contents']
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.guard:mcp_guard server=github tool=get_file_contents is_error=False category=- chars=2641 truncated=False seconds=0.57
+INFO:changelens.graph:Tools round 3: ['get_file_contents'] took 0.57s, statuses=['success']
+INFO:httpx2:HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:changelens.graph:Agent LLM call took 4.09s, tool calls requested: ['get_file_contents']
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.guard:mcp_guard server=github tool=get_file_contents is_error=False category=- chars=3528 truncated=False seconds=0.53
+INFO:changelens.graph:Tools round 4: ['get_file_contents'] took 0.53s, statuses=['success']
+INFO:httpx2:HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:changelens.graph:Agent LLM call took 27.32s, tool calls requested: []
+INFO:httpx2:HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+ERROR:changelens.graph:Synthesis failed; preserving the agent response
+Traceback (most recent call last):
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/changelens/graph.py", line 585, in synthesize
+    draft = await asyncio.wait_for(
+            ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.12/3.12.13_2/Frameworks/Python.framework/Versions/3.12/lib/python3.12/asyncio/tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/langchain_core/runnables/base.py", line 3496, in ainvoke
+    input_ = await coro_with_context(part(), context, create_task=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/langchain_core/runnables/base.py", line 6027, in ainvoke
+    return await self.bound.ainvoke(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/langchain_core/language_models/chat_models.py", line 511, in ainvoke
+    llm_result = await self.agenerate_prompt(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/langchain_core/language_models/chat_models.py", line 1888, in agenerate_prompt
+    return await self.agenerate(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/langchain_core/language_models/chat_models.py", line 1846, in agenerate
+    raise exceptions[0]
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/langchain_core/language_models/chat_models.py", line 2179, in _agenerate_with_cache
+    result = await self._agenerate(
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/langchain_openai/chat_models/base.py", line 2293, in _agenerate
+    raise e
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/langchain_openai/chat_models/base.py", line 2244, in _agenerate
+    response = raw_response.parse()
+               ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/openai/_legacy_response.py", line 140, in parse
+    parsed = self._options.post_parser(parsed)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/openai/resources/chat/completions/completions.py", line 1822, in parser
+    return _parse_chat_completion(
+           ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/openai/lib/_parsing/_completions.py", line 110, in parse_chat_completion
+    raise LengthFinishReasonError(completion=chat_completion)
+openai.LengthFinishReasonError: Could not parse response content as the length limit was reached - CompletionUsage(completion_tokens=2048, prompt_tokens=1686, total_tokens=3734, completion_tokens_details=CompletionTokensDetails(accepted_prediction_tokens=None, audio_tokens=None, reasoning_tokens=1795, rejected_prediction_tokens=None, text_tokens=None), prompt_tokens_details=PromptTokensDetails(audio_tokens=None, cache_write_tokens=None, cached_tokens=0, image_tokens=None, text_tokens=None))
+ERROR:changelens.graph:Empty model reply: finish_reason='length', content=''
+ERROR:changelens.api:Graph failed
+Traceback (most recent call last):
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/changelens/api.py", line 75, in chat
+    result = await graph.ainvoke(
+             ^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/langgraph/pregel/main.py", line 4155, in ainvoke
+    async for chunk in self.astream(
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/langgraph/pregel/main.py", line 3505, in astream
+    async for _ in runner.atick(
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/langgraph/pregel/_runner.py", line 397, in atick
+    await arun_with_retry(
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/langgraph/pregel/_retry.py", line 744, in arun_with_retry
+    return await task.proc.ainvoke(task.input, config)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/langgraph/_internal/_runnable.py", line 756, in ainvoke
+    input = await asyncio.create_task(
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/langgraph/_internal/_runnable.py", line 522, in ainvoke
+    ret = await self.afunc(*args, **kwargs)
+          ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/changelens/graph.py", line 849, in render
+    raise ValueError(
+ValueError: Model reached its output limit before producing answer text
+During task with name 'render' and id '69354546-e56c-f29e-014a-40885ad316ab'
+INFO:httpx:HTTP Request: DELETE https://api.githubcopilot.com/mcp/ "HTTP/1.1 204 No Content"
+INFO:     127.0.0.1:64900 - "POST /chat HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [78256]

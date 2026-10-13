@@ -1,0 +1,61 @@
+INFO:     Started server process [78422]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8099 (Press CTRL+C to quit)
+INFO:httpx:HTTP Request: POST https://mcp.context7.com/mcp "HTTP/1.1 200 OK"
+INFO:mcp.client.streamable_http:Negotiated protocol version: 2025-11-25
+INFO:httpx:HTTP Request: POST https://mcp.context7.com/mcp "HTTP/1.1 202 Accepted"
+INFO:httpx:HTTP Request: POST https://mcp.context7.com/mcp "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.session:MCP server context7 loaded 2 tools in 0.81s
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 200 OK"
+INFO:mcp.client.streamable_http:Received session ID: 1880e2fe-7bd9-438c-b25d-d57f21790507
+INFO:mcp.client.streamable_http:Negotiated protocol version: 2025-11-25
+INFO:httpx:HTTP Request: GET https://api.githubcopilot.com/mcp/ "HTTP/1.1 405 Method Not Allowed"
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 202 Accepted"
+INFO:mcp.client.streamable_http:GET stream disconnected, reconnecting in 1000ms...
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.session:MCP server github loaded 6 tools in 1.06s
+INFO:httpx:HTTP Request: POST https://mcp.tavily.com/mcp/ "HTTP/1.1 200 OK"
+INFO:mcp.client.streamable_http:Negotiated protocol version: 2025-11-25
+INFO:httpx:HTTP Request: POST https://mcp.tavily.com/mcp/ "HTTP/1.1 202 Accepted"
+INFO:httpx:HTTP Request: GET https://api.githubcopilot.com/mcp/ "HTTP/1.1 405 Method Not Allowed"
+INFO:httpx:HTTP Request: POST https://mcp.tavily.com/mcp/ "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.session:MCP server tavily loaded 1 tools in 0.88s
+INFO:changelens.mcp_tools.session:MCP tools initialized in 2.76s: 9 tools, available=['context7', 'github', 'tavily'], unavailable=[]
+INFO:httpx2:HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:changelens.graph:Agent LLM call took 2.90s, tool calls requested: ['get_commit']
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.guard:mcp_guard server=github tool=get_commit is_error=False category=- chars=909 truncated=False seconds=0.94
+INFO:changelens.graph:Tools round 1: ['get_commit'] took 0.94s, statuses=['success']
+INFO:httpx2:HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:changelens.graph:Agent LLM call took 1.14s, tool calls requested: ['get_file_contents']
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.guard:mcp_guard server=github tool=get_file_contents is_error=False category=- chars=1978 truncated=False seconds=0.70
+INFO:changelens.graph:Tools round 2: ['get_file_contents'] took 0.71s, statuses=['success']
+INFO:httpx2:HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:changelens.graph:Agent LLM call took 1.15s, tool calls requested: ['get_file_contents']
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.guard:mcp_guard server=github tool=get_file_contents is_error=False category=- chars=5630 truncated=False seconds=0.86
+INFO:changelens.graph:Tools round 3: ['get_file_contents'] took 0.86s, statuses=['success']
+INFO:httpx2:HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:changelens.graph:Agent LLM call took 1.29s, tool calls requested: ['get_file_contents']
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.guard:mcp_guard server=github tool=get_file_contents is_error=False category=- chars=6267 truncated=False seconds=0.95
+INFO:changelens.graph:Tools round 4: ['get_file_contents'] took 0.95s, statuses=['success']
+INFO:httpx2:HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:changelens.graph:Agent LLM call took 1.33s, tool calls requested: ['get_file_contents']
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.guard:mcp_guard server=github tool=get_file_contents is_error=False category=- chars=2641 truncated=False seconds=0.51
+INFO:changelens.graph:Tools round 5: ['get_file_contents'] took 0.51s, statuses=['success']
+INFO:httpx2:HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:changelens.graph:Agent LLM call took 5.12s, tool calls requested: ['get_file_contents']
+WARNING:changelens.graph:Model requested tools while none were bound: ['get_file_contents']
+INFO:httpx2:HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:changelens.graph:Final-answer retry took 6.15s
+INFO:httpx2:HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: DELETE https://api.githubcopilot.com/mcp/ "HTTP/1.1 204 No Content"
+INFO:     127.0.0.1:65080 - "POST /chat HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [78422]

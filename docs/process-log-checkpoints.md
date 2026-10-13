@@ -226,3 +226,32 @@ Each entry: ID, date, type, summary, evidence paths, AI tools, status, open ques
   - The coach did not read the scripts, raw JSONL or `docs/evidence/g0/**`.
   - Unknown: rate limits, Context7 quota, Jev data retention and how long the key stays valid.
   - Pending: held-out validation of policy v2 (M3) and Cloud Run measurements (M1).
+
+---
+
+## CP-004 | 2026-10-13 | Build phase M1 to M4 (Workflow A)
+
+- **Baseline:** CP-003 (M0, 8865a22 / PR #5). Current: d95ff10 "m3 - completed" on feature/m3 (not merged); feature/m4 has uncommitted changes: M changelens/graph.py, state.py; new changelens/evidence.py, report.py, schemas.py, stack.py, triage.py; docs/evidence/m4/. Merged since CP-003: PR #6 (M1 skeleton and Cloud Run deploy), PR #7 (M2 failure handling).
+- **Milestones reviewed:**
+  - M1 skeleton and deploy: no evidence file in docs/evidence/; Cloud Run result unverified.
+  - M2 resilience: docs/evidence/m2/resilience_run.txt (11 selected tests, 9 visible PASSED in lines 1-40), live logs A-app.log, B-app.log, A1-A5, B1-B2 (contents not read).
+  - M3 tool selection and chaining: docs/evidence/m3/01_no_tool.txt, 02_manifest_context7_chain.txt (GitHub x3 then Context7, 9 tools from 3 servers loaded in 2.56 s), 03_tavily.txt; README diagrams (not checked against code).
+  - M4 Workflow A: docs/evidence/m4/README.md. run1 failed at 66.2 s (LengthFinishReasonError, max_tokens 2048); run2 38.6 s, 0 assumptions; run3 49.3 s, 4/4 grounded, 4 tests not executed. Target fastapi/full-stack-fastapi-template @ e99fbae.
+- **Student-reported (no artifact):** student wrote most code with Claude coaching in Guide mode; Claude wrote M4 step 7 (report.py/render) on explicit request and applied the Claude-proposed live-run fixes only as snippets the student pasted. Student fixed: async def on pure helpers, TypedDict vs BaseModel, wrong boolean in evidence.py, wrong object passed to detect_stack, deleted schema classes, missing graph edge, duplicate edge. Live-run bugs: max_tokens 2048 starving structured output; tool budget spent on directory listings.
+- **Deviations:** no commit_memory node, no repair loop, no Jev triage (regex), no pytest files for M4 modules, 3 older tests failing since M3 (render footer text, guard structuredContent, api test).
+- **AI tools observed:** Claude Code (main session); research-architect; coding-coach subagent (model not confirmed); process-log-coach Sonnet 5.5 (claude-sonnet-5-5); runtime nemotron-3-super-120b-a12b via NIM; Jev jev-1.13.0 (not wired into the app yet). Outside-session AI use: UNCONFIRMED.
+- **Flags:**
+  - PROCESS_LOG.md is at docs/PROCESS_LOG.md. requirements.md section 5 (line 127) says root of submission, and no root copy exists (confirmed 2026-10-13).
+  - Log sections are stale (see Status).
+- **Reminder:** delivered 2026-10-13.
+- **Status:** ALL PENDING. PROCESS_LOG.md still covers only the CP-001 design phase (checked 2026-10-13: section 1 lacks Nemotron, Jev, coding-coach; section 3 says nothing verified; section 4 empty). Carried over pending from CP-001..003: v3 redesign and D18, S0b/S0c, M0 results, F8 professor answer.
+- **Open questions (student, own voice):**
+  - Q1. Which fixed bug took longest, and how did you find it?
+  - Q2. What made you suspect max_tokens (run1) and the directory-listing budget (run2)? Which fix was yours?
+  - Q3. Why did you ask Claude to write step 7, and what did you check afterwards?
+  - Q4. Why was Jev triage deferred? Is it a time decision?
+  - Q5. What did the AI coaching not resolve that you worked out yourself?
+  - Q6. Any M1 evidence (Cloud Run URL, latency, curl output)? Did you decide to merge M3 before M4?
+  - Carried from CP-003: triage labels review (Q5), Q6.
+- **Next baseline:** CP-004. Next checkpoint covers the PROCESS_LOG.md update, M3 merge, M4 commit and tests, and any final submission review.
+- **Evidence gaps:** no M1 evidence; m2/m3 contents beyond the excerpts not read; M4 raw run files and source not read by the coach; test run status after M3 unknown; Cloud Run latency unmeasured.

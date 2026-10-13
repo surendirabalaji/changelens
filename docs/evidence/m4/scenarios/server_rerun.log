@@ -1,0 +1,204 @@
+INFO:     Started server process [80354]
+INFO:     Waiting for application startup.
+INFO:     Application startup complete.
+INFO:     Uvicorn running on http://127.0.0.1:8099 (Press CTRL+C to quit)
+INFO:httpx:HTTP Request: POST https://mcp.context7.com/mcp "HTTP/1.1 200 OK"
+INFO:mcp.client.streamable_http:Negotiated protocol version: 2025-11-25
+INFO:httpx:HTTP Request: POST https://mcp.context7.com/mcp "HTTP/1.1 202 Accepted"
+INFO:httpx:HTTP Request: POST https://mcp.context7.com/mcp "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.session:MCP server context7 loaded 2 tools in 0.82s
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 200 OK"
+INFO:mcp.client.streamable_http:Received session ID: d6e711ba-9886-4916-a9c8-0ed411adcc1f
+INFO:mcp.client.streamable_http:Negotiated protocol version: 2025-11-25
+INFO:httpx:HTTP Request: GET https://api.githubcopilot.com/mcp/ "HTTP/1.1 405 Method Not Allowed"
+INFO:mcp.client.streamable_http:GET stream disconnected, reconnecting in 1000ms...
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 202 Accepted"
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.session:MCP server github loaded 6 tools in 1.08s
+INFO:httpx:HTTP Request: POST https://mcp.tavily.com/mcp/ "HTTP/1.1 200 OK"
+INFO:mcp.client.streamable_http:Negotiated protocol version: 2025-11-25
+INFO:httpx:HTTP Request: POST https://mcp.tavily.com/mcp/ "HTTP/1.1 202 Accepted"
+INFO:httpx:HTTP Request: GET https://api.githubcopilot.com/mcp/ "HTTP/1.1 405 Method Not Allowed"
+INFO:httpx:HTTP Request: POST https://mcp.tavily.com/mcp/ "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.session:MCP server tavily loaded 1 tools in 0.95s
+INFO:changelens.mcp_tools.session:MCP tools initialized in 2.86s: 9 tools, available=['context7', 'github', 'tavily'], unavailable=[]
+INFO:httpx2:HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:changelens.graph:Agent LLM call took 3.18s, tool calls requested: ['list_branches']
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.guard:mcp_guard server=github tool=list_branches is_error=False category=- chars=1431 truncated=False seconds=0.86
+INFO:changelens.graph:Tools round 1: ['list_branches'] took 0.87s, statuses=['success']
+INFO:httpx2:HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:changelens.graph:Agent LLM call took 1.50s, tool calls requested: ['get_file_contents']
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.guard:mcp_guard server=github tool=get_file_contents is_error=False category=- chars=2813 truncated=False seconds=0.90
+INFO:changelens.graph:Tools round 2: ['get_file_contents'] took 0.90s, statuses=['success']
+INFO:httpx2:HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:changelens.graph:Agent LLM call took 1.57s, tool calls requested: ['get_file_contents']
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.guard:mcp_guard server=github tool=get_file_contents is_error=True category=not_found chars=122 truncated=False seconds=0.96
+WARNING:changelens.graph:Tool get_file_contents on server github attempt 1 returned error kind=not_found
+INFO:changelens.graph:Tools round 3: ['get_file_contents'] took 0.97s, statuses=['error']
+INFO:httpx2:HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:changelens.graph:Agent LLM call took 1.09s, tool calls requested: ['get_file_contents']
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.guard:mcp_guard server=github tool=get_file_contents is_error=False category=- chars=3550 truncated=False seconds=0.73
+INFO:changelens.graph:Tools round 4: ['get_file_contents'] took 0.73s, statuses=['success']
+INFO:httpx2:HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:changelens.graph:Agent LLM call took 1.74s, tool calls requested: ['search_code']
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.guard:mcp_guard server=github tool=search_code is_error=False category=- chars=11776 truncated=True seconds=2.17
+INFO:changelens.graph:Tools round 5: ['search_code'] took 2.17s, statuses=['success']
+INFO:httpx2:HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:changelens.graph:Agent LLM call took 2.63s, tool calls requested: ['search_code']
+WARNING:changelens.graph:Model requested tools while none were bound: ['search_code']
+INFO:httpx2:HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:changelens.graph:Final-answer retry took 3.28s
+INFO:httpx2:HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:httpx:HTTP Request: DELETE https://api.githubcopilot.com/mcp/ "HTTP/1.1 204 No Content"
+INFO:     127.0.0.1:49826 - "POST /chat HTTP/1.1" 200 OK
+INFO:httpx:HTTP Request: POST https://mcp.context7.com/mcp "HTTP/1.1 200 OK"
+INFO:mcp.client.streamable_http:Negotiated protocol version: 2025-11-25
+INFO:httpx:HTTP Request: POST https://mcp.context7.com/mcp "HTTP/1.1 202 Accepted"
+INFO:httpx:HTTP Request: POST https://mcp.context7.com/mcp "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.session:MCP server context7 loaded 2 tools in 0.77s
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 200 OK"
+INFO:mcp.client.streamable_http:Received session ID: c91a744f-6b04-42d2-bcab-7d6e68f54836
+INFO:mcp.client.streamable_http:Negotiated protocol version: 2025-11-25
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 202 Accepted"
+INFO:httpx:HTTP Request: GET https://api.githubcopilot.com/mcp/ "HTTP/1.1 405 Method Not Allowed"
+INFO:mcp.client.streamable_http:GET stream disconnected, reconnecting in 1000ms...
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.session:MCP server github loaded 6 tools in 1.00s
+INFO:httpx:HTTP Request: POST https://mcp.tavily.com/mcp/ "HTTP/1.1 200 OK"
+INFO:mcp.client.streamable_http:Negotiated protocol version: 2025-11-25
+INFO:httpx:HTTP Request: POST https://mcp.tavily.com/mcp/ "HTTP/1.1 202 Accepted"
+INFO:httpx:HTTP Request: POST https://mcp.tavily.com/mcp/ "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.session:MCP server tavily loaded 1 tools in 0.76s
+INFO:changelens.mcp_tools.session:MCP tools initialized in 2.52s: 9 tools, available=['context7', 'github', 'tavily'], unavailable=[]
+INFO:httpx:HTTP Request: GET https://api.githubcopilot.com/mcp/ "HTTP/1.1 405 Method Not Allowed"
+INFO:httpx2:HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:changelens.graph:Agent LLM call took 10.33s, tool calls requested: ['get_file_contents']
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.guard:mcp_guard server=github tool=get_file_contents is_error=False category=- chars=1978 truncated=False seconds=0.70
+INFO:changelens.graph:Tools round 1: ['get_file_contents'] took 0.70s, statuses=['success']
+INFO:httpx2:HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:changelens.graph:Agent LLM call took 1.19s, tool calls requested: ['get_file_contents']
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.guard:mcp_guard server=github tool=get_file_contents is_error=False category=- chars=3528 truncated=False seconds=0.62
+INFO:changelens.graph:Tools round 2: ['get_file_contents'] took 0.62s, statuses=['success']
+INFO:httpx2:HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:changelens.graph:Agent LLM call took 16.05s, tool calls requested: []
+ERROR:changelens.graph:Synthesis failed; preserving the agent response
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.12/3.12.13_2/Frameworks/Python.framework/Versions/3.12/lib/python3.12/asyncio/tasks.py", line 520, in wait_for
+    return await fut
+           ^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/langchain_core/runnables/base.py", line 3496, in ainvoke
+    input_ = await coro_with_context(part(), context, create_task=True)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/langchain_core/runnables/base.py", line 6027, in ainvoke
+    return await self.bound.ainvoke(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/langchain_core/language_models/chat_models.py", line 511, in ainvoke
+    llm_result = await self.agenerate_prompt(
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/langchain_core/language_models/chat_models.py", line 1888, in agenerate_prompt
+    return await self.agenerate(
+           ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/langchain_core/language_models/chat_models.py", line 1808, in agenerate
+    results = await asyncio.gather(
+              ^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/langchain_core/language_models/chat_models.py", line 2179, in _agenerate_with_cache
+    result = await self._agenerate(
+             ^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/langchain_openai/chat_models/base.py", line 2241, in _agenerate
+    raw_response = await self.root_async_client.chat.completions.with_raw_response.parse(  # noqa: E501
+                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/openai/_legacy_response.py", line 386, in wrapped
+    return cast(LegacyAPIResponse[R], await func(*args, **kwargs))
+                                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/openai/resources/chat/completions/completions.py", line 1828, in parse
+    return await self._post(
+           ^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/openai/_base_client.py", line 2053, in post
+    return await self.request(cast_to, opts, stream=stream, stream_cls=stream_cls)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/openai/_base_client.py", line 1773, in request
+    response = await self._send_request(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/openai/_client.py", line 1361, in _send_request
+    response = await self._send_with_auth_retry(request, stream=stream, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/openai/_client.py", line 1340, in _send_with_auth_retry
+    response = await super()._send_request(request, stream=stream, **kwargs)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/openai/_base_client.py", line 1690, in _send_request
+    return await self._client.send(request, stream=stream, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/httpx2/_client.py", line 1818, in send
+    response = await self._send_handling_auth(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/httpx2/_client.py", line 1846, in _send_handling_auth
+    response = await self._send_handling_redirects(
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/httpx2/_client.py", line 1881, in _send_handling_redirects
+    response = await self._send_single_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/httpx2/_client.py", line 1915, in _send_single_request
+    response = await transport.handle_async_request(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/httpx2/_transports/default.py", line 388, in handle_async_request
+    resp = await self._pool.handle_async_request(req)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/httpcore2/_async/connection_pool.py", line 242, in handle_async_request
+    raise exc from None
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/httpcore2/_async/connection_pool.py", line 224, in handle_async_request
+    response = await connection.handle_async_request(pool_request.request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/httpcore2/_async/connection.py", line 96, in handle_async_request
+    return await self._connection.handle_async_request(request)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/httpcore2/_async/http11.py", line 125, in handle_async_request
+    raise exc
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/httpcore2/_async/http11.py", line 97, in handle_async_request
+    ) = await self._receive_response_headers(**kwargs)
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/httpcore2/_async/http11.py", line 167, in _receive_response_headers
+    event = await self._receive_event(timeout=timeout)
+            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/httpcore2/_async/http11.py", line 200, in _receive_event
+    data = await self._network_stream.read(self.READ_NUM_BYTES, timeout=timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/httpcore2/_backends/anyio.py", line 37, in read
+    return await self._stream.receive(max_bytes=max_bytes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/anyio/streams/tls.py", line 254, in receive
+    data = await self._call_sslobject_method(self._ssl_object.read, max_bytes)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/anyio/streams/tls.py", line 194, in _call_sslobject_method
+    data = await self.transport_stream.receive()
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/.venv/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 1407, in receive
+    await self._protocol.read_event.wait()
+  File "/opt/homebrew/Cellar/python@3.12/3.12.13_2/Frameworks/Python.framework/Versions/3.12/lib/python3.12/asyncio/locks.py", line 212, in wait
+    await fut
+asyncio.exceptions.CancelledError
+
+The above exception was the direct cause of the following exception:
+
+Traceback (most recent call last):
+  File "/Users/surensfolder/Desktop/Agentic AI/assignemnt1/changelens/graph.py", line 595, in synthesize
+    draft = await asyncio.wait_for(
+            ^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.12/3.12.13_2/Frameworks/Python.framework/Versions/3.12/lib/python3.12/asyncio/tasks.py", line 519, in wait_for
+    async with timeouts.timeout(timeout):
+               ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.12/3.12.13_2/Frameworks/Python.framework/Versions/3.12/lib/python3.12/asyncio/timeouts.py", line 115, in __aexit__
+    raise TimeoutError from exc_val
+TimeoutError
+INFO:httpx:HTTP Request: DELETE https://api.githubcopilot.com/mcp/ "HTTP/1.1 204 No Content"
+INFO:     127.0.0.1:49847 - "POST /chat HTTP/1.1" 200 OK
+INFO:     Shutting down
+INFO:     Waiting for application shutdown.
+INFO:     Application shutdown complete.
+INFO:     Finished server process [80354]

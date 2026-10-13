@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>run3_response</title>
+<style>
+:root {
+  --bg: #fbfbfa; --surface: #ffffff; --text: #1f2328; --muted: #59636e; --border: #d8dee4;
+  --accent: #0b6bcb; --code-bg: #f2f4f6; --row-alt: #f6f8fa; --mark: #fff3c4;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1115; --surface: #161a20; --text: #e6e8eb; --muted: #9aa4af; --border: #2c333c;
+    --accent: #6cb6ff; --code-bg: #1d232b; --row-alt: #1a1f26; --mark: #4a3f12;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1115; --surface: #161a20; --text: #e6e8eb; --muted: #9aa4af; --border: #2c333c;
+  --accent: #6cb6ff; --code-bg: #1d232b; --row-alt: #1a1f26; --mark: #4a3f12;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+.layout { display: grid; grid-template-columns: 1fr; max-width: 1280px; margin: 0 auto; padding: 0 16px; }
+@media (min-width: 1100px) { .layout { grid-template-columns: 260px minmax(0, 1fr); gap: 40px; } }
+nav.toc { display: none; }
+@media (min-width: 1100px) {
+  nav.toc { display: block; position: sticky; top: 0; align-self: start; max-height: 100vh; overflow-y: auto;
+    padding: 24px 0; font-size: 14px; }
+}
+nav.toc a { color: var(--muted); text-decoration: none; display: block; padding: 3px 0; }
+nav.toc a:hover { color: var(--accent); }
+nav.toc .h3 { padding-left: 14px; font-size: 13px; }
+nav.toc .home { font-weight: 600; color: var(--text); margin-bottom: 10px; }
+main { min-width: 0; padding: 24px 0 80px; }
+.banner { font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 10px;
+  margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between; }
+.banner button { font: inherit; color: var(--muted); background: none; border: 1px solid var(--border);
+  border-radius: 6px; padding: 2px 10px; cursor: pointer; }
+h1 { font-size: 2em; line-height: 1.25; margin: 0.2em 0 0.6em; }
+h2 { font-size: 1.5em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; margin-top: 2em; }
+h3 { font-size: 1.2em; margin-top: 1.6em; }
+h1, h2, h3, h4 { scroll-margin-top: 16px; }
+a { color: var(--accent); }
+p, li { overflow-wrap: anywhere; }
+code { background: var(--code-bg); border-radius: 4px; padding: 0.1em 0.35em; font-size: 0.88em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+pre { background: var(--code-bg); border-radius: 8px; padding: 14px 16px; overflow-x: auto; font-size: 13.5px;
+  line-height: 1.5; }
+pre code { background: none; padding: 0; font-size: inherit; }
+pre.mermaid { background: var(--surface); border: 1px solid var(--border); text-align: center; }
+blockquote { margin: 1em 0; padding: 0.4em 1em; border-left: 4px solid var(--accent); color: var(--muted);
+  background: var(--surface); border-radius: 0 6px 6px 0; }
+.table-wrap { overflow-x: auto; margin: 1em 0; border: 1px solid var(--border); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; background: var(--surface); }
+th, td { border-bottom: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+th { background: var(--row-alt); font-weight: 600; }
+tr:nth-child(even) td { background: var(--row-alt); }
+tr:last-child td { border-bottom: none; }
+del { color: var(--muted); }
+hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+.index-list { list-style: none; padding: 0; }
+.index-list li { padding: 12px 0; border-bottom: 1px solid var(--border); }
+.index-list .path { color: var(--muted); font-size: 13px; }
+</style>
+
+<script>
+(function () {
+  var key = "changelens-docs-theme";
+  try { var saved = localStorage.getItem(key); if (saved) document.documentElement.dataset.theme = saved; } catch (e) {}
+  window.toggleTheme = function () {
+    var dark = document.documentElement.dataset.theme
+      ? document.documentElement.dataset.theme === "dark"
+      : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var next = dark ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem(key, next); } catch (e) {}
+  };
+})();
+</script>
+
+</head>
+<body>
+<div class="layout">
+<nav class="toc"><a class="home" href="../../index.html">ChangeLens docs</a><a class="h2" href="#decision-review-proposed-not-accepted">Decision review (proposed, not accepted)</a><a class="h3" href="#assumptions">Assumptions</a><a class="h3" href="#suggested-tests-not-executed">Suggested tests (not executed)</a></nav>
+<main>
+<div class="banner"><span>Generated from <code>docs/evidence/m4/run3_response.md</code>. Edit the .md file, then run
+<code>python scripts/render_docs.py</code>.</span><span><a href="../../index.html">All docs</a>
+<button type="button" onclick="toggleTheme()">Light / dark</button></span></div>
+<p>Changing the list endpoint from offset-based pagination (skip/limit) to cursor pagination could break the following assumptions:</p>
+<ol>
+<li>
+<p><strong>Client expectations of arbitrary page jumping</strong> - Clients currently using <code>skip</code> to jump to specific pages (e.g., page 100) would need to change their approach since cursor pagination doesn't support direct page jumping without traversing from the beginning.</p>
+</li>
+<li>
+<p><strong>Total count dependency</strong> - The current endpoint returns a <code>count</code> of total items (line 31-32 in items.py). Cursor pagination typically doesn't provide an efficient total count, so clients relying on this count for UI elements (like &quot;X of Y items&quot; or total page calculations) would break.</p>
+</li>
+<li>
+<p><strong>Parameter contract change</strong> - The endpoint currently accepts <code>skip</code> and <code>limit</code> query parameters (line 20). Switching to cursor pagination would require changing these to <code>cursor</code> and <code>limit</code> (or similar), breaking any existing client code that sends <code>skip</code>/<code>limit</code>.</p>
+</li>
+<li>
+<p><strong>Ordering stability requirements</strong> - Cursor pagination requires a unique, stable ordering. The current ordering by <code>created_at.desc()</code> (lines 26 and 38) might produce inconsistent results if items have identical timestamps, requiring additional tie-breakers (like item ID) to ensure consistency.</p>
+</li>
+<li>
+<p><strong>Response structure change</strong> - The current <code>ItemsPublic</code> response model includes <code>data</code> and <code>count</code> fields (line 20). Cursor pagination would likely return different metadata (like <code>next_cursor</code>/<code>prev_cursor</code> instead of <code>count</code>), requiring updates to client response handling.</p>
+</li>
+<li>
+<p><strong>Security filtering consistency</strong> - The endpoint has different queries for superusers vs regular users (lines 24-29 vs 33-39). Any cursor implementation must preserve this same access control logic to avoid breaking security assumptions.</p>
+</li>
+<li>
+<p><strong>Performance characteristics</strong> - While cursor pagination is more efficient for large datasets, clients might have been optimized around the offset-based performance profile (e.g., avoiding large skip values).</p>
+</li>
+<li>
+<p><strong>Test suite compatibility</strong> - Existing tests that validate skip/limit behavior, count values, or specific page results would need updating.</p>
+</li>
+<li>
+<p><strong>API documentation consumers</strong> - Any generated OpenAPI/Swagger documentation or API consumers relying on the current parameter definitions would need updates.</p>
+</li>
+<li>
+<p><strong>Cacheability assumptions</strong> - Clients might be caching results based on skip/limit parameters, which would become invalid with the new cursor-based approach.</p>
+</li>
+</ol>
+<p>These assumptions are derived from examining the current implementation in <code>backend/app/api/routes/items.py</code> where the endpoint uses offset-based pagination with skip/limit parameters, returns a total count, and has separate query paths for superuser and regular users. The <code>backend/pyproject.toml</code> shows the project uses FastAPI and SQLModel, which would need to be considered when implementing cursor pagination.</p>
+<h2 id="decision-review-proposed-not-accepted">Decision review (proposed, not accepted)</h2>
+<p>Proposed change: Replace offset/limit pagination with cursor-based pagination on the /items list endpoint.
+Stack: fastapi &gt;=0.141.1,&lt;1.0.0 - evaluated batch</p>
+<h3 id="assumptions">Assumptions</h3>
+<ul>
+<li>A1: The endpoint expects skip and limit query parameters for pagination (&quot;skip: int = 0, limit: int = 100&quot;) [dd28c975995505bd].
+Quote: &quot;skip: int = 0, limit: int = 100&quot;
+Source: backend/app/api/routes/items.py@e99fbaeba3b55190156ebae525ad9d481d76677e [dd28c975995505bd]</li>
+<li>A2: The response includes a count field representing total number of items (&quot;return ItemsPublic(data=items_public, count=count)&quot;) [dd28c975995505bd].
+Quote: &quot;return ItemsPublic(data=items_public, count=count)&quot;
+Source: backend/app/api/routes/items.py@e99fbaeba3b55190156ebae525ad9d481d76677e [dd28c975995505bd]</li>
+<li>A3: Items are ordered by created_at descending (&quot;order_by(col(Item.created_at).desc())&quot;) [dd28c975995505bd].
+Quote: &quot;order_by(col(Item.created_at).desc())&quot;
+Source: backend/app/api/routes/items.py@e99fbaeba3b55190156ebae525ad9d481d76677e [dd28c975995505bd]</li>
+<li>A4: Pagination is implemented via offset and limit (skip/limit) (&quot;.offset(skip).limit(limit)&quot;) [dd28c975995505bd].
+Quote: &quot;.offset(skip).limit(limit)&quot;
+Source: backend/app/api/routes/items.py@e99fbaeba3b55190156ebae525ad9d481d76677e [dd28c975995505bd]</li>
+</ul>
+<p>4 of 4 assumptions have a quote that matches the saved file text. A matching quote shows the citation is real, not that the assumption is true.</p>
+<h3 id="suggested-tests-not-executed">Suggested tests (not executed)</h3>
+<ul>
+<li>For A1: A request to GET /items without skip/limit parameters -&gt; The endpoint uses default skip=0, limit=100 -&gt; expect Returns first 100 items as per offset/limit pagination</li>
+<li>For A2: A request to GET /items returns ItemsPublic -&gt; The count field equals total items matching filters -&gt; expect Client can rely on count for total items</li>
+<li>For A3: Items are stored with varying created_at timestamps -&gt; The query orders by created_at descending -&gt; expect Response list shows newest items first</li>
+<li>For A4: Client sends skip=20, limit=10 -&gt; Endpoint applies offset 20 and limit 10 -&gt; expect Returns items 21-30 of the ordered list</li>
+</ul>
+
+</main>
+</div>
+</body>
+</html>
