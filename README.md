@@ -2,7 +2,7 @@
 
 A tool-using agent for code-review questions, built for CSCI 599 Assignment 1. It answers from the model's own knowledge when no lookup is needed, and otherwise chooses among tools exposed by three real MCP servers (GitHub, Context7, Tavily). It keeps per-session conversational memory and runs on Google Cloud Run.
 
-- **Live URL:** `TODO: paste the Cloud Run URL`
+- **Live URL:** https://changelens-g7b7dxmyuq-uw.a.run.app
 - **Framework:** LangGraph (with FastAPI and `langchain-mcp-adapters`)
 - **LLM:** OpenAI `gpt-5.4-mini` through the OpenAI-compatible chat API. Set by `LLM_MODEL`, `LLM_BASE_URL` and `LLM_API_KEY`; the same code also ran on NVIDIA NIM `nemotron-3-super-120b-a12b` during development (see Evaluation).
 
