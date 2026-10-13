@@ -1,0 +1,27 @@
+INFO:httpx:HTTP Request: POST https://mcp.context7.com/mcp "HTTP/1.1 200 OK"
+INFO:mcp.client.streamable_http:Negotiated protocol version: 2025-11-25
+INFO:httpx:HTTP Request: POST https://mcp.context7.com/mcp "HTTP/1.1 202 Accepted"
+INFO:httpx:HTTP Request: POST https://mcp.context7.com/mcp "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.session:MCP server context7 loaded 2 tools in 0.85s
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 200 OK"
+INFO:mcp.client.streamable_http:Received session ID: 87b77696-dea8-4a37-9213-217f12a47a72
+INFO:mcp.client.streamable_http:Negotiated protocol version: 2025-11-25
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 202 Accepted"
+INFO:httpx:HTTP Request: GET https://api.githubcopilot.com/mcp/ "HTTP/1.1 405 Method Not Allowed"
+INFO:mcp.client.streamable_http:GET stream disconnected, reconnecting in 1000ms...
+INFO:httpx:HTTP Request: POST https://api.githubcopilot.com/mcp/ "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.session:MCP server github loaded 6 tools in 1.07s
+INFO:httpx:HTTP Request: POST https://mcp.tavily.com/mcp/ "HTTP/1.1 200 OK"
+INFO:mcp.client.streamable_http:Negotiated protocol version: 2025-11-25
+INFO:httpx:HTTP Request: POST https://mcp.tavily.com/mcp/ "HTTP/1.1 202 Accepted"
+INFO:httpx:HTTP Request: POST https://mcp.tavily.com/mcp/ "HTTP/1.1 200 OK"
+INFO:changelens.mcp_tools.session:MCP server tavily loaded 1 tools in 0.83s
+INFO:changelens.mcp_tools.session:MCP tools initialized in 2.75s: 9 tools, available=['context7', 'github', 'tavily'], unavailable=[]
+INFO:httpx:HTTP Request: GET https://api.githubcopilot.com/mcp/ "HTTP/1.1 405 Method Not Allowed"
+INFO:httpx2:HTTP Request: POST https://integrate.api.nvidia.com/v1/chat/completions "HTTP/1.1 200 OK"
+INFO:changelens.graph:Agent LLM call took 1.43s, tool calls requested: []
+INFO:httpx:HTTP Request: DELETE https://api.githubcopilot.com/mcp/ "HTTP/1.1 204 No Content"
+
+{
+  "response": "2+2 equals 4."
+}
