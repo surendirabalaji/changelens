@@ -107,14 +107,15 @@ async def test_empty_success_gets_placeholder():
     assert result_text(out) == "[empty result]"
 
 
-async def test_structured_content_is_dropped():
+async def test_structured_content_is_passed_through_with_guarded_text():
     raw = CallToolResult(
         content=[TextContent(type="text", text="data")],
         structuredContent={"big": "payload"},
         isError=False,
     )
     out = await guard(make_request(), fake_handler(raw))
-    assert out.structuredContent is None
+    assert result_text(out) == "data"
+    assert out.structuredContent == {"big": "payload"}
 
 
 # ---------- guard: error path ----------

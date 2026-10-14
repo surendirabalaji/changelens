@@ -10,7 +10,6 @@ Writes redacted evidence to docs/evidence/m0/corpus/benchmark_candidates.json.
 from __future__ import annotations
 
 import asyncio
-import json
 import re
 import sys
 from pathlib import Path

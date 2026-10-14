@@ -1,0 +1,42 @@
+review express-realworld 19.2 {'assumptions': 4, 'grounded': 4, 'tests': 2}
+review nestjs-boilerplate 20.0 {'assumptions': 4, 'grounded': 4, 'tests': 3}
+# Evaluation summary
+
+## Tool selection
+- No-tool queries: 9/9 made 0 tool calls
+- Tool-needed queries: 12/12 called an accepted server
+- Overall: 21/21
+- Misses:
+
+## Multi-step chaining
+- 5/5 made 2+ calls across every required server
+- Misses:
+
+## Memory and isolation
+- 5/5 checks passed (recall sessions plus one isolation check)
+
+## Groundedness (check_decision)
+- Reviews that produced a decision record: 4/4
+- Assumptions whose quote matched the saved file text: 7/8
+- Assumptions flagged NOT VERIFIED: 1
+  - fastapi-template: {'assumptions': 4, 'grounded': 3, 'tests': 3} evidence=2 stack=evaluated batch 10.6s 
+  - polar: {'assumptions': 4, 'grounded': 4, 'tests': 3} evidence=4 stack=None 15.9s 
+  - express-realworld: {'assumptions': 0, 'grounded': 0, 'tests': 0} evidence=2 stack=evaluated batch 19.4s 
+  - nestjs-boilerplate: {'assumptions': 0, 'grounded': 0, 'tests': 0} evidence=2 stack=None 14.3s 
+- Baseline, no tools (same request): decision=None, evidence=0
+
+## Latency (seconds, laptop to real services, one run each)
+- chain: n=5 p50=10.7 p95=12.4 max=12.4
+- iso_turn: n=3 p50=3.8 p95=3.8 max=3.8
+- memory_turn: n=9 p50=3.4 p95=4.1 max=4.1
+- no_tool: n=9 p50=4.9 p95=6.8 max=6.8
+- review: n=4 p50=15.1 p95=19.4 max=19.4
+- scenario: n=8 p50=5.2 p95=41.2 max=41.2
+- tool_needed: n=12 p50=7.7 p95=9.8 max=9.9
+- Turns over 60 s: 0/50
+- Turns that errored: 0
+- Agent-call tokens over 50 turns: input 557062, output 9068 (excludes the separate synthesis call)
+
+## Scenario outputs
+See scenarios.jsonl (read the responses; these are judged by hand)
+

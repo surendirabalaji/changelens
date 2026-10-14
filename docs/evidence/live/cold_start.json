@@ -1,0 +1,30 @@
+[
+  {
+    "label": "cold_1_first_request_is_a_repo_review",
+    "at": "2026-10-13T19:15:00",
+    "status": 200,
+    "seconds": 30.8,
+    "response_start": "Assumptions that could break include the current `skip`/`limit` offset contract and stable `created_at`-descending ordering, per `backend/app/api/routes/items.py:13-32`, and I couldn\u2019t verify any clie"
+  },
+  {
+    "label": "cold_2_first_request_is_health",
+    "at": "2026-10-13T19:35:20",
+    "status": 200,
+    "seconds": 12.7,
+    "response_start": "{\"status\":\"ok\"}"
+  },
+  {
+    "label": "cold_2_then_non_code_question",
+    "at": "2026-10-13T19:35:25",
+    "status": 200,
+    "seconds": 4.9,
+    "response_start": "According to general knowledge, the capital of Australia is **Canberra**."
+  },
+  {
+    "label": "cold_2_then_repo_review_warm",
+    "at": "2026-10-13T19:35:38",
+    "status": 200,
+    "seconds": 13.0,
+    "response_start": "Assumptions that could break include page-number/offset clients and count-based UI expectations, based on `backend/app/api/routes/items.py:13-35` and the `ItemsPublic(data=..., count=count)` response "
+  }
+]

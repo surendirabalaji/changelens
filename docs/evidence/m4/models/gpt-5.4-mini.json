@@ -1,0 +1,23 @@
+{
+  "label": "gpt-5.4-mini",
+  "results": [
+    {
+      "case": "no_tool",
+      "query": "What is the capital of Australia?",
+      "seconds": 5.1,
+      "response": "The capital of Australia is **Canberra**. This is general knowledge, so no external source was needed."
+    },
+    {
+      "case": "tool",
+      "query": "According to library documentation, what does FastAPI's Depends function do?",
+      "seconds": 12.2,
+      "response": "According to library documentation, `Depends` tells FastAPI that a path operation or other callable **depends on another callable**, so FastAPI will **run that dependency first, resolve its parameters from the request, and inject its result** into the function. It\u2019s part of FastAPI\u2019s dependency injection system. Source: library documentation.\n\nAlso, the docs say you pass the dependency callable **without executing it**, and FastAPI takes care of calling it. Source: library documentation."
+    },
+    {
+      "case": "repo_review",
+      "query": "Review https://github.com/fastapi/full-stack-fastapi-template at e99fbaeba3b55190156ebae525ad9d481d76677e. Read backend/pyproject.toml and backend/app/api/routes/items.py. I want to change the list endpoint to cursor pagination. What assumptions could that break?",
+      "seconds": 12.5,
+      "response": "Assumptions that could break include clients relying on `skip`/`limit` offset semantics and the returned `count` total, because `read_items` currently uses `offset(skip).limit(limit)` and returns `ItemsPublic(data=items_public, count=count)` in `backend/app/api/routes/items.py:13-38`; `backend/pyproject.toml:1-31` shows only `sqlmodel`/`fastapi`/`pydantic` dependencies, so I could not verify any existing cursor-pagination library support.\n\n## Decision review (proposed, not accepted)\nProposed change: The list endpoint appears to use offset/limit pagination, so switching to cursor pagination may break callers that rely on skip/limit and total count semantics; evidence is limited to the route and project config.\nStack: fastapi >=0.141.1,<1.0.0 - evaluated batch\n\n### Assumptions\n- A1: The endpoint is expected to keep accepting offset-style pagination parameters.\n  Quote: \"session: SessionDep, current_user: CurrentUser, skip: int = 0, limit: int = 100\"\n  Source: backend/app/api/routes/items.py@e99fbaeba3b55190156ebae525ad9d481d76677e [dd28c975995505bd]\n- A2: Callers may rely on the returned total count alongside the page data.\n  Quote: \"return ItemsPublic(data=items_public, count=count)\"\n  Source: backend/app/api/routes/items.py@e99fbaeba3b55190156ebae525ad9d481d76677e [dd28c975995505bd]\n- A3: The route orders items by creation time before paginating them.\n  Quote: \"select(Item).order_by(col(Item.created_at).desc()).offset(skip).limit(limit)\"\n  Source: backend/app/api/routes/items.py@e99fbaeba3b55190156ebae525ad9d481d76677e [dd28c975995505bd]\n- A4: The project uses strict typing, so changing the response shape or params may require broader updates.\n  Quote: \"[tool.mypy] strict = true\"\n  Source: backend/pyproject.toml@e99fbaeba3b55190156ebae525ad9d481d76677e [1bc95cbe1629e2f4]\n\n4 of 4 assumptions have a quote that matches the saved file text. A matching quote shows the citation is real, not that the assumption is true.\n\n### Suggested tests (not executed)\n- For A1: Seed items with different created_at values and an authenticated user. -> Request the list endpoint with skip and limit. -> expect Results are returned in created_at descending order and respect the requested slice.\n- For A2: Seed several items for one user and an admin view. -> Request the list endpoint and inspect the response body. -> expect The response includes both data and a count field.\n- For A3: Seed items with known timestamps. -> Compare two pages after changing the pagination method. -> expect Page ordering remains stable by created_at descending.\n- For A4: Run type checks after updating the route and response model. -> Execute mypy on the backend package. -> expect The code type-checks without widening existing contracts unexpectedly."
+    }
+  ]
+}

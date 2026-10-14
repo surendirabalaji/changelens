@@ -91,12 +91,12 @@ hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
 <h1 id="changelens-v3-decision-memory-code-review--architecture-plan">ChangeLens v3: Decision-Memory Code Review — Architecture Plan</h1>
 <blockquote>
 <p>Produced by the <code>research-architect</code> subagent on 2026-10-06 from the student's redesign brief, then revised with the student (D18: Jev triage).
-Replaces <a href="architecture-plan.html">architecture-plan.md</a> (v2) and <a href="design.html">design.md</a> as the current design. v2 is kept for history.
-<strong>Status:</strong> design only. Nothing here is built, measured or deployed. <strong>[V: src]</strong> = checked against a file in this repo; <strong>[A]</strong> = assumption; <strong>[O]</strong> = optional; <strong>[T]</strong> = target to test, not a result. &quot;Missing evidence&quot; marks what still has to be obtained.
-Evidence read: <code>requirements.md</code>, <code>docs/architecture-plan.md</code>, <code>docs/design.md</code>, <code>docs/evidence/g0/**</code> (S0b probes, S0c bake-off <code>bakeoff/summary_partial.md</code>), <code>requirements.txt</code>, <code>.env.example</code>.</p>
+Replaces the earlier v1 and v2 drafts, which were removed from the repository (see git history).
+<strong>Status (updated 2026-10-13): this is the original plan for milestones M0 to M10. Only M0 to M4 were built.</strong> Built: the LangGraph agent with three real MCP servers, failure handling, session memory, Cloud Run deployment, and Workflow A (grounded repository review). <strong>Not built:</strong> Workflow B (revising a decision), Workflow C (rechecking against a pull request), the HTML report store, cost controls (M7), the full B1/B2 evaluation (M9), a separate <code>commit_memory</code> node, and the Jev classifier in the running app. Where this plan differs from the code, the code and <code>README.md</code> are correct. Tags below: <strong>[V: src]</strong> = checked against a file in this repo; <strong>[A]</strong> = assumption; <strong>[O]</strong> = optional; <strong>[T]</strong> = target to test, not a result.
+Evidence read: <code>requirements.md</code>, <code>docs/evidence/g0/**</code> (S0b probes, S0c bake-off <code>bakeoff/summary_partial.md</code>), <code>requirements.txt</code>, <code>.env.example</code>.</p>
 </blockquote>
 <h2 id="context">Context</h2>
-<p>The student asked to rework the v2 design (<code>docs/architecture-plan.md</code>, <code>docs/design.md</code>) before building starts. The new framing:</p>
+<p>The student asked to rework the earlier v2 design before building started. The new framing:</p>
 <ul>
 <li>ChangeLens is a stack-open, decision-memory layer for code review.</li>
 <li>It has three workflows: A (initial review), B (correction) and C (recheck against a later PR or commit).</li>

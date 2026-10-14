@@ -1,0 +1,4 @@
+{
+  "query": "Review https://github.com/fastapi/full-stack-fastapi-template at e99fbaeba3b55190156ebae525ad9d481d76677e. Read backend/pyproject.toml and backend/app/api/routes/items.py. I want to change the list endpoint to cursor pagination. What assumptions could that break?",
+  "session_id": "m4-live-3"
+}

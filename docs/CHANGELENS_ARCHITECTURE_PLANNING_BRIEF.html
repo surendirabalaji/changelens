@@ -1,0 +1,370 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>ChangeLens — Architecture and Planning Brief</title>
+<style>
+:root {
+  --bg: #fbfbfa; --surface: #ffffff; --text: #1f2328; --muted: #59636e; --border: #d8dee4;
+  --accent: #0b6bcb; --code-bg: #f2f4f6; --row-alt: #f6f8fa; --mark: #fff3c4;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #0f1115; --surface: #161a20; --text: #e6e8eb; --muted: #9aa4af; --border: #2c333c;
+    --accent: #6cb6ff; --code-bg: #1d232b; --row-alt: #1a1f26; --mark: #4a3f12;
+  }
+}
+:root[data-theme="dark"] {
+  --bg: #0f1115; --surface: #161a20; --text: #e6e8eb; --muted: #9aa4af; --border: #2c333c;
+  --accent: #6cb6ff; --code-bg: #1d232b; --row-alt: #1a1f26; --mark: #4a3f12;
+}
+* { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--text);
+  font: 16px/1.65 -apple-system, BlinkMacSystemFont, "Segoe UI", Helvetica, Arial, sans-serif; }
+.layout { display: grid; grid-template-columns: 1fr; max-width: 1280px; margin: 0 auto; padding: 0 16px; }
+@media (min-width: 1100px) { .layout { grid-template-columns: 260px minmax(0, 1fr); gap: 40px; } }
+nav.toc { display: none; }
+@media (min-width: 1100px) {
+  nav.toc { display: block; position: sticky; top: 0; align-self: start; max-height: 100vh; overflow-y: auto;
+    padding: 24px 0; font-size: 14px; }
+}
+nav.toc a { color: var(--muted); text-decoration: none; display: block; padding: 3px 0; }
+nav.toc a:hover { color: var(--accent); }
+nav.toc .h3 { padding-left: 14px; font-size: 13px; }
+nav.toc .home { font-weight: 600; color: var(--text); margin-bottom: 10px; }
+main { min-width: 0; padding: 24px 0 80px; }
+.banner { font-size: 13px; color: var(--muted); border-bottom: 1px solid var(--border); padding-bottom: 10px;
+  margin-bottom: 20px; display: flex; flex-wrap: wrap; gap: 8px 16px; justify-content: space-between; }
+.banner button { font: inherit; color: var(--muted); background: none; border: 1px solid var(--border);
+  border-radius: 6px; padding: 2px 10px; cursor: pointer; }
+h1 { font-size: 2em; line-height: 1.25; margin: 0.2em 0 0.6em; }
+h2 { font-size: 1.5em; border-bottom: 1px solid var(--border); padding-bottom: 0.3em; margin-top: 2em; }
+h3 { font-size: 1.2em; margin-top: 1.6em; }
+h1, h2, h3, h4 { scroll-margin-top: 16px; }
+a { color: var(--accent); }
+p, li { overflow-wrap: anywhere; }
+code { background: var(--code-bg); border-radius: 4px; padding: 0.1em 0.35em; font-size: 0.88em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; }
+pre { background: var(--code-bg); border-radius: 8px; padding: 14px 16px; overflow-x: auto; font-size: 13.5px;
+  line-height: 1.5; }
+pre code { background: none; padding: 0; font-size: inherit; }
+pre.mermaid { background: var(--surface); border: 1px solid var(--border); text-align: center; }
+blockquote { margin: 1em 0; padding: 0.4em 1em; border-left: 4px solid var(--accent); color: var(--muted);
+  background: var(--surface); border-radius: 0 6px 6px 0; }
+.table-wrap { overflow-x: auto; margin: 1em 0; border: 1px solid var(--border); border-radius: 8px; }
+table { border-collapse: collapse; width: 100%; font-size: 14.5px; background: var(--surface); }
+th, td { border-bottom: 1px solid var(--border); padding: 8px 12px; text-align: left; vertical-align: top; }
+th { background: var(--row-alt); font-weight: 600; }
+tr:nth-child(even) td { background: var(--row-alt); }
+tr:last-child td { border-bottom: none; }
+del { color: var(--muted); }
+hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
+.index-list { list-style: none; padding: 0; }
+.index-list li { padding: 12px 0; border-bottom: 1px solid var(--border); }
+.index-list .path { color: var(--muted); font-size: 13px; }
+</style>
+
+<script>
+(function () {
+  var key = "changelens-docs-theme";
+  try { var saved = localStorage.getItem(key); if (saved) document.documentElement.dataset.theme = saved; } catch (e) {}
+  window.toggleTheme = function () {
+    var dark = document.documentElement.dataset.theme
+      ? document.documentElement.dataset.theme === "dark"
+      : window.matchMedia("(prefers-color-scheme: dark)").matches;
+    var next = dark ? "light" : "dark";
+    document.documentElement.dataset.theme = next;
+    try { localStorage.setItem(key, next); } catch (e) {}
+  };
+})();
+</script>
+
+</head>
+<body>
+<div class="layout">
+<nav class="toc"><a class="home" href="index.html">ChangeLens docs</a><a class="h2" href="#1-read-requirements-first-and-establish-evidence-boundaries">1. Read requirements first and establish evidence boundaries</a><a class="h2" href="#2-product-vision">2. Product vision</a><a class="h3" href="#proposed-first-scope">Proposed first scope</a><a class="h2" href="#3-inputs-outputs-and-the-two-core-workflows">3. Inputs, outputs, and the two core workflows</a><a class="h3" href="#workflow-a-map-the-code-and-challenge-the-proposal">Workflow A: Map the code and challenge the proposal</a><a class="h3" href="#workflow-b-revise-the-design-and-turn-assumptions-into-tests">Workflow B: Revise the design and turn assumptions into tests</a><a class="h3" href="#api-contract-and-examples">API contract and examples</a><a class="h2" href="#4-evidence-model-graphs-and-the-html-experience">4. Evidence model, graphs, and the HTML experience</a><a class="h2" href="#5-proposed-mcp-integrations-and-evidence-gates">5. Proposed MCP integrations and evidence gates</a><a class="h2" href="#6-architecture-decisions-the-plan-must-resolve">6. Architecture decisions the plan must resolve</a><a class="h2" href="#7-binding-assignment-checklist">7. Binding assignment checklist</a><a class="h2" href="#8-evaluation-plan-the-architect-must-produce">8. Evaluation plan the architect must produce</a><a class="h2" href="#9-required-planning-deliverables">9. Required planning deliverables</a><a class="h2" href="#10-documentation-pointers-for-the-main-agent">10. Documentation pointers for the main agent</a></nav>
+<main>
+<div class="banner"><span>Generated from <code>docs/CHANGELENS_ARCHITECTURE_PLANNING_BRIEF.md</code>. Edit the .md file, then run
+<code>python scripts/render_docs.py</code>.</span><span><a href="index.html">All docs</a>
+<button type="button" onclick="toggleTheme()">Light / dark</button></span></div>
+<h1 id="changelens--architecture-and-planning-brief">ChangeLens — Architecture and Planning Brief</h1>
+<p><strong>Purpose:</strong> Give this document to the existing <code>research-architect</code> agent to design and plan ChangeLens before implementation.</p>
+<p><strong>Requested phase:</strong> Research synthesis, architecture, trade-off analysis, evaluation design, and an implementation plan. <strong>Do not implement, install dependencies, execute repository code, modify application files, provision infrastructure, or deploy anything during this phase.</strong> Proposed interfaces, schemas, pseudocode, diagrams, and backlog items are appropriate planning outputs.</p>
+<p><strong>Status:</strong> Product proposal, not a description of an implemented system. No diagnosis, graph, test, performance target, or example below is a measured result. Scope is inferred from the developer-focused “second brain” idea discussed with the user; do not combine it with trading or literature research products.</p>
+<h2 id="1-read-requirements-first-and-establish-evidence-boundaries">1. Read requirements first and establish evidence boundaries</h2>
+<p>Before evaluating this design, read <code>requirements.md</code> in the actual project root. Treat it as the authoritative assignment source and reconcile it with the attached <code>Assignment_1_Description.pdf</code> and the professor's clarification below. If sources conflict, identify the conflict rather than silently choosing convenient requirements.</p>
+<p><strong>Missing evidence: No project-root <code>requirements.md</code> was available in the preparation workspace.</strong> The attached assignment PDF was read for this brief. The checklist below is a useful transcription, not a replacement for reading the actual project requirements. If the file is still unavailable, proceed with explicitly provisional planning and list what cannot be verified. Do not claim complete compliance.</p>
+<p>The research-architect has <strong>Read, Grep, and Glob only</strong>. It cannot browse URLs, fetch documentation, inspect live MCP servers, run commands, or verify deployment. URLs in this document are source pointers, not permission or ability to retrieve them. Request missing documentation, source snapshots, tool manifests, and command results from the main agent using:</p>
+<blockquote>
+<p><strong>Missing evidence: <code>&lt;specific artifact needed and the decision it would resolve&gt;</code>.</strong></p>
+</blockquote>
+<p>Keep binding requirements, product choices, assumptions, and optional enhancements separate. Do not invent a deadline, budget, credential access, completed experiment, or dependency version.</p>
+<h2 id="2-product-vision">2. Product vision</h2>
+<p>ChangeLens is a developer's reasoning partner for changing an unfamiliar codebase. A developer provides an independently maintained public repository and a proposed feature. The agent maps the relevant existing workflow, makes design assumptions explicit, searches for evidence that supports or challenges them, and proposes a revised plan with test scenarios.</p>
+<p>Its central question is:</p>
+<blockquote>
+<p>“Given how this application currently works, what must be true for my change to be safe, and how can we check that?”</p>
+</blockquote>
+<p>The product should challenge unsupported reasoning without manufacturing disagreement. It must acknowledge when the developer's assumption is supported. Missing evidence, an actual contradiction, and a speculative concern are different outcomes.</p>
+<p>The resume value comes from evidence-linked program analysis, useful multi-step tool selection, revisions across conversational turns, honest uncertainty, and measurable warning quality. A visually impressive graph is useful only when its relationships can be inspected and justified.</p>
+<h3 id="proposed-first-scope">Proposed first scope</h3>
+<ul>
+<li>Python repositories using a recognizable FastAPI route/service structure; confirm this choice against representative external repositories before committing.</li>
+<li>One user-selected route or feature area per investigation, with bounded expansion into relevant dependencies and tests.</li>
+<li>Feature requests involving caching, pagination, or request validation; prioritize one end-to-end workflow before broadening.</li>
+<li>Public repository URL, optional branch/commit or PR, feature description, and developer constraints as inputs.</li>
+<li>Read-only investigation, proposed design changes, interactive HTML report, and test scenarios as outputs.</li>
+</ul>
+<p>Support different repositories within the declared scope. Do not hard-code one demonstration repository or promise arbitrary-language whole-program understanding. Unknown architectures should receive a useful scope explanation or a request for a relevant entry point.</p>
+<p>Optional later capabilities include additional languages, authenticated private repositories, executable patch verification, durable knowledge across sessions, and PR creation. They are not prerequisites for the first design.</p>
+<h2 id="3-inputs-outputs-and-the-two-core-workflows">3. Inputs, outputs, and the two core workflows</h2>
+<h3 id="workflow-a-map-the-code-and-challenge-the-proposal">Workflow A: Map the code and challenge the proposal</h3>
+<p><strong>Illustrative request:</strong></p>
+<blockquote>
+<p>“Inspect <code>&lt;public-repository-url&gt;</code> at <code>&lt;commit-sha&gt;</code>. I want to cache product-search responses for five minutes. Show the current request flow, identify assumptions in my proposal, and explain possible bugs with evidence.”</p>
+</blockquote>
+<p>The planned investigation should:</p>
+<ol>
+<li>Resolve the repository and revision; identify relevant entry points, framework versions, dependencies, and existing tests.</li>
+<li>Retrieve bounded source context through MCP and construct a graph of the relevant workflow.</li>
+<li>Extract assumptions from the proposal and code. Seek both supporting and contradicting evidence.</li>
+<li>Consult documentation and upstream evidence only where it resolves a concrete uncertainty.</li>
+<li>Produce a scoped report with a current graph, proposed changes, evidence-backed concerns, unanswered questions, and candidate tests.</li>
+</ol>
+<p>An illustrative assumption is “search responses are identical for all users.” A code path that injects customer-specific prices challenges that assumption. A missing pricing implementation establishes uncertainty, not proof of a leak. The report must distinguish these cases.</p>
+<h3 id="workflow-b-revise-the-design-and-turn-assumptions-into-tests">Workflow B: Revise the design and turn assumptions into tests</h3>
+<p><strong>Illustrative follow-up:</strong></p>
+<blockquote>
+<p>“Prices are customer-specific, but the public catalog is shared. Cache only the shared catalog. Update the graph and show the tests we need.”</p>
+</blockquote>
+<p>The agent should recall the repository, pinned revision, prior evidence, and previous proposal; update the assumption ledger; mark superseded conclusions; revise only affected graph sections; and generate scenarios such as customer isolation, cache-key distinctions, expiry, invalidation, and error behavior where the code makes them relevant.</p>
+<p>A scenario includes setup, action, expected result, evidence for that expectation, and the assumption it tests. Where expected behavior is unspecified, ask the developer instead of inventing the test oracle.</p>
+<p>Clearly separate:</p>
+<ul>
+<li>A <strong>scenario</strong> describing behavior to check.</li>
+<li>A <strong>generated test</strong> that has not been executed.</li>
+<li>An <strong>executed test result</strong> supported by a real runner trace.</li>
+</ul>
+<p>The public agent need not execute repository code. A separately controlled offline runner may later support evaluation and must not be confused with a counted external MCP source.</p>
+<h3 id="api-contract-and-examples">API contract and examples</h3>
+<p>The assignment contract remains exactly:</p>
+<pre><code class="language-http">POST /chat
+Content-Type: application/json
+</code></pre>
+<pre><code class="language-json">{
+  &quot;query&quot;: &quot;Inspect &lt;public-repository-url&gt; at &lt;commit-sha&gt;. I want five-minute caching for product search. Map the current flow, challenge the assumptions, and propose tests.&quot;,
+  &quot;session_id&quot;: &quot;example-session-01&quot;
+}
+</code></pre>
+<pre><code class="language-json">{
+  &quot;response&quot;: &quot;Illustrative response only: the investigation report would summarize the relevant flow, cite supporting source, distinguish observed behavior from hypotheses, list unresolved assumptions, and provide proposed test scenarios. An optional report link may appear here.&quot;
+}
+</code></pre>
+<p>Repository and feature details live inside <code>query</code>; do not require extra top-level request fields. <code>response</code> stays a string containing a useful self-contained answer even when HTML is unavailable. Follow-up requests reuse <code>session_id</code>. Conceptual questions such as “What makes a good cache key?” can be answered without forced retrieval when no current or repository-specific evidence is needed.</p>
+<p>For ambiguous input, ask a targeted question or state a reversible assumption. For missing evidence, return useful partial findings. The grader's repository choices and exact questions are unknown; document the supported domain without assuming the grader will use the demo repository.</p>
+<h2 id="4-evidence-model-graphs-and-the-html-experience">4. Evidence model, graphs, and the HTML experience</h2>
+<p>Ask the architect to propose conceptual schemas and lifecycle rules for these records:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Record</th>
+<th>Essential information</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Investigation</td>
+<td>Repository identity, pinned revision, scope, feature request, constraints, evidence budget, limitations</td>
+</tr>
+<tr>
+<td>Evidence</td>
+<td>Source URL, retrieval time, repository commit/path/line range or document version, supporting excerpt, extraction method</td>
+</tr>
+<tr>
+<td>Assumption</td>
+<td>Statement, origin, status, supporting/challenging evidence IDs, unresolved question, revision history</td>
+</tr>
+<tr>
+<td>Graph node/edge</td>
+<td>Stable identity, relationship type, revision, evidence IDs, derivation method, scope limits</td>
+</tr>
+<tr>
+<td>Concern</td>
+<td>Claim, prerequisites, impact if true, evidence, counterevidence, confidence rationale, proposed verification</td>
+</tr>
+<tr>
+<td>Test scenario</td>
+<td>Behavior, preconditions, action, expected result and its basis, linked concern, execution status</td>
+</tr>
+</tbody>
+</table></div>
+<p>Use separate graph labels for <strong>source-backed structural relationships</strong>, <strong>inferred relationships</strong>, <strong>proposed relationships</strong>, and <strong>runtime-observed relationships</strong>. A syntactic call expression does not always prove a runtime target. Imports, dependency injection, dynamic dispatch, and middleware require explicit handling or a recorded limitation. Never label a static graph as an observed execution trace.</p>
+<p>The architect should decide what deterministic parsing can establish and what the LLM may infer. Deterministic code should validate identifiers, references, graph structure, and supported syntax; the LLM should interpret intent, choose evidence, compare explanations, and communicate uncertainty. Do not let plausible prose silently create authoritative edges.</p>
+<p>The HTML design should support current/proposed/revised views, clickable nodes and edges, source evidence, an assumption ledger, and linked test scenarios. Include filters for evidence status and avoid dumping the entire repository into one unreadable graph. Preserve a text alternative.</p>
+<p>The existing <code>changelens-concept.html</code>, if supplied, is an illustrative UI prototype. Its graph and concerns are not findings from a real repository, ground truth, runtime evidence, or MCP integration credit.</p>
+<p>Define invalidation when a branch moves, a new commit is selected, a user corrects an assumption, or documentation versions differ. Old reports should retain their pinned context and be marked stale where appropriate; do not silently combine incompatible revisions.</p>
+<p>HTML must escape repository text, logs, excerpts, and model output. Plan safe URL handling, report expiry, bounded artifact size, and explicit access semantics. A public endpoint with <code>session_id</code> does not establish identity or private report authorization. Do not publish private content behind merely guessable report IDs.</p>
+<h2 id="5-proposed-mcp-integrations-and-evidence-gates">5. Proposed MCP integrations and evidence gates</h2>
+<p>The intended set is three distinct servers. These are candidates supported by documentation summaries supplied by the main agent on October 5, 2026; deployed interoperability, credentials, exact schemas, and selected repository access have <strong>not</strong> been verified.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Candidate</th>
+<th>Meaningful contribution</th>
+<th>Transport/authentication planning</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Official GitHub MCP</td>
+<td>Retrieve repository files, changes, tests, issues, and relevant history</td>
+<td>Remote HTTP at <code>https://api.githubcopilot.com/mcp/</code>; PAT bearer authentication; read-only configuration and explicit tool allowlist</td>
+</tr>
+<tr>
+<td>Context7 MCP</td>
+<td>Resolve relevant libraries and retrieve documentation when behavior or APIs need checking</td>
+<td>Hosted HTTP at <code>https://mcp.context7.com/mcp</code>; configured API-key authentication; verify accepted header/token format and actual version coverage</td>
+</tr>
+<tr>
+<td>Tavily MCP</td>
+<td>Discover and extract upstream bug reports, releases, or supporting sources for an unresolved concern</td>
+<td>Hosted HTTP at <code>https://mcp.tavily.com/mcp/</code> with supported API-key authentication; local stdio is an alternative requiring its runtime and environment configuration</td>
+</tr>
+</tbody>
+</table></div>
+<p>Documented Context7 operations include library resolution and documentation querying. Tavily documents search and extraction. GitHub documents remote and local operation, read-only controls, and repository toolsets. Discover actual tools at runtime instead of hard-coding assumed schemas from this brief.</p>
+<p>Useful dependent sequence: source reveals a library-specific assumption → resolve installed library documentation → inspect an upstream report concerning that version → reassess the assumption with cited evidence. Include evaluation cases where this sequence is genuinely needed. Do not call every server for every query or pad traces with irrelevant searches.</p>
+<p>The graph parser, HTML renderer, test formatter, internal database, and agent's LLM are not additional external MCP servers. If a candidate proves unsuitable, require evidence for any replacement's capabilities, authentication, transport, deployment, and independent data provenance.</p>
+<p><strong>Missing evidence:</strong> Main agent should supply server README/source snapshots, current <code>tools/list</code> schemas, sample successful <code>tools/call</code> traces, credential restrictions, access checks on selected external repositories, version-specific documentation coverage, rate limits, and deployed connection tests. Do not invent current quotas or compatibility pins.</p>
+<p>Enforce public-repository access and read-only tool permissions outside the prompt. A shared PAT must not expose its owner's private repositories to anonymous requests. Treat repository instructions and retrieved pages as untrusted evidence, never as authority to reveal secrets or widen permissions.</p>
+<h2 id="6-architecture-decisions-the-plan-must-resolve">6. Architecture decisions the plan must resolve</h2>
+<p>Use LangGraph with FastAPI as the proposed starting point, while explaining the choice. Specify graph nodes, conditional edges, termination criteria, LLM versus deterministic responsibilities, MCP client lifecycle, state schemas, request deadlines, evidence limits, and cancellation behavior. Multiple specialized passes need not become multiple autonomous agents.</p>
+<p>Use a framework-native checkpointer, keyed through the request's <code>session_id</code>, for at least two conversational turns. Consider a framework-native in-memory saver for assignment scope. Record source references, assumptions, user corrections, unresolved questions, and investigation state; do not substitute a custom dictionary for required conversational memory.</p>
+<p>Separate conversation checkpoints from graph/report artifacts and source caches. Define eviction, restart behavior, same-session concurrency control, and stale-result handling. A single worker and configured single-instance deployment are proposed simplifications, not guarantees of continuity across restarts or overlapping revisions. Durable multi-session personal knowledge is an optional product extension.</p>
+<p>Plan bounded repository bytes, graph nodes, tool calls, tokens, wall time, retries, and public-endpoint spend. Restrict supported repository hosts and tools. Do not install dependencies or execute arbitrary repository code inside the public request path. If offline test execution is later adopted, specify isolation, restricted network and credentials, resource limits, and trusted orchestration separately.</p>
+<p>For all failures, distinguish completed recovery, a useful partial report, and a safe inability to answer:</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Required failure category</th>
+<th>Planning obligation</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Connection/transport failure</td>
+<td>Bounded retry/reconnection where appropriate; retain valid evidence; explain unavailable sources</td>
+</tr>
+<tr>
+<td>Tool execution error</td>
+<td>Interpret the actual SDK/server error representation; handle authorization, missing resources, rate limits, and unsupported queries without fabricated data</td>
+</tr>
+<tr>
+<td>Malformed/invalid response</td>
+<td>Validate protocol/schema and tool data; reject invalid evidence; bounded recovery or explicit partial/safe failure</td>
+</tr>
+</tbody>
+</table></div>
+<p>Also cover inaccessible or oversized repositories, missing entry points, unsupported syntax, document-version mismatch, conflicting sources, and exhausted budgets. No repeated retry loop should hide the original failure or consume unbounded budget.</p>
+<h2 id="7-binding-assignment-checklist">7. Binding assignment checklist</h2>
+<p>From the supplied PDF, subject to reconciliation with project-root requirements:</p>
+<ul>
+<li>Individual assignment; at least two distinct MCP servers, with at least three for full additional-server credit. Each has a reachable configured manifest, real <code>tools/list</code> and <code>tools/call</code>, and arguments matching declared JSON Schema. Dead configuration or simulated responses do not qualify.</li>
+<li>Semantic LLM tool selection; appropriate no-tool answers; at least two dependent calls where needed; reasonable varied queries rather than memorized cases.</li>
+<li>Framework-native session memory across at least two turns for the running instance's lifetime. Durable persistence is not required.</li>
+<li>Graceful handling of the three failure categories above.</li>
+<li>Live, publicly reachable Cloud Run endpoint that the grader can call without Google sign-in or application API credentials, following the assignment's <code>--allow-unauthenticated</code> deployment pattern; exact <code>/chat</code> request/response shape above; bind <code>0.0.0.0</code> and read runtime <code>PORT</code>. Deployed inference uses a cloud-accessible LLM, not Ollama. Local Ollama is optional.</li>
+<li>Multi-stage Docker build and non-root final runtime. Include local MCP runtimes only if needed. Verify dependencies and container behavior rather than copying example deployment snippets blindly.</li>
+<li>Environment-based credentials; ignored local <code>.env</code>; committed <code>.env.example</code> with placeholders; no literal keys in source, ZIP, logs, or deployment scripts. Explain local-to-deployment environment flow.</li>
+<li>README with setup, run, deploy, cost disclosure, server attribution, and three accurate architecture diagrams. Source ZIP excludes dependency environments and secrets; use canonical unprefixed names such as <code>README.md</code>, <code>main.py</code>, and <code>deploy.sh</code>.</li>
+<li>Root <code>PROCESS_LOG.md</code>: actual AI tools/model versions when known, a chronological 200–300-word development narrative with material prompts, verification beyond one run, and 2–3 sentences of personal lessons. Do not fabricate development history or the student's experience during planning.</li>
+<li>Substantially adapted external code requires source attribution in comments and process log; cite external MCP projects in README. Ordinary framework imports do not require invented adaptation claims.</li>
+</ul>
+<p>Professor clarification: counted MCP sources must access independent external systems or data not built by the student. A student-built application with deliberately induced incidents was explicitly rejected. A student-authored MCP wrapper around a real published public dataset or API is allowed. Therefore use independently maintained repositories and upstream sources for demonstrations and evaluation. Fault-injection fixtures test resilience; they do not establish live integration credit.</p>
+<p>The HTML UI, persistent database, automatic patches, multi-agent architecture, and seven-metric evaluation program are product/design requests or enhancements, not all PDF requirements.</p>
+<h2 id="8-evaluation-plan-the-architect-must-produce">8. Evaluation plan the architect must produce</h2>
+<p>Build a reviewed corpus from real external repositories, historical feature requests, and pinned pre-change revisions. Include straightforward, ambiguous, unsupported, no-tool, and multi-turn tasks, plus held-out repositories. Hide completed patches and later fixes during investigation; retrieval cutoffs and screening must prevent accidental future-solution leakage. Multiple implementations may satisfy a feature; one historical patch is not the only truth.</p>
+<p>For each metric, specify operational definition, denominator, labeled test-set characteristics, measurement procedure, fair baseline, proposed target, and conditions. Fair comparisons use the same orchestrator model/version, tasks, accessible evidence, and comparable token/tool budgets, changing only the feature being tested. Disclose unavoidable differences. All targets below are <strong>proposed hypotheses</strong>, not measured results or statistical guarantees.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Metric</th>
+<th>Operational measurement and proposed comparison</th>
+<th>Initial target hypothesis and conditions</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Tool Selection Accuracy</td>
+<td>Score expert-accepted tool/path choices, including correct abstention; accept valid alternatives. Compare evidence-aware planning with the same agent without the evidence-gap planning pass.</td>
+<td>≥85% accepted decisions on at least 30 varied tasks; report by task type and tool availability.</td>
+</tr>
+<tr>
+<td>Multi-step Success Rate</td>
+<td>Complete a rubric-defined task that requires outputs from one tool to determine a later call; merely making two calls is insufficient. Compare with a single-pass evidence plan under comparable budgets.</td>
+<td>≥75% on at least 20 dependent tasks; report unresolved evidence and access failures separately.</td>
+</tr>
+<tr>
+<td>End-to-End Latency</td>
+<td>Measure request arrival to complete response, including tools and rendering; report p50/p95, failures, and sample counts. Compare the same workflow with optional visualization disabled.</td>
+<td>Provisional warm p95 ≤90 seconds; at least 100 warm requests and 20 separately identified cold requests, concurrency 1 and 3; revise after pilot.</td>
+</tr>
+<tr>
+<td>Error Resilience Rate</td>
+<td>Inject every required failure category at discovery and invocation where applicable. Classify full recovery, useful partial result, and safe failure; report crashes separately. Compare recovery enabled versus disabled.</td>
+<td>Zero unhandled crashes; ≥80% full/useful-partial outcomes on cases with an available fallback; report all unavoidable safe failures in the full denominator.</td>
+</tr>
+<tr>
+<td>Memory Fidelity</td>
+<td>Check recall, correction replacement, assumption revision, and cross-session isolation in interleaved conversations. Compare checkpointer-enabled with stateless behavior.</td>
+<td>≥90% correct recall/update checks and zero observed cross-session leakage over at least 20 sessions of 3–5 turns; test same-instance and document restart loss.</td>
+</tr>
+<tr>
+<td>Groundedness</td>
+<td>Label factual claims supported, unsupported, or contradicted by cited evidence; distinguish hypothesis language. Compare provenance validation enabled/disabled.</td>
+<td>≥95% supported factual claims and zero fabricated source references on at least 100 reviewed claims; report incorrect and unsupported separately.</td>
+</tr>
+<tr>
+<td>Cost per Query</td>
+<td>Attribute LLM input/output tokens, paid tool usage, and relevant infrastructure to successful, partial, and failed requests. Compare bounded retrieval with a fixed-context baseline.</td>
+<td>Stay within an explicitly agreed per-request budget and achieve a proposed ≥20% lower median cost without a material task-success loss; report pricing date, caches, workload, retries, concurrency, and fixed-cost assumptions.</td>
+</tr>
+</tbody>
+</table></div>
+<p>Add product metrics: precision and coverage of manually reviewed graph edges; unsupported-concern/false-alarm rate; useful detection of known feature interactions; correct assumption revision after user correction; and test-scenario validity. For executable regression tests, require failure on the relevant pre-fix revision and success after the real fix, with unrelated environment failures excluded. Report unexecuted, inconclusive, and confirmed outcomes separately.</p>
+<p>Have a reviewer assess whether expected test behavior follows from an issue, specification, code contract, or developer decision. An LLM judge alone is not ground truth. Choose final sample sizes and targets after assessing annotation effort and available cases; do not promise results before measurement.</p>
+<h2 id="9-required-planning-deliverables">9. Required planning deliverables</h2>
+<p>Return the research-architect's six-section architecture proposal:</p>
+<ol>
+<li><strong>Verified Requirements Summary:</strong> Binding evidence, professor clarification, assumptions, and unresolved conflicts.</li>
+<li><strong>Project Vision:</strong> Product value, supported workflow, explicit scope, and why its evidence is useful.</li>
+<li><strong>System Design:</strong> Graph topology, tool lifecycle, native memory, evidence schemas, API mapping, HTML design, credentials, isolation, and failures.</li>
+<li><strong>Evaluation &amp; Metrics Plan:</strong> All seven metrics and product-specific checks above, fair ablations, targets, dataset provenance, and leakage controls.</li>
+<li><strong>Main Risks &amp; Mitigation:</strong> Include repository diversity, static-analysis limits, false warnings, version mismatch, meaningful third-server use, public-endpoint cost, and unknown time/credential constraints.</li>
+<li><strong>Diagram Mapping:</strong> Provide proposed diagrams and explain what must be updated to match the eventual implementation.</li>
+</ol>
+<p>Map the three required diagrams explicitly:</p>
+<ul>
+<li><strong>System architecture:</strong> FastAPI, LangGraph, MCP client, each named server, actual selected cloud LLM, checkpointer, and request/response arrows; label optional artifact storage separately.</li>
+<li><strong>Tool invocation loop:</strong> Query → reasoning → tool selection → MCP call → server response → synthesis, with a loop back for dependent calls, no-tool exit, and bounded failure branches.</li>
+<li><strong>Deployment topology:</strong> Local Docker with local or cloud LLM; image → Artifact Registry → Cloud Run → public URL; local <code>.env</code> and deployment environment-variable flow.</li>
+</ul>
+<p>Append a decision register, prioritized backlog with acceptance criteria, evidence requests for the main agent, and phased gates: source/access validation → one grounded investigation → correction/test-scenario workflow → HTML → evaluation → deployment readiness. These are future work plans, not authorization to perform them. Give fallback scope at each gate and identify blockers before estimating a schedule.</p>
+<h2 id="10-documentation-pointers-for-the-main-agent">10. Documentation pointers for the main agent</h2>
+<ul>
+<li>Assignment: supplied <code>Assignment_1_Description.pdf</code>; actual project <code>requirements.md</code> still required.</li>
+<li>GitHub MCP: https://github.com/github/github-mcp-server</li>
+<li>GitHub configuration: https://github.com/github/github-mcp-server/blob/main/docs/server-configuration.md</li>
+<li>Context7: https://github.com/upstash/context7</li>
+<li>Tavily MCP: https://github.com/tavily-ai/tavily-mcp</li>
+<li>LangGraph memory: https://docs.langchain.com/oss/python/langgraph/add-memory</li>
+<li>MCP adapters: https://github.com/langchain-ai/langchain-mcp-adapters</li>
+<li>Cloud Run container contract: https://docs.cloud.google.com/run/docs/container-contract</li>
+</ul>
+<p>These are evidence leads. The main agent must provide accessible contents and actual command results when the read-only architect needs them. Record retrieval dates and version/commit identifiers for the eventual evidence packet.</p>
+
+</main>
+</div>
+</body>
+</html>

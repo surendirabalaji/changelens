@@ -1,0 +1,105 @@
+[
+  {
+    "check": "health (first request, may be a cold start)",
+    "path": "/health",
+    "request": null,
+    "status": 200,
+    "seconds": 0.1,
+    "body": "{\"status\":\"ok\"}"
+  },
+  {
+    "check": "health again (warm)",
+    "path": "/health",
+    "request": null,
+    "status": 200,
+    "seconds": 0.1,
+    "body": "{\"status\":\"ok\"}"
+  },
+  {
+    "check": "no-tool question",
+    "path": "/chat",
+    "request": {
+      "query": "What is the capital of Australia?",
+      "session_id": "live-a"
+    },
+    "status": 200,
+    "seconds": 3.4,
+    "body": "{\"response\":\"Australia\u2019s capital is **Canberra**.\"}"
+  },
+  {
+    "check": "tool question (Context7)",
+    "path": "/chat",
+    "request": {
+      "query": "According to library documentation, what does FastAPI's Depends function do?",
+      "session_id": "live-b"
+    },
+    "status": 200,
+    "seconds": 9.0,
+    "body": "{\"response\":\"According to library documentation, `Depends` marks a function or class as a dependency that FastAPI will call and use for dependency injection into a path operation or another dependency. It can also be used in a route\u2019s `dependencies=[...]` list to run dependencies for their side effects, and in that case their return values are not injected into the endpoint. Source: library documentation.\"}"
+  },
+  {
+    "check": "recall turn 1",
+    "path": "/chat",
+    "request": {
+      "query": "Remember the code word PELICAN-42.",
+      "session_id": "live-c"
+    },
+    "status": 200,
+    "seconds": 3.3,
+    "body": "{\"response\":\"PELICAN-42\"}"
+  },
+  {
+    "check": "recall turn 2",
+    "path": "/chat",
+    "request": {
+      "query": "What was the code word I gave you?",
+      "session_id": "live-c"
+    },
+    "status": 200,
+    "seconds": 3.5,
+    "body": "{\"response\":\"PELICAN-42\"}"
+  },
+  {
+    "check": "isolation: other session asks",
+    "path": "/chat",
+    "request": {
+      "query": "What was the code word I gave you?",
+      "session_id": "live-d"
+    },
+    "status": 200,
+    "seconds": 3.7,
+    "body": "{\"response\":\"I don\u2019t have enough information to know\u2014no code word appears in the conversation I can see. Source: the conversation so far.\"}"
+  },
+  {
+    "check": "invalid body (missing session_id)",
+    "path": "/chat",
+    "request": {
+      "query": "hi"
+    },
+    "status": 422,
+    "seconds": 0.1,
+    "body": "{\"response\":\"The request body must be JSON with exactly the fields 'query' and 'session_id', both strings.\"}"
+  },
+  {
+    "check": "repo review",
+    "path": "/chat",
+    "request": {
+      "query": "Review https://github.com/fastapi/full-stack-fastapi-template at e99fbaeba3b55190156ebae525ad9d481d76677e. Read backend/pyproject.toml and backend/app/api/routes/items.py. I want to change the list endpoint to cursor pagination. What assumptions could that break?",
+      "session_id": "live-e"
+    },
+    "status": 200,
+    "seconds": 10.8,
+    "body": "{\"response\":\"Assumptions at risk are that clients can page by `skip`/`limit` and that `count` + `ORDER BY created_at DESC OFFSET/LIMIT` defines stable, globally ordered results; that comes from `backend/app/api/routes/items.py:12-36`, and I could not verify any frontend consumers from the requested files.\\n\\n## Decision review (proposed, not accepted)\\nProposed change: Change the items list endpoint from offset-based pagination to cursor pagination, but the supplied evidence is insufficient to assess downstream breakage assumptions beyond the existing query shape and response count.\\nStack: fastapi >=0.141.1,<1.0.0 - evaluated batch\\n\\n### Assumptions\\n- A1: The endpoint currently accepts offset-style paging inputs that clients may rely on.\\n  Quote: \\\"skip: int = 0, limit: int = 100\\\"\\n  Source: backend/app/api/routes/items.py@e99fbaeba3b55190156ebae525ad9d481d76677e [e72b130f8765ed3f]\\n- A2: The list endpoint returns a total count that cursor pagination may no longer represent the same way.\\n  Quote: \\\"return ItemsPublic(data=items_public, count=count)\\\"\\n  Source: backend/app/api/routes/items.py@e99fbaeba3b55190156ebae525ad9d481d76677e [e72b130f8765ed3f]\\n- A3: Items are currently ordered by creation time descending, so cursor logic must preserve this ordering.\\n  Quote: \\\"order_by(col(Item.created_at).desc())\\\"\\n  Source: backend/app/api/routes/items.py@e99fbaeba3b55190156ebae525ad9d481d76677e [e72b130f8765ed3f]\\n- A4: The project uses FastAPI with SQLModel, so pagination changes must fit that stack's query and response patterns.\\n  Quote: \\\"\\\"fastapi[standard]>=0.141.1,<1.0.0\\\"\\\"\\n  Source: backend/pyproject.toml@e99fbaeba3b55190156ebae525ad9d481d76677e [d0e7bd355bdc93ff]\\n\\n4 of 4 assumptions have a quote that matches the saved file text. A matching quote shows the citation is real, not that the assumption is true.\\n\\n### Suggested tests (not executed)\\n- For A3: Create items with different created_at values for both superuser and normal user. -> Request the list endpoint with the first cursor page. -> expect Results are sorted newest-first and match the page size for the caller.\\n- For A2: Seed more items than one page and keep a known total count. -> Request successive cursor pages until exhaustion. -> expect No item is repeated, and pagination advances without offset parameters.\\n- For A1: Call the list endpoint using existing offset-based query parameters. -> Send skip and limit on the new implementation. -> expect The API rejects them or ignores them consistently with the new contract.\"}"
+  },
+  {
+    "check": "follow-up on the review (same session)",
+    "path": "/chat",
+    "request": {
+      "query": "Which of your assumptions are NOT verified, if any?",
+      "session_id": "live-e"
+    },
+    "status": 200,
+    "seconds": 3.9,
+    "body": "{\"response\":\"Not verified: whether any clients actually rely on `skip`/`limit`, and whether downstream code depends on the `count` field semantics beyond what the endpoint returns. Those were listed as assumptions in the review text, but the review explicitly says the evidence is insufficient to assess downstream breakage; the only verified file facts are the endpoint signature, `count` return, and `created_at DESC` ordering from `backend/app/api/routes/items.py`, plus the FastAPI/SQLModel stack from `backend/pyproject.toml`.\"}"
+  }
+]

@@ -112,7 +112,9 @@ def test_chat_passes_session_id_limits_and_context_to_the_graph(client):
 
     assert call["payload"] == {"query": "hi"}
     assert call["config"]["configurable"]["thread_id"] == "session-1"
-    assert call["config"]["recursion_limit"] == 2 * 3 + 10
+    assert call["config"]["recursion_limit"] == (
+        2 * Settings(_env_file=None).max_tool_rounds + 10
+    )
     assert call["context"].sources == ("context7",)
     assert call["context"].unavailable == ("github",)
     assert call["context"].tool_servers == {}

@@ -83,7 +83,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
 </head>
 <body>
 <div class="layout">
-<nav class="toc"><a class="home" href="index.html">ChangeLens docs</a><a class="h2" href="#cp-001--2026-10-05--architecture-decision-design-phase">CP-001 | 2026-10-05 | Architecture decision (design phase)</a><a class="h2" href="#cp-002--2026-10-06--architecture-decision-v3-redesign-d18-jev-triage">CP-002 | 2026-10-06 | Architecture decision (v3 redesign, D18 Jev triage)</a><a class="h2" href="#cp-003--2026-10-06--verification-milestone-m0-evidence-top-up">CP-003 | 2026-10-06 | Verification milestone (M0 evidence top-up)</a></nav>
+<nav class="toc"><a class="home" href="index.html">ChangeLens docs</a><a class="h2" href="#cp-001--2026-10-05--architecture-decision-design-phase">CP-001 | 2026-10-05 | Architecture decision (design phase)</a><a class="h2" href="#cp-002--2026-10-06--architecture-decision-v3-redesign-d18-jev-triage">CP-002 | 2026-10-06 | Architecture decision (v3 redesign, D18 Jev triage)</a><a class="h2" href="#cp-003--2026-10-06--verification-milestone-m0-evidence-top-up">CP-003 | 2026-10-06 | Verification milestone (M0 evidence top-up)</a><a class="h2" href="#cp-004--2026-10-13--build-phase-m1-to-m4-workflow-a">CP-004 | 2026-10-13 | Build phase M1 to M4 (Workflow A)</a></nav>
 <main>
 <div class="banner"><span>Generated from <code>docs/process-log-checkpoints.md</code>. Edit the .md file, then run
 <code>python scripts/render_docs.py</code>.</span><span><a href="index.html">All docs</a>
@@ -243,7 +243,7 @@ Each entry: ID, date, type, summary, evidence paths, AI tools, status, open ques
 <p><strong>Evidence:</strong></p>
 <ul>
 <li><code>docs/architecture-plan-v3.md</code> (the full design is in the project).</li>
-<li><code>docs/design.md</code> (superseded note).</li>
+<li><code>docs/design.md</code> (superseded note; removed from the repo on 2026-10-13, see git history).</li>
 <li><code>.env.example</code> (placeholders for <code>JEV_API_KEY</code> and <code>TRIAGE_BACKEND</code>).</li>
 <li><code>CLAUDE.md</code> (current-design pointer).</li>
 <li>Plan file: <code>/Users/surensfolder/.claude/plans/research-architect-agent-before-rustling-muffin.md</code>, outside the project.</li>
@@ -443,6 +443,43 @@ Each entry: ID, date, type, summary, evidence paths, AI tools, status, open ques
 <li>Pending: held-out validation of policy v2 (M3) and Cloud Run measurements (M1).</li>
 </ul>
 </li>
+</ul>
+<hr />
+<h2 id="cp-004--2026-10-13--build-phase-m1-to-m4-workflow-a">CP-004 | 2026-10-13 | Build phase M1 to M4 (Workflow A)</h2>
+<ul>
+<li><strong>Baseline:</strong> CP-003 (M0, 8865a22 / PR #5). Current: d95ff10 &quot;m3 - completed&quot; on feature/m3 (not merged); feature/m4 has uncommitted changes: M changelens/graph.py, state.py; new changelens/evidence.py, report.py, schemas.py, stack.py, triage.py; docs/evidence/m4/. Merged since CP-003: PR #6 (M1 skeleton and Cloud Run deploy), PR #7 (M2 failure handling).</li>
+<li><strong>Milestones reviewed:</strong>
+<ul>
+<li>M1 skeleton and deploy: no evidence file in docs/evidence/; Cloud Run result unverified.</li>
+<li>M2 resilience: docs/evidence/m2/resilience_run.txt (11 selected tests, 9 visible PASSED in lines 1-40), live logs A-app.log, B-app.log, A1-A5, B1-B2 (contents not read).</li>
+<li>M3 tool selection and chaining: docs/evidence/m3/01_no_tool.txt, 02_manifest_context7_chain.txt (GitHub x3 then Context7, 9 tools from 3 servers loaded in 2.56 s), 03_tavily.txt; README diagrams (not checked against code).</li>
+<li>M4 Workflow A: docs/evidence/m4/README.md. run1 failed at 66.2 s (LengthFinishReasonError, max_tokens 2048); run2 38.6 s, 0 assumptions; run3 49.3 s, 4/4 grounded, 4 tests not executed. Target fastapi/full-stack-fastapi-template @ e99fbae.</li>
+</ul>
+</li>
+<li><strong>Student-reported (no artifact):</strong> student wrote most code with Claude coaching in Guide mode; Claude wrote M4 step 7 (report.py/render) on explicit request and applied the Claude-proposed live-run fixes only as snippets the student pasted. Student fixed: async def on pure helpers, TypedDict vs BaseModel, wrong boolean in evidence.py, wrong object passed to detect_stack, deleted schema classes, missing graph edge, duplicate edge. Live-run bugs: max_tokens 2048 starving structured output; tool budget spent on directory listings.</li>
+<li><strong>Deviations:</strong> no commit_memory node, no repair loop, no Jev triage (regex), no pytest files for M4 modules, 3 older tests failing since M3 (render footer text, guard structuredContent, api test).</li>
+<li><strong>AI tools observed:</strong> Claude Code (main session); research-architect; coding-coach subagent (model not confirmed); process-log-coach Sonnet 5.5 (claude-sonnet-5-5); runtime nemotron-3-super-120b-a12b via NIM; Jev jev-1.13.0 (not wired into the app yet). Outside-session AI use: UNCONFIRMED.</li>
+<li><strong>Flags:</strong>
+<ul>
+<li>PROCESS_LOG.md is at docs/PROCESS_LOG.md. requirements.md section 5 (line 127) says root of submission, and no root copy exists (confirmed 2026-10-13).</li>
+<li>Log sections are stale (see Status).</li>
+</ul>
+</li>
+<li><strong>Reminder:</strong> delivered 2026-10-13.</li>
+<li><strong>Status:</strong> ALL PENDING. PROCESS_LOG.md still covers only the CP-001 design phase (checked 2026-10-13: section 1 lacks Nemotron, Jev, coding-coach; section 3 says nothing verified; section 4 empty). Carried over pending from CP-001..003: v3 redesign and D18, S0b/S0c, M0 results, F8 professor answer.</li>
+<li><strong>Open questions (student, own voice):</strong>
+<ul>
+<li>Q1. Which fixed bug took longest, and how did you find it?</li>
+<li>Q2. What made you suspect max_tokens (run1) and the directory-listing budget (run2)? Which fix was yours?</li>
+<li>Q3. Why did you ask Claude to write step 7, and what did you check afterwards?</li>
+<li>Q4. Why was Jev triage deferred? Is it a time decision?</li>
+<li>Q5. What did the AI coaching not resolve that you worked out yourself?</li>
+<li>Q6. Any M1 evidence (Cloud Run URL, latency, curl output)? Did you decide to merge M3 before M4?</li>
+<li>Carried from CP-003: triage labels review (Q5), Q6.</li>
+</ul>
+</li>
+<li><strong>Next baseline:</strong> CP-004. Next checkpoint covers the PROCESS_LOG.md update, M3 merge, M4 commit and tests, and any final submission review.</li>
+<li><strong>Evidence gaps:</strong> no M1 evidence; m2/m3 contents beyond the excerpts not read; M4 raw run files and source not read by the coach; test run status after M3 unknown; Cloud Run latency unmeasured.</li>
 </ul>
 
 </main>
