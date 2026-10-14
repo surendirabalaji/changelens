@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Process Log — CSCI 599 Assignment 1 (ChangeLens)</title>
+<title>Live Cloud Run checks (2026-10-13)</title>
 <style>
 :root {
   --bg: #fbfbfa; --surface: #ffffff; --text: #1f2328; --muted: #59636e; --border: #d8dee4;
@@ -83,29 +83,100 @@ hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
 </head>
 <body>
 <div class="layout">
-<nav class="toc"><a class="home" href="index.html">ChangeLens docs</a><a class="h2" href="#1-ai-tools-used">1. AI tools used</a><a class="h2" href="#2-development-narrative">2. Development narrative</a><a class="h2" href="#3-verification-approach">3. Verification approach</a><a class="h2" href="#4-what-i-learned">4. What I learned</a></nav>
+<nav class="toc"><a class="home" href="../../index.html">ChangeLens docs</a><a class="h2" href="#cold-start-2026-10-13-cold_startjson">Cold start (2026-10-13), cold_start.json</a></nav>
 <main>
-<div class="banner"><span>Generated from <code>docs/PROCESS_LOG.md</code>. Edit the .md file, then run
-<code>python scripts/render_docs.py</code>.</span><span><a href="index.html">All docs</a>
+<div class="banner"><span>Generated from <code>docs/evidence/live/README.md</code>. Edit the .md file, then run
+<code>python scripts/render_docs.py</code>.</span><span><a href="../../index.html">All docs</a>
 <button type="button" onclick="toggleTheme()">Light / dark</button></span></div>
-<h1 id="process-log--csci-599-assignment-1-changelens">Process Log — CSCI 599 Assignment 1 (ChangeLens)</h1>
-<h2 id="1-ai-tools-used">1. AI tools used</h2>
-<ul>
-<li><strong>Claude Code</strong> (Anthropic CLI). Main session model: Claude Opus 5.5 (<code>claude-opus-5-5</code>).</li>
-<li><strong>research-architect</strong> (a custom Claude Code subagent, <code>.claude/agents/research-architect.md</code>). Runs on Opus 5.5. It is set up as a senior architect for ideation and system design checked against <code>requirements.md</code>. It can only read files (Read/Grep/Glob).</li>
-<li><strong>process-log-coach</strong> (a custom Claude Code subagent, <code>.claude/agents/process-log-coach.md</code>). Runs on Sonnet. It reminds me to log progress at milestones and collects evidence into <code>docs/process-log-checkpoints.md</code>.</li>
-</ul>
-<h2 id="2-development-narrative">2. Development narrative</h2>
-<p><strong>Design phase (Oct 4–5, 2026).</strong> Before writing any code, I set up <code>requirements.md</code> (my summary of the assignment PDF), <code>CLAUDE.md</code>, and a <code>research-architect</code> subagent to act as a senior architect during ideation. It suggested several AI SaaS ideas. I rejected some because they couldn't use real MCP data without mocking. For example, an AI deployment-monitoring tool needed actual running services to feed it data. After several rounds of ideas I chose a developer &quot;second brain&quot;, narrowed it into ChangeLens, and wrote a planning brief for it. Then I asked the architect for a design-only plan:</p>
-<blockquote>
-<p>&quot;Design and plan ChangeLens using <code>CHANGELENS_ARCHITECTURE_PLANNING_BRIEF.md</code>. First read project-root <code>requirements.md</code>, the supplied assignment PDF, and the professor's clarification. … Stay in design/planning mode: do not implement application code … Distinguish verified facts, assumptions, optional features, and target metrics. … End with the most important unresolved design decisions and the precise evidence needed to settle them.&quot;</p>
-</blockquote>
-<p>The plan it produced, which I approved, uses LangGraph + FastAPI with three MCP servers: GitHub, Context7 and Tavily. Memory is the LangGraph checkpointer keyed by <code>session_id</code>. Every decision in it is still provisional until it passes the access checks (gate G0).</p>
-<!-- Implementation entries go here. Keep the whole narrative to 200–300 words. -->
-<h2 id="3-verification-approach">3. Verification approach</h2>
-<p>Nothing has been verified yet; the project is still in design. The first step is gate G0: list each MCP server's tools and make one real tool call, confirm the GitHub token can't read a private repo, and check that the Dockerfile works as a non-root user.</p>
-<h2 id="4-what-i-learned">4. What I learned</h2>
-<!-- 2–3 sentences in your own words: what the AI tools could not do that you had to work out yourself. -->
+<h1 id="live-cloud-run-checks-2026-10-13">Live Cloud Run checks (2026-10-13)</h1>
+<p>Service: https://changelens-g7b7dxmyuq-uw.a.run.app (model gpt-5.4-mini). Raw responses: <code>live_checks.json</code>.
+Plain HTTP requests from a laptop, one run each.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Check</th>
+<th>Result</th>
+<th>Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>GET /health (first request after deploy)</td>
+<td>200 <code>{&quot;status&quot;:&quot;ok&quot;}</code></td>
+<td>0.1 s</td>
+</tr>
+<tr>
+<td>Non-code question (&quot;capital of Australia&quot;)</td>
+<td>&quot;Canberra&quot;, no tools</td>
+<td>3.4 s</td>
+</tr>
+<tr>
+<td>Library question</td>
+<td>Answered with a Context7 source</td>
+<td>9.0 s</td>
+</tr>
+<tr>
+<td>Recall: give code word, then ask for it (same session)</td>
+<td>Returned <code>PELICAN-42</code></td>
+<td>3.3 s, 3.5 s</td>
+</tr>
+<tr>
+<td>Isolation: another session asks for the code word</td>
+<td>&quot;no code word appears in the conversation&quot;</td>
+<td>3.7 s</td>
+</tr>
+<tr>
+<td>Invalid body (missing session_id)</td>
+<td>HTTP 422 with the explanatory message</td>
+<td>0.1 s</td>
+</tr>
+<tr>
+<td>Repository review (FastAPI template, pinned commit)</td>
+<td>4 of 4 assumptions grounded, 3 tests, stack <code>fastapi &gt;=0.141.1</code> evaluated batch</td>
+<td>10.8 s</td>
+</tr>
+<tr>
+<td>Follow-up in the review session</td>
+<td>Answered from the saved review</td>
+<td>3.9 s</td>
+</tr>
+</tbody>
+</table></div>
+<p>Limits: the service had just been deployed, so the first health call was fast and a true cold start was NOT measured. One run per check. The follow-up answer about &quot;not verified&quot; items mixed the quote check with real-world doubts from the review text.</p>
+<h2 id="cold-start-2026-10-13-cold_startjson">Cold start (2026-10-13), <code>cold_start.json</code></h2>
+<p>The instance had been idle for more than 15 minutes before each sample (2 hours before sample 1, 20 minutes before sample 2). <code>--min-instances 0</code>.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Sample</th>
+<th>First request</th>
+<th>Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Repository review (cold start plus a full review)</td>
+<td><strong>30.8 s</strong></td>
+</tr>
+<tr>
+<td>2</td>
+<td><code>GET /health</code> (cold start alone)</td>
+<td><strong>12.7 s</strong></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Non-code question, right after</td>
+<td>4.9 s</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Repository review, warm</td>
+<td>13.0 s</td>
+</tr>
+</tbody>
+</table></div>
+<p>Cold start adds roughly 13 to 20 s. Both worst-case numbers stay under the 60 s limit. Two samples, one run each, from a laptop. The cold start was longer than a warm <code>/health</code> (0.1 s) by about 12 s.</p>
 
 </main>
 </div>

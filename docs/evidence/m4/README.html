@@ -83,7 +83,7 @@ hr { border: none; border-top: 1px solid var(--border); margin: 2em 0; }
 </head>
 <body>
 <div class="layout">
-<nav class="toc"><a class="home" href="../../index.html">ChangeLens docs</a><a class="h2" href="#limits-state-these-honestly">Limits (state these honestly)</a></nav>
+<nav class="toc"><a class="home" href="../../index.html">ChangeLens docs</a><a class="h2" href="#limits-state-these-honestly">Limits (state these honestly)</a><a class="h2" href="#follow-up-scenarios-2026-10-13">Follow-up scenarios (2026-10-13)</a></nav>
 <main>
 <div class="banner"><span>Generated from <code>docs/evidence/m4/README.md</code>. Edit the .md file, then run
 <code>python scripts/render_docs.py</code>.</span><span><a href="../../index.html">All docs</a>
@@ -130,6 +130,54 @@ Real MCP (GitHub) and real NIM Nemotron. Local uvicorn on port 8099. No secrets 
 <li>The pyproject excerpt is capped at 1500 characters; a truncated TOML fails to parse (stack detection returns none). Not hit here.</li>
 <li>Unit/pytest tests for the M4 modules do not exist yet; 3 older tests fail from M3 changes (render footer, guard structuredContent, api limit).</li>
 </ul>
+<h2 id="follow-up-scenarios-2026-10-13">Follow-up scenarios (2026-10-13)</h2>
+<p>After fixing the agent timeout, adding the one-sentence rule and putting the latest decision review into the agent prompt.
+<code>scenario_attempt1/2_*</code>: before the fixes, turn 1 failed twice (agent LLM call exceeded the 30 s timeout). In attempt 1 the model also accepted a follow-up about &quot;assumption A3&quot; although no review existed.
+<code>scenario_attempt3_*</code>: after the fixes, 3 turns in one session. Turn 1 full decision review (47.5 s, 4/4 grounded). Turn 2 quoted A3 and its file from the review. Turn 3 reported all assumptions matched.
+<code>scenarios/</code>: one JSON per scenario.</p>
+<div class="table-wrap"><table>
+<thead>
+<tr>
+<th>Scenario</th>
+<th>Result</th>
+<th>Time</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>s3 isolation: session A reviews a repo; session B asks &quot;what did I ask earlier?&quot; and &quot;quote for A1?&quot;</td>
+<td><strong>Pass.</strong> B knew nothing and leaked nothing.</td>
+<td>B: 4.5 s, 6.1 s</td>
+</tr>
+<tr>
+<td>s3 review in session A (two runs)</td>
+<td>Run 1: decision review shown, but the agent's text was cut off at the length limit; 57.0 s. Run 2 (clean server log <code>server_rerun.log</code>): <strong>synthesis timed out at 30 s, only the agent prose returned, no decision review; 61.8 s, over the 60 s limit.</strong></td>
+<td>57.0 s, 61.8 s</td>
+</tr>
+<tr>
+<td>s4 no entry point named (auth flow)</td>
+<td>Honest: said it had not read the auth files; 0 assumptions.</td>
+<td>33.2 s</td>
+</tr>
+<tr>
+<td>s5 Express router</td>
+<td>Honest but unhelpful: could not find the router source, 0 assumptions, stack not detected (never read package.json). 5 rounds spent.</td>
+<td>44.1 s, 27.1 s</td>
+</tr>
+<tr>
+<td>s6 non-code (&quot;capital of Australia&quot;, then &quot;what did I just ask?&quot;)</td>
+<td><strong>Pass.</strong> Direct answer, no tools, correct recall.</td>
+<td>4.0 s, 4.0 s</td>
+</tr>
+<tr>
+<td>s7 nonexistent repo</td>
+<td><strong>Pass.</strong> Clear &quot;could not be found&quot;, no invented assumptions.</td>
+<td>8.2 s</td>
+</tr>
+</tbody>
+</table></div>
+<p>Notes: the first batch for s3 to s7 was served by a leftover process because port 8099 was in use, so that batch has no server log. s3 run 2 and s5 run 2 have a clean log. Latency is from a laptop, one run each.
+Open problem: a repository review can exceed 60 s when the agent's last call (10 to 16 s) and the synthesis call (up to the 30 s timeout) both run long.</p>
 
 </main>
 </div>

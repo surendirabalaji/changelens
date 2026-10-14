@@ -103,7 +103,7 @@ Each entry: ID, date, type, summary, evidence paths, AI tools, status, open ques
   - F9: `search_code` searches all of GitHub, so the design requires a `repo:` qualifier.
 - **Evidence:**
   - `docs/architecture-plan-v3.md` (the full design is in the project).
-  - `docs/design.md` (superseded note).
+  - `docs/design.md` (superseded note; removed from the repo on 2026-10-13, see git history).
   - `.env.example` (placeholders for `JEV_API_KEY` and `TRIAGE_BACKEND`).
   - `CLAUDE.md` (current-design pointer).
   - Plan file: `/Users/surensfolder/.claude/plans/research-architect-agent-before-rustling-muffin.md`, outside the project.

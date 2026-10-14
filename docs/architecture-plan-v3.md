@@ -1,12 +1,12 @@
 # ChangeLens v3: Decision-Memory Code Review — Architecture Plan
 
 > Produced by the `research-architect` subagent on 2026-10-06 from the student's redesign brief, then revised with the student (D18: Jev triage).
-> Replaces [architecture-plan.md](architecture-plan.md) (v2) and [design.md](design.md) as the current design. v2 is kept for history.
-> **Status:** design only. Nothing here is built, measured or deployed. **[V: src]** = checked against a file in this repo; **[A]** = assumption; **[O]** = optional; **[T]** = target to test, not a result. "Missing evidence" marks what still has to be obtained.
-> Evidence read: `requirements.md`, `docs/architecture-plan.md`, `docs/design.md`, `docs/evidence/g0/**` (S0b probes, S0c bake-off `bakeoff/summary_partial.md`), `requirements.txt`, `.env.example`.
+> Replaces the earlier v1 and v2 drafts, which were removed from the repository (see git history).
+> **Status (updated 2026-10-13): this is the original plan for milestones M0 to M10. Only M0 to M4 were built.** Built: the LangGraph agent with three real MCP servers, failure handling, session memory, Cloud Run deployment, and Workflow A (grounded repository review). **Not built:** Workflow B (revising a decision), Workflow C (rechecking against a pull request), the HTML report store, cost controls (M7), the full B1/B2 evaluation (M9), a separate `commit_memory` node, and the Jev classifier in the running app. Where this plan differs from the code, the code and `README.md` are correct. Tags below: **[V: src]** = checked against a file in this repo; **[A]** = assumption; **[O]** = optional; **[T]** = target to test, not a result.
+> Evidence read: `requirements.md`, `docs/evidence/g0/**` (S0b probes, S0c bake-off `bakeoff/summary_partial.md`), `requirements.txt`, `.env.example`.
 
 ## Context
-The student asked to rework the v2 design (`docs/architecture-plan.md`, `docs/design.md`) before building starts. The new framing:
+The student asked to rework the earlier v2 design before building started. The new framing:
 - ChangeLens is a stack-open, decision-memory layer for code review.
 - It has three workflows: A (initial review), B (correction) and C (recheck against a later PR or commit).
 - Decisions, assumptions and evidence are stored as structured records.

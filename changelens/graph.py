@@ -21,7 +21,13 @@ from langgraph.runtime import Runtime
 
 from changelens.config import get_settings
 from changelens.evidence import build_evidence
-from changelens.schemas import Evidence,AssumptionDraft,Assumption,DecisionRecord,SynthesisOutput,TestScenario
+from changelens.schemas import (
+    Assumption,
+    DecisionRecord,
+    Evidence,
+    SynthesisOutput,
+    TestScenario,
+)
 from changelens.report import format_decision
 from changelens.stack import detect_stack, merge_repo_context
 from changelens.triage import triage

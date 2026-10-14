@@ -14,7 +14,7 @@ from mcp.types import ImageContent
 
 from changelens import api, graph
 from changelens.context import TurnContext
-from changelens.errors import TRANSIENT_KINDS, FailureKind
+from changelens.errors import FailureKind
 from changelens.mcp_tools import session
 from changelens.mcp_tools.session import open_tools
 

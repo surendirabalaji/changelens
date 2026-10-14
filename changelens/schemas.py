@@ -1,8 +1,6 @@
-from pydantic.fields import Field
-import hashlib
 from typing import Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 
 
 class Evidence(BaseModel):
@@ -72,15 +70,3 @@ class DecisionRecord(BaseModel):
     tests: list[TestScenario] = Field(default_factory=list)
     acceptance : Literal["proposed","user_accepted"] = "proposed"
     revision_history: list[dict] = Field(default_factory=list)
-
-def make_evidence_id(url: str, revision: str, path: str, lines: str) -> str:
-
-    # 1. Combine the inputs using a delimiter to prevent boundary collisions
-    # Example: "url|revision|path|lines"
-    combined_string = f"{url}|{revision}|{path}|{lines}"
-    
-    # 2. Convert the string to bytes and generate a SHA-256 hash
-    hash_object = hashlib.sha256(combined_string.encode('utf-8'))
-    
-    # 3. Return the hash as a clean, readable hexadecimal string
-    return hash_object.hexdigest()[:16]
