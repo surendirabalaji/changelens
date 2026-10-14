@@ -111,9 +111,11 @@ The script validates the environment file, builds the multi-stage image with Clo
 ## Tests and evidence
 
 - Resilience tests (stub MCP server, test-only, never deployed): `pytest tests/resilience`
-- Real-server failure runs: `docs/evidence/m2/`
+- Real-server failure runs: `docs/evidence/m2/` (for example Tavily pointed at an unreachable address, a missing GitHub file, a nonsense Context7 library name)
 - Unit and resilience tests: `pytest` (104 tests pass, no network needed for the unit tests)
-- Workflow A live runs against `fastapi/full-stack-fastapi-template` at a pinned commit, three runs including two failures and their fixes: `docs/evidence/m4/README.md`
+- Workflow A live runs against `fastapi/full-stack-fastapi-template` at a pinned commit, three runs including two failures and their fixes, and follow-up scenarios: `docs/evidence/m4/README.md`
+- Evaluation (tool selection, chaining, memory, groundedness, latency): `docs/evidence/eval/summary.md`
+- Checks against the deployed service, including cold starts: `docs/evidence/live/README.md`
 - Tool selection and chaining traces, with live MCP servers: `docs/evidence/m3/`
   - no tool needed: `docs/evidence/m3/01_no_tool.txt` (0 tool calls)
   - GitHub manifest, then Context7 `resolve-library-id`, then `query-docs`: `docs/evidence/m3/02_manifest_context7_chain.txt` (5 rounds)
@@ -152,6 +154,33 @@ Repeated runs (3 per repository, `docs/evidence/eval/review_repeat3_*.jsonl`): u
 
 An earlier model (NVIDIA NIM `nemotron-3-super-120b-a12b`) was slower and less stable on the same reviews (38 to 66 s, one 62 s review and one empty reply; see `docs/evidence/m4/README.md`). This is why the model was changed.
 
+## Live deployment checks
+
+Run against https://changelens-g7b7dxmyuq-uw.a.run.app on 2026-10-13 from a laptop, one run each (`docs/evidence/live/`).
+
+| Check | Result |
+|---|---|
+| `GET /health` | 200, 0.1 s warm |
+| Non-code question | Answered without tools, 3.4 s |
+| Library question | Answered from Context7, 9.0 s |
+| Recall in one session | Returned the code word given in turn 1 |
+| Isolation, other session asks | No code word leaked |
+| Body missing `session_id` | 422 with an explanatory message |
+| Repository review (FastAPI template, pinned commit) | 4 of 4 assumptions grounded, 10.8 s |
+| Follow-up in the same session | Answered from the saved review, 3.9 s |
+| Cold start: a review as the first request after more than 2 hours idle | 30.8 s |
+| Cold start: `/health` as the first request after 20 minutes idle | 12.7 s |
+
+Cold start adds roughly 13 to 20 s, so a review stayed under the 60 s limit in both samples. These are two samples, not a distribution.
+
+## Repository map
+
+- `main.py`, `changelens/`: the service. `api.py` (FastAPI), `graph.py` (LangGraph nodes), `triage.py`, `evidence.py`, `stack.py`, `schemas.py`, `report.py`, and `mcp_tools/` (MCP connections, guard, circuit breaker).
+- `tests/`: unit tests and `tests/resilience/` (stub MCP server with injected faults).
+- `scripts/run_eval.py`: the evaluation runner. The other scripts in `scripts/` are the early probes (M0) and doc tools.
+- `docs/evidence/`: saved runs and logs. `docs/requirements.md` is the assignment summary and `docs/architecture-plan-v3.md` the original plan.
+- `deploy.sh`, `Dockerfile`, `.env.example`: build and deploy. `PROCESS_LOG.md`: development narrative.
+
 ## Cost disclosure
 
 Prices were checked on 2026-10-13 and can change. Amounts for my own usage are estimates unless stated.
@@ -174,8 +203,11 @@ The service stays up until grades are posted. With scale to zero and a few grade
 - Memory is in-process: it is lost when the instance restarts, and sessions do not survive scale-to-zero.
 - With web search unavailable, an answer can still state a version number from library documentation in its first sentence. A fixed note at the end says the newest releases were not checked.
 - The tool-round limit (5) can run out before a long multi-file investigation finishes. The answer then says what it could not check. In one live run the agent spent all its rounds on directory listings and produced no assumptions; the prompt now tells it to ration rounds.
-- Workflow A is evaluated on a handful of repositories with one to three runs each. It is a smoke test, not a benchmark. With `gpt-5.4-mini` a review took 10 to 21 s locally. Cloud Run cold-start latency has not been measured.
+- Workflow A is evaluated on a handful of repositories with one to three runs each. It is a smoke test, not a benchmark. With `gpt-5.4-mini` a review took 10 to 21 s locally and 10.8 s on the warm Cloud Run service. Two cold-start samples were measured (see Live deployment checks); a longer sample was not taken.
 - Review quality varies between runs of the same query. Naming the files to read in the request (as in the FastAPI example above) makes reviews more reliable.
 - Only the first 4,000 characters of a source file (6,000 for a manifest) are citable. A quote from later in a long file is marked NOT VERIFIED.
-- `check_decision` checks citations, not truth. Assumption status stays `unverified`. There is no repair loop after a failed check, and no separate commit step: the decision lives in the checkpointer state.
+- `check_decision` checks citations, not truth. Assumption status stays `unverified`. A failed quote gets one repair pass, which did not trigger in the live runs I made, so it has only been checked on constructed data. There is no separate commit step: the decision lives in the checkpointer state.
 - Intent is not classified by a model yet. A message without a GitHub URL always takes the general path.
+- Opening the MCP connections in `changelens/api.py` has no overall timeout. One evaluation run stalled for 28 minutes in a connection step and could not be reproduced. The evaluation script guards its own turns, but the API does not.
+- When asked a follow-up such as which assumptions are not verified, the model can mix the quote check with doubts of its own from the review text.
+- The work stops at milestone M4 of a larger plan (`docs/architecture-plan-v3.md`). Revising stored decisions, rechecking them against a pull request, the HTML report store and cost controls were designed but not built.
