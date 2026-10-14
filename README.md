@@ -26,22 +26,22 @@ curl -s "$URL/chat" -H 'content-type: application/json' \
 
 ### 1. System architecture
 
-![System architecture](docs/01_system_architecture.png)
+![System architecture](docs/01-system-architecture.svg)
 
 ### 2. Tool invocation flow
 
-![Tool invocation flow](docs/02_tool_invocation_flow.png)
+![Tool invocation flow](docs/02-tool-invocation-flow.svg)
 
 ### 3. Deployment topology
 
-![Cloud Run deployment topology](docs/03_deployment_topology.png)
+![Cloud Run deployment topology](docs/03-deployment-topology.svg)
 
 ## How it works
 
 For every `/chat` request the service:
 
 1. Connects to each MCP server and runs `tools/list`. Only an allowlist of 9 read-only tools is kept.
-2. Runs a LangGraph state graph: `ingest → triage → agent ⇄ tools → render`. For a repository review it continues `agent → synthesize → check_decision → render` (see Workflow A below).
+2. Runs a LangGraph state graph: `ingest → triage → agent ⇄ tools → render`. For a repository review it continues `agent → synthesize → check_decision → render`, with one repair pass back to `synthesize` if a quote fails the check (see Workflow A below).
 3. Lets the LLM decide, by the meaning of the query, whether to answer directly or call tools. There is no keyword routing. `triage` only parses input: it looks for a `github.com/<owner>/<repo>` URL (and an optional commit SHA or ref) and sets `intent` to `repo_review` or `general`. It never chooses tools.
 4. Saves the conversation and the review state in the framework checkpointer, keyed by `session_id`.
 
