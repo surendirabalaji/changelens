@@ -15,3 +15,15 @@ Plain HTTP requests from a laptop, one run each.
 | Follow-up in the review session | Answered from the saved review | 3.9 s |
 
 Limits: the service had just been deployed, so the first health call was fast and a true cold start was NOT measured. One run per check. The follow-up answer about "not verified" items mixed the quote check with real-world doubts from the review text.
+
+## Cold start (2026-10-13), `cold_start.json`
+The instance had been idle for more than 15 minutes before each sample (2 hours before sample 1, 20 minutes before sample 2). `--min-instances 0`.
+
+| Sample | First request | Time |
+|---|---|---|
+| 1 | Repository review (cold start plus a full review) | **30.8 s** |
+| 2 | `GET /health` (cold start alone) | **12.7 s** |
+| 2 | Non-code question, right after | 4.9 s |
+| 2 | Repository review, warm | 13.0 s |
+
+Cold start adds roughly 13 to 20 s. Both worst-case numbers stay under the 60 s limit. Two samples, one run each, from a laptop. The cold start was longer than a warm `/health` (0.1 s) by about 12 s.
