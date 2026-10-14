@@ -67,7 +67,7 @@ If synthesis fails or no files were read, the agent's own text is returned uncha
 | Context7 | `https://mcp.context7.com/mcp` | 2 | Library documentation for a specific version |
 | Tavily | `https://mcp.tavily.com/mcp/` | 1 | Web search for news and release notes |
 
-All three wrap real external systems. Nothing is simulated in production. These are hosted third-party servers used as clients, so there is nothing to install. Attribution: `TODO: confirm provider names for each server`. Credentials are read from environment variables.
+All three wrap real external systems. Nothing is simulated in production. These are hosted third-party servers used as clients, so there is nothing to install. Attribution: the GitHub server is GitHub's hosted MCP server (the open-source `github/github-mcp-server`), Context7 is provided by Upstash, and Tavily MCP is provided by Tavily. None of their code is copied into this repository. Credentials are read from environment variables.
 
 ### Memory
 
@@ -154,14 +154,20 @@ An earlier model (NVIDIA NIM `nemotron-3-super-120b-a12b`) was slower and less s
 
 ## Cost disclosure
 
-`TODO: fill with your own figures and dates.`
+Prices were checked on 2026-10-13 and can change. Amounts for my own usage are estimates unless stated.
 
-| Item | Basis |
-|---|---|
-| LLM (OpenAI `gpt-5.4-mini` API) | `TODO` |
-| Cloud Run | `TODO` |
-| Cloud Build and Artifact Registry | `TODO` |
-| GitHub, Context7, Tavily | `TODO` |
+| Item | Price basis | My usage and cost |
+|---|---|---|
+| LLM: OpenAI `gpt-5.4-mini` | $0.75 per 1M input tokens, $4.50 per 1M output tokens, cached input $0.075 per 1M ([OpenAI pricing summary](https://openrouter.ai/openai/gpt-5.4-mini)) | The logged evaluation turns used about 1.34M input and 25k output tokens in agent calls, about **$1.1**. Synthesis calls, earlier tests and live checks add more. Estimated total under **$3**. Check the OpenAI usage page for the exact figure. A repository review costs roughly a cent or two. |
+| LLM during early development: NVIDIA NIM `nemotron-3-super-120b-a12b` | Developer key | Free for development use |
+| Cloud Run (`--max-instances 1`, `--min-instances 0`, 1 vCPU, 1 GiB, request-based billing) | Free tier of 180,000 vCPU-seconds, 360,000 GiB-seconds and 2M requests per month; then about $0.000024 per vCPU-second, $0.0000025 per GiB-second and $0.40 per million requests ([Cloud Run pricing](https://cloud.google.com/run/pricing)) | Test traffic is far inside the free tier: **$0** expected. Scaled to zero, nothing is billed while idle. |
+| Cloud Build | 2,500 free build-minutes per month on the default machine, then $0.006 per minute ([Cloud Build pricing](https://cloud.google.com/build/pricing)) | A few builds of a few minutes each: **$0** expected |
+| Artifact Registry | 0.5 GB free per month, then $0.10 per GB-month ([pricing](https://cloud.google.com/artifact-registry/pricing)) | One small image: **$0** to about **$0.10** per month |
+| GitHub MCP | Free with a read-only personal access token for public repositories | **$0** |
+| Context7 | Free plan of 1,000 calls per month, paid Pro plan from $20 per month ([Context7 plans](https://context7.com/docs)) | A few dozen calls: **$0** |
+| Tavily | Free plan of 1,000 credits per month, then $0.008 per credit ([Tavily credits](https://docs.tavily.com/guides/api-credits)) | A handful of searches: **$0** |
+
+The service stays up until grades are posted. With scale to zero and a few grader requests, the main running cost is the OpenAI usage per request. Setting a spending limit on the OpenAI key caps it.
 
 ## Known limitations
 
